@@ -102,10 +102,10 @@ abort() {
 
 #### START:FUNCTION - Check if image-catalog and Cloud Object has images from last time and deleted it ####
 delete_previous_img() {
-	img_id_old=$(/usr/local/bin/ibmcloud pi img ls | grep $vsi | grep $old_img | awk {'print $1'})
-	img_name_old=$(/usr/local/bin/ibmcloud pi img ls | grep $vsi | grep $old_img | awk {'print $2'})
-	objstg_img=$(/usr/local/bin/ibmcloud cos list-objects-v2 --bucket $bucket | grep $vsi | grep $old_img | awk {'print $1'})
-	today_img=$(/usr/local/bin/ibmcloud cos list-objects-v2 --bucket $bucket | grep $vsi | grep $capture_date | awk {'print $1'})
+	img_id_old=$(/usr/local/bin/ibmcloud pi img ls | grep -i $vsi | grep $old_img | awk {'print $1'})
+	img_name_old=$(/usr/local/bin/ibmcloud pi img ls | grep -i $vsi | grep $old_img | awk {'print $2'})
+	objstg_img=$(/usr/local/bin/ibmcloud cos list-objects-v2 --bucket $bucket | grep -i $vsi | grep $old_img | awk {'print $1'})
+	today_img=$(/usr/local/bin/ibmcloud cos list-objects-v2 --bucket $bucket | grep -i $vsi | grep $capture_date | awk {'print $1'})
 	if [ ! $img_id_old ]
 	then
 		echo "`date +%Y-%m-%d_%H:%M:%S` - There is no Image from $old_img - Nothing to delete in image catalog." >> $log_file
@@ -133,7 +133,7 @@ dc_vsi_list() {
 	sh -c '/usr/local/bin/ibmcloud pi ws tg '$1 2>> $log_file
     # List all VSI in this POWERVS DC and Get VSI Name and ID #
 	sh -c '/usr/local/bin/ibmcloud pi ins ls | awk {'\''print $1" "$2'\''} | tail -n +2' > $vsi_list_id_tmp 2>> $log_file
-	vsi_id=$(cat $vsi_list_id_tmp | grep $vsi | awk {'print $1'})
+	vsi_id=$(cat $vsi_list_id_tmp | grep -i $vsi | awk {'print $1'})
 	cat $vsi_list_id_tmp | awk {'print $2'} > $vsi_list_tmp
 }
 ####  END:FUNCTION - Target DC and List all VSI in the POWERVS DC and Get VSI Name and ID  ####
@@ -214,7 +214,7 @@ get_IASP_name() {
 	if [ $test -eq 0 ]
 	then
 		echo "`date +%Y-%m-%d_%H:%M:%S` - Getting $vsi IASP Name..." >> $log_file
-		vsi_ip=$(cat $bluexscrt | grep $vsi | awk {'print $2'})
+		vsi_ip=$(cat $bluexscrt | grep -i $vsi | awk {'print $2'})
 		if ping -c1 -w3 $vsi_ip &> /dev/null
 		then
 			echo "`date +%Y-%m-%d_%H:%M:%S` - Ping VSI $vsi OK." >> $log_file
@@ -264,7 +264,7 @@ check_VSI_exists() {
 		full_ws_name="${wsmap[$ws]}" # Get the full workspace name from the map
 		echo "`date +%Y-%m-%d_%H:%M:%S` - Searching for VSI in $full_ws_name..." >> $log_file
 		dc_vsi_list "$shortnamecrn"
-		if grep -qe ^$vsi$ $vsi_list_tmp
+		if grep -qie ^$vsi$ $vsi_list_tmp
 		then
 			echo "`date +%Y-%m-%d_%H:%M:%S` - VSI $vsi was found in $full_ws_name..." >> $log_file
 			echo "`date +%Y-%m-%d_%H:%M:%S` - VSI to Capture: $vsi" >> $log_file
@@ -369,7 +369,7 @@ case $1 in
 		test=0
 	fi
 	vsi=$2
-	vsi_id=`cat $bluexscrt | grep $vsi | awk {'print $3'}`
+	vsi_id=`cat $bluexscrt | grep -i $vsi | awk {'print $3'}`
 	if [[ $vsi_id == "" ]]
 	then
 		abort "`date +%Y-%m-%d_%H:%M:%S` - VSI ID missing in $bluexscrt file, please insert it there..."
@@ -437,7 +437,7 @@ case $1 in
 	done
 	echo "`date +%Y-%m-%d_%H:%M:%S` - Volumes Name to exclude: ${exclude_names[*]}" >> $log_file
 	vsi=$3
-	vsi_id=`cat $bluexscrt | grep $vsi | awk {'print $3'}`
+	vsi_id=`cat $bluexscrt | grep -i $vsi | awk {'print $3'}`
 	if [[ $vsi_id == "" ]]
 	then
 		abort "`date +%Y-%m-%d_%H:%M:%S` - VSI ID missing in $bluexscrt file, please insert it there..."
