@@ -397,7 +397,7 @@ case $1 in
 		fi
 		old_img=$(date --date '1 hour ago' "+%H")
 		capture_name=$capture_img_name"_"$capture_hour
-	if [[ $6 == "daily" ]]
+	elif [[ $6 == "daily" ]]
 	then
 		old_img=$(date --date '1 day ago' "+%Y-%m-%d")
 	elif [[ $6 == "weekly" ]]
