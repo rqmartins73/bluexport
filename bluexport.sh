@@ -87,7 +87,7 @@ help() {
 	echo ""
 	echo "Example:  ./bluexport.sh -a vsiprd vsiprd_img image-catalog daily ---- Includes all Volumes and exports to COS and image catalog"
 	echo "Example:  ./bluexport.sh -x ASP2_ vsiprd vsiprd_img both monthly    ---- Excludes Volumes with ASP2_ in the name and exports to image catalog and COS"
-	echo "Example:  ./bluexport.sh -x ""ASP2_ IASPname"" vsiprd vsiprd_img both monthly    ---- Excludes Volumes with ASP2_ and IASPname in the name and exports to image catalog and COS"
+	echo 'Example:  ./bluexport.sh -x "ASP2_ IASPname" vsiprd vsiprd_img both monthly    ---- Excludes Volumes with ASP2_ and IASPname in the name and exports to image catalog and COS'
 	echo ""
 	echo "Flag t before a or x makes it a test and do not makes the capture"
 	echo "Example:  ./bluexport.sh -tx ASP2_ vsiprd vsiprd_img both monthly ---- Do not makes the export"
