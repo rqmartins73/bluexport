@@ -270,10 +270,11 @@ check_VSI_exists() {
 		full_ws_name="${wsmap[$ws]}" # Get the full workspace name from the map
 		echo "`date +%Y-%m-%d_%H:%M:%S` - Searching for VSI in $full_ws_name..." >> $log_file
 		dc_vsi_list "$shortnamecrn"
+		vsi_cloud_name=$(cat $vsi_list_tmp | grep -i $vsi | awk {'print $1'})
 		if grep -qie ^$vsi$ $vsi_list_tmp
 		then
-			echo "`date +%Y-%m-%d_%H:%M:%S` - VSI $vsi was found in $full_ws_name..." >> $log_file
-			echo "`date +%Y-%m-%d_%H:%M:%S` - VSI to Capture: $vsi" >> $log_file
+			echo "`date +%Y-%m-%d_%H:%M:%S` - VSI $vsi_cloud_name was found in $full_ws_name..." >> $log_file
+			echo "`date +%Y-%m-%d_%H:%M:%S` - VSI to Capture: $vsi_cloud_name" >> $log_file
 			if [ $flagj -eq 0 ]
 			then
 				get_IASP_name
@@ -281,12 +282,12 @@ check_VSI_exists() {
 			found=1
 			break
 		else
-			echo "`date +%Y-%m-%d_%H:%M:%S` - VSI $vsi not found in $full_ws_name!" >> $log_file
+			echo "`date +%Y-%m-%d_%H:%M:%S` - VSI $vsi_cloud_name not found in $full_ws_name!" >> $log_file
 		fi
 	done
 	if [ "$found" -eq 0 ]
 	then
-		abort "$(date +%Y-%m-%d_%H:%M:%S) - VSI $vsi not found in any of the workspaces available in bluexscrt file!"
+		abort "$(date +%Y-%m-%d_%H:%M:%S) - VSI $vsi_cloud_name not found in any of the workspaces available in bluexscrt file!"
 	fi
 }
 ####  END:FUNCTION - Check if VSI exists and Get VSI IP and IASP NAME if exists  ####
