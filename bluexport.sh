@@ -1,6 +1,8 @@
 #!/bin/bash
 #
-# Usage:    ./bluexport.sh [ -a | -x volumes_name_to_exclude ] [VSI_Name_to_Capture] [Capture_Image_Name] [both|image-catalog|cloud-storage] [hourly | daily | weekly | monthly | single]
+# Usage for all volumes:	./bluexport.sh -a VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single
+# Usage for excluding volumes:	./bluexport.sh -x volumes_name_to_exclude VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single
+# Usage for monitoring job:	./bluexport -j VSI_NAME IMAGE_NAME
 #
 # Example:  ./bluexport.sh -a vsiprd vsiprd_img image-catalog daily            ---- Includes all Volumes and exports to COS and image catalog
 # Example:  ./bluexport.sh -x ASP2_ vsiprd vsiprd_img both monthly             ---- Excludes Volumes with ASP2_ in the name and exports to image catalog and COS
@@ -77,7 +79,11 @@ help() {
 	echo ""
 	echo "Capture IBM Cloud POWERVS VSI and Export to COS or/and Image Catalog"
 	echo ""
-	echo "Usage: ./bluexport.sh [ -a | -x volumes_name_to_exclude ] [VSI_Name_to_Capture] [Capture_Image_Name] [both|image-catalog|cloud-storage] [hourly | daily | weekly | monthly | single]"
+	echo "Usage for all volumes:        ./bluexport.sh -a VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single"
+	echo ""
+	echo "Usage for excluding volumes:  ./bluexport.sh -x volumes_name_to_exclude VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single"
+	echo ""
+	echo "Usage for monitoring job:     ./bluexport -j VSI_NAME IMAGE_NAME"
 	echo ""
 	echo "Example:  ./bluexport.sh -a vsiprd vsiprd_img image-catalog daily ---- Includes all Volumes and exports to COS and image catalog"
 	echo "Example:  ./bluexport.sh -x ASP2_ vsiprd vsiprd_img both monthly    ---- Excludes Volumes with ASP2_ in the name and exports to image catalog and COS"
