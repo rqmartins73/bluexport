@@ -16,7 +16,7 @@
        #####  START:CODE  #####
 
 ####  START: Constants Definition  #####
-Version=1.9.4
+Version=1.9.5
 bluexscrt="$HOME/bluexscrt"
 log_file="$HOME/bluexport.log"
 capture_time=`date +%Y-%m-%d_%H%M`
@@ -309,7 +309,7 @@ case $1 in
 		echo "Flag -j selected, but Arguments Missing!! Syntax: bluexport -j VSI_NAME IMAGE_NAME"
 		abort "`date +%Y-%m-%d_%H:%M:%S` - Flag -j selected, but Arguments Missing!! Syntax: bluexport -j VSI_NAME IMAGE_NAME"
 	fi
-	vsi=${2^^}
+	vsi=$2
 	capture_name=${3^^}
 	echo "`date +%Y-%m-%d_%H:%M:%S` - Flag -j selected, watching only the Job Status for Capture Image $capture_name! Logging at $HOME/bluexport_j_"$capture_name".log" >> $log_file
 	timestamp=$(date +%F" "%T" "%Z)
@@ -368,8 +368,12 @@ case $1 in
 	else
 		test=0
 	fi
-	vsi=${2^^}
+	vsi=$2
 	vsi_id=`cat $bluexscrt | grep $vsi | awk {'print $3'}`
+	if [[ $vsi_id == "" ]]
+	then
+		abort "`date +%Y-%m-%d_%H:%M:%S` - VSI ID missing in $bluexscrt file, please insert it there..."
+	fi
 	echo "`date +%Y-%m-%d_%H:%M:%S` - Starting Capture&Export for VSI Name: $vsi ..." >> $log_file
 	echo "`date +%Y-%m-%d_%H:%M:%S` - Capture Name: $capture_name" >> $log_file
 	echo "`date +%Y-%m-%d_%H:%M:%S` - Export Destination: $destination" >> $log_file
@@ -432,8 +436,12 @@ case $1 in
 		exclude_grep_opts+=" | grep -v $name"
 	done
 	echo "`date +%Y-%m-%d_%H:%M:%S` - Volumes Name to exclude: ${exclude_names[*]}" >> $log_file
-	vsi=${3^^}
+	vsi=$3
 	vsi_id=`cat $bluexscrt | grep $vsi | awk {'print $3'}`
+	if [[ $vsi_id == "" ]]
+	then
+		abort "`date +%Y-%m-%d_%H:%M:%S` - VSI ID missing in $bluexscrt file, please insert it there..."
+	fi
 	echo "`date +%Y-%m-%d_%H:%M:%S` - Starting Capture&Export for VSI Name: $vsi ..." >> $log_file
 	echo "`date +%Y-%m-%d_%H:%M:%S` - Capture Name: $capture_name" >> $log_file
 	destination=$5
