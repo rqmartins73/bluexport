@@ -10,7 +10,7 @@ Capture IBM Cloud POWERVS VSI and Export to COS or/and Image Catalog.
    <h6>./bluexport.sh -x ASP2_ vsi_name capture_img_name both monthly  ---- Excludes Volumes with ASP2_ in the name and exports to image catalog and COS, and deletes last month images if exists.</h6>  
 
  <h5>Flag t before a or x makes it a test and do not makes the capture</h5>  
- <h5>Example:</h5>  <h6>./bluexport.sh -tx "ASP2_ IASP" vsi_name capture_img_name both monthly ---- Do not makes the export, and makes log in a different log file.</h6>  
+ <h5>Example:</h5>  <h6>./bluexport.sh -tx "ASP2_ IASP" vsi_name capture_img_name both single ---- Does not makes the export, and makes log in a different log file.</h6>  
  <h6>[hourly | daily | weekly | monthly | single] - This parameter allows the script to delete the image from the previous capture. i.e. If weekly is selected it will try to delete the image from the week before.</h6>
   
  <h6>Note: Reocurrence "hourly" only permits captures to image-catalog</h6>  

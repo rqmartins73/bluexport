@@ -90,7 +90,7 @@ help() {
 	echo 'Example:  ./bluexport.sh -x "ASP2_ IASPname" vsiprd vsiprd_img both monthly    ---- Excludes Volumes with ASP2_ and IASPname in the name and exports to image catalog and COS'
 	echo ""
 	echo "Flag t before a or x makes it a test and do not makes the capture"
-	echo "Example:  ./bluexport.sh -tx ASP2_ vsiprd vsiprd_img both monthly ---- Do not makes the export"
+	echo "Example:  ./bluexport.sh -tx ASP2_ vsiprd vsiprd_img both single ---- Does not makes the export"
 	echo ""
 	echo "Ricardo Martins - Blue Chip Portugal © 2023-2024"
 	echo ""
