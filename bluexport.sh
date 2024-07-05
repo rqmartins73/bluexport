@@ -3,8 +3,8 @@
 # Usage for all volumes:	./bluexport.sh -a VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single
 # Usage for excluding volumes:	./bluexport.sh -x volumes_name_to_exclude VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single
 # Usage for monitoring job:	./bluexport -j VSI_NAME IMAGE_NAME
-# Usage to create a snapshot:	./bluexport -snapcr VSI_NAME SNAPSHOT_NAME 0|[DESCRIPTION] 0|[VOLUMES(Comma separated list)]
-# Usage to update a snapshot:	./bluexport -snapupd SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|[DESCRIPTION]
+# Usage to create a snapshot:	./bluexport -snapcr VSI_NAME SNAPSHOT_NAME 0|["DESCRIPTION"] 0|[VOLUMES(Comma separated list)]
+# Usage to update a snapshot:	./bluexport -snapupd SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|["DESCRIPTION"]
 # Usage to delete snapshot:	./bluexport -snapdel SNAPSHOT_NAME
 #
 # Example:  ./bluexport.sh -a vsiprd vsiprd_img image-catalog daily            ---- Includes all Volumes and exports to COS and image catalog

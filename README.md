@@ -5,12 +5,21 @@ Capture IBM Cloud POWERVS VSI and Export to COS or/and Image Catalog.
 
 ## Usage:
 `./bluexport.sh [ -a | -x volumes_name_to_exclude ] [VSI_Name_to_Capture] [Capture_Image_Name] [both|image-catalog|cloud-storage] [hourly | daily | weekly | monthly | single]`
+`./bluexport -snapcr VSI_NAME SNAPSHOT_NAME 0|["DESCRIPTION"] 0|[VOLUMES(Comma separated list)]`
+`./bluexport -snapupd SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|["DESCRIPTION"]`
+`./bluexport -snapdel SNAPSHOT_NAME`
 
 **Examples:**
 
 - `./bluexport.sh -a vsi_name capture_img_name image-catalog daily` ---- Includes all Volumes and exports to image catalog, and deletes yesterday image if exists.
  
 - `./bluexport.sh -x ASP2_ vsi_name capture_img_name both monthly`  ---- Excludes Volumes with ASP2_ in the name and exports to image catalog and COS, and deletes last month images if exists.  
+
+- `./bluexport.sh -snapcr IBMi75 IBMi75_snap "Description of the snap shot" 0`   ---- Makes a Snapshot of LPAR IBMi75 with snap name IBMi75_snap with description "Description of the snap shot" and all volumes.
+
+- `./bluexport.sh -snapupd IBMi75_snap2 0 "SNAP TEST"`    ---- Updates the description to "SNAP TEST" of snapshot IBMi75_snap2.
+
+- `./bluexport.sh -snapdel IBMi75_snap`   ---- Deletes the snapshot named IBMi75_snap.
 
 Flag `t` before `a` or `x` makes it a test and do not makes the capture.
 
