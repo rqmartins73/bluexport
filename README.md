@@ -36,7 +36,7 @@ i.e. If weekly is selected it will try to delete the image from the week before.
 
  <br>
   
- *This file is to be run in crontab or in background, it will not produce many or none output to screen, it will log in a file.*  
+ *This file is to be run in crontab or in background, it will produce little or no output to screen, it will log in a file.*  
   
 Before running `bluexport.sh`, first you must configure the file **bluexscrt** with your IBM Cloud Data.
 
