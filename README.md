@@ -3,26 +3,36 @@ Capture IBM Cloud POWERVS VSI and Export to COS or/and Image Catalog.
 
 <h6>This script was made in GNU bash, version 5.1.16(1)-release.</h6>  
 
-#
- Usage:    <h6>./bluexport.sh [ -a | -x volumes_name_to_exclude ] [VSI_Name_to_Capture] [Capture_Image_Name] [both|image-catalog|cloud-storage] [hourly | daily | weekly | monthly | single]</h6>
+## Usage:
+`./bluexport.sh [ -a | -x volumes_name_to_exclude ] [VSI_Name_to_Capture] [Capture_Image_Name] [both|image-catalog|cloud-storage] [hourly | daily | weekly | monthly | single]`
 
- Examples:  <h6>./bluexport.sh -a vsi_name capture_img_name image-catalog daily  ---- Includes all Volumes and exports to image catalog, and deletes yesterday image if exists.</h6>
-   <h6>./bluexport.sh -x ASP2_ vsi_name capture_img_name both monthly  ---- Excludes Volumes with ASP2_ in the name and exports to image catalog and COS, and deletes last month images if exists.</h6>  
+**Examples:**
 
- <h5>Flag t before a or x makes it a test and do not makes the capture</h5>  
- <h5>Example:</h5>  <h6>./bluexport.sh -tx "ASP2_ IASP" vsi_name capture_img_name both single ---- Does not makes the export, and makes log in a different log file.</h6>  
- <h6>[hourly | daily | weekly | monthly | single] - This parameter allows the script to delete the image from the previous capture. i.e. If weekly is selected it will try to delete the image from the week before.</h6>
+- `./bluexport.sh -a vsi_name capture_img_name image-catalog daily` ---- Includes all Volumes and exports to image catalog, and deletes yesterday image if exists.
+ 
+- `./bluexport.sh -x ASP2_ vsi_name capture_img_name both monthly`  ---- Excludes Volumes with ASP2_ in the name and exports to image catalog and COS, and deletes last month images if exists.  
+
+Flag `t` before `a` or `x` makes it a test and do not makes the capture.
+
+**Example:** 
+- `./bluexport.sh -tx "ASP2_ IASP" vsi_name capture_img_name both single` ---- Does not makes the export, and makes log in a different log file.
+ 
+- `[hourly | daily | weekly | monthly | single]` - This parameter allows the script to delete the image from the previous capture. 
+i.e. If weekly is selected it will try to delete the image from the week before.
   
- <h6>Note: Reocurrence "hourly" only permits captures to image-catalog</h6>  
+ **Note:** Reocurrence "hourly" only permits captures to image-catalog
+
+ <br>
   
  *This file is to be run in crontab or in background, it will not have many or none output to screen, it will log in a file.*  
   
-*Before running bluexport.sh, first you must configure the file <U>bluexscrt</U> with your IBM Cloud Data.*  
+Before running `bluexport.sh`, first you must configure the file **bluexscrt** with your IBM Cloud Data.
+
 *Replace all <> with your data.*  
 
+<br>
   
-Content of file bluexscrt before edit:  
-
+**Content of file bluexscrt before edit:**
 ```
 APYKEY REPLACE-ALL-THIS-WITH-YOUR-API-KEY  
 WSFRADR REPLACE-ALL-THIS-WITH-YOUR-POWER-VIRTUAL-SERVER-CRN-i.e.   crn:v1:bluemix:public:power-iaas:blablablablabla::  
@@ -73,5 +83,6 @@ SSHKEYPATH /home/<USER>/.ssh/bluexport_rsa
 
 ```
 
-#
-  <sub>Ricardo Martins - [Blue Chip Portugal](http://www.bluechip.pt) © 2024</sub>  
+***
+
+ <sub>Ricardo Martins - [Blue Chip Portugal](http://www.bluechip.pt) © 2024</sub>  
