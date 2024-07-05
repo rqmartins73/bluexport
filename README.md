@@ -7,11 +7,11 @@ Version 2.x now supports the creation, update and delete Snapshots.
 ## Usage:
 `./bluexport.sh [ -a | -x volumes_name_to_exclude ] [VSI_Name_to_Capture] [Capture_Image_Name] [both|image-catalog|cloud-storage] [hourly | daily | weekly | monthly | single]`  
   
-`./bluexport -snapcr VSI_NAME SNAPSHOT_NAME 0|["DESCRIPTION"] 0|[VOLUMES(Comma separated list)]`  
+`./bluexport.sh -snapcr VSI_NAME SNAPSHOT_NAME 0|["DESCRIPTION"] 0|[VOLUMES(Comma separated list)]`  
   
-`./bluexport -snapupd SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|["DESCRIPTION"]`  
+`./bluexport.sh -snapupd SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|["DESCRIPTION"]`  
   
-`./bluexport -snapdel SNAPSHOT_NAME`  
+`./bluexport.sh -snapdel SNAPSHOT_NAME`  
 
 **Examples:**
 
