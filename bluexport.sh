@@ -2,10 +2,10 @@
 #
 # Usage for all volumes:	./bluexport.sh -a VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single
 # Usage for excluding volumes:	./bluexport.sh -x volumes_name_to_exclude VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single
-# Usage for monitoring job:	./bluexport -j VSI_NAME IMAGE_NAME
-# Usage to create a snapshot:	./bluexport -snapcr VSI_NAME SNAPSHOT_NAME 0|["DESCRIPTION"] 0|[VOLUMES(Comma separated list)]
-# Usage to update a snapshot:	./bluexport -snapupd SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|["DESCRIPTION"]
-# Usage to delete snapshot:	./bluexport -snapdel SNAPSHOT_NAME
+# Usage for monitoring job:	./bluexport.sh -j VSI_NAME IMAGE_NAME
+# Usage to create a snapshot:	./bluexport.sh -snapcr VSI_NAME SNAPSHOT_NAME 0|["DESCRIPTION"] 0|[VOLUMES(Comma separated list)]
+# Usage to update a snapshot:	./bluexport.sh -snapupd SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|["DESCRIPTION"]
+# Usage to delete snapshot:	./bluexport.sh -snapdel SNAPSHOT_NAME
 #
 # Example:  ./bluexport.sh -a vsiprd vsiprd_img image-catalog daily            ---- Includes all Volumes and exports to COS and image catalog
 # Example:  ./bluexport.sh -x ASP2_ vsiprd vsiprd_img both monthly             ---- Excludes Volumes with ASP2_ in the name and exports to image catalog and COS
@@ -86,13 +86,13 @@ help() {
 	echo ""
 	echo "Usage for excluding volumes:  ./bluexport.sh -x volumes_name_to_exclude VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single"
 	echo ""
-	echo "Usage for monitoring job:     ./bluexport -j VSI_NAME IMAGE_NAME"
+	echo "Usage for monitoring job:     ./bluexport.sh -j VSI_NAME IMAGE_NAME"
 	echo ""
-	echo "Usage to create a snapshot:   ./bluexport -snapcr VSI_NAME SNAPSHOT_NAME 0|[DESCRIPTION] 0|[VOLUMES(Comma separated list)]"
+	echo "Usage to create a snapshot:   ./bluexport.sh -snapcr VSI_NAME SNAPSHOT_NAME 0|[DESCRIPTION] 0|[VOLUMES(Comma separated list)]"
 	echo ""
-	echo "Usage to update a snapshot:   ./bluexport -snapupd SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|[DESCRIPTION]"
+	echo "Usage to update a snapshot:   ./bluexport.sh -snapupd SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|[DESCRIPTION]"
 	echo ""
-	echo "Usage to delete snapshot:     ./bluexport -snapdel SNAPSHOT_NAME"
+	echo "Usage to delete snapshot:     ./bluexport.sh -snapdel SNAPSHOT_NAME"
 	echo ""
 	echo "Example:  ./bluexport.sh -a vsiprd vsiprd_img image-catalog daily ---- Includes all Volumes and exports to COS and image catalog"
 	echo "Example:  ./bluexport.sh -x ASP2_ vsiprd vsiprd_img both monthly    ---- Excludes Volumes with ASP2_ in the name and exports to image catalog and COS"
@@ -416,8 +416,8 @@ case $1 in
    -j)
 	if [ $# -lt 3 ]
 	then
-		echo "Flag -j selected, but Arguments Missing!! Syntax: bluexport -j VSI_NAME IMAGE_NAME"
-		abort "`date +%Y-%m-%d_%H:%M:%S` - Flag -j selected, but Arguments Missing!! Syntax: bluexport -j VSI_NAME IMAGE_NAME"
+		echo "Flag -j selected, but Arguments Missing!! Syntax: bluexport.sh -j VSI_NAME IMAGE_NAME"
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Flag -j selected, but Arguments Missing!! Syntax: bluexport.sh -j VSI_NAME IMAGE_NAME"
 	fi
 	vsi=$2
 	capture_name=${3^^}
@@ -437,7 +437,7 @@ case $1 in
    -a | -ta)
 	if [ $# -lt 5 ]
 	then
-		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport $1 VSI_NAME IMAGE_NAME EXPORT_LOCATION [daily|weekly|monthly|single]"
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport.sh $1 VSI_NAME IMAGE_NAME EXPORT_LOCATION [daily|weekly|monthly|single]"
 	fi
 	destination=$4
 	capture_img_name=${3^^}
@@ -495,7 +495,7 @@ case $1 in
    -x | -tx)
 	if [ $# -lt 6 ]
 	then
-		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport $1 EXCLUDE_NAME VSI_NAME IMAGE_NAME EXPORT_LOCATION [daily|weekly|monthly|single]"
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport.sh $1 EXCLUDE_NAME VSI_NAME IMAGE_NAME EXPORT_LOCATION [daily|weekly|monthly|single]"
 	fi
 	capture_img_name=${4^^}
 	capture_name=$capture_img_name"_"$capture_time
@@ -560,7 +560,7 @@ case $1 in
   -snapcr)
 	if [ $# -lt 5 ]
 	then
-		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport $1 LPAR_NAME SNAPSHOT_NAME 0|\"DESCRIPTION\" 0|[Comma separated Volumes name list to snap]"
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport.sh $1 LPAR_NAME SNAPSHOT_NAME 0|\"DESCRIPTION\" 0|[Comma separated Volumes name list to snap]"
 	fi
 	vsi=$2
 	vsi_id_bluexscrt
@@ -578,7 +578,7 @@ case $1 in
 		then
 			description=""
 		else
-			abort "`date +%Y-%m-%d_%H:%M:%S` - Argument DESCRIPTION must be 0 or a phrase inside quotation marks!! Syntax: bluexport $1 LPAR_NAME SNAPSHOT_NAME 0|[\"DESCRIPTION\"] 0|[VOLUMES - Comma separated Volumes name list to snap]"
+			abort "`date +%Y-%m-%d_%H:%M:%S` - Argument DESCRIPTION must be 0 or a phrase inside quotation marks!! Syntax: bluexport.sh $1 LPAR_NAME SNAPSHOT_NAME 0|[\"DESCRIPTION\"] 0|[VOLUMES - Comma separated Volumes name list to snap]"
 		fi
 	else
 		description="--description "$description
@@ -591,7 +591,7 @@ case $1 in
 			volumes_to_snap=""
 			volumes_to_echo="ALL"
 		else
-			abort "`date +%Y-%m-%d_%H:%M:%S` - Argument VOLUMES must be 0 or comma separated names or IDs!! Syntax: bluexport $1 LPAR_NAME SNAPSHOT_NAME 0|[\"DESCRIPTION\"] 0|[VOLUMES - Comma separated Volumes name list to snap]"
+			abort "`date +%Y-%m-%d_%H:%M:%S` - Argument VOLUMES must be 0 or comma separated names or IDs!! Syntax: bluexport.sh $1 LPAR_NAME SNAPSHOT_NAME 0|[\"DESCRIPTION\"] 0|[VOLUMES - Comma separated Volumes name list to snap]"
 		fi
 	else
 		volumes_to_echo=$volumes_to_snap
@@ -607,7 +607,7 @@ case $1 in
   -snapupd)
 	if [ $# -lt 3 ]
 	then
-		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport $1 SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|[\"DESCRIPTION\"]"
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport.sh $1 SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|[\"DESCRIPTION\"]"
 	fi
 	test=0
 	snap_name=$2
@@ -630,7 +630,7 @@ case $1 in
 			description=""
 			new_description_echo=""
 		else
-			abort "`date +%Y-%m-%d_%H:%M:%S` - Argument DESCRIPTION must be 0 or a phrase inside quotation marks!! Syntax:  bluexport $1 SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|[\"DESCRIPTION\"]"
+			abort "`date +%Y-%m-%d_%H:%M:%S` - Argument DESCRIPTION must be 0 or a phrase inside quotation marks!! Syntax:  bluexport.sh $1 SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|[\"DESCRIPTION\"]"
 		fi
 	else
 		description="--description \""$description"\""
@@ -644,7 +644,7 @@ case $1 in
 			new_name_echo=""
 			new_name=""
 		else
-			abort "`date +%Y-%m-%d_%H:%M:%S` - Argument NEW_SNAPSHOT_NAME must be 0 or a name!! Syntax:  bluexport $1 SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|[\"DESCRIPTION\"]"
+			abort "`date +%Y-%m-%d_%H:%M:%S` - Argument NEW_SNAPSHOT_NAME must be 0 or a name!! Syntax:  bluexport.sh $1 SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|[\"DESCRIPTION\"]"
 		fi
 	else
 		if [[ "$new_snap_name" == "$snap_name" ]]
@@ -663,7 +663,7 @@ case $1 in
   -snapdel)
 	if [ $# -lt 2 ]
 	then
-		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport $1 SNAPSHOT_NAME"
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport.sh $1 SNAPSHOT_NAME"
 	fi
 	test=0
 	snap_name=$2
@@ -681,14 +681,14 @@ case $1 in
    -vclone)
 	if [ $# -lt 8 ]
 	then
-		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport $1 VOLUME_CLONE_NAME BASE_NAME LPAR_NAME True|False True|False STORAGE_TIER ALL|[Comma seperated Volumes name list to clone]"
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport.sh $1 VOLUME_CLONE_NAME BASE_NAME LPAR_NAME True|False True|False STORAGE_TIER ALL|[Comma seperated Volumes name list to clone]"
 	fi
     ;;
 
    -vclonedel)
 	if [ $# -lt 2 ]
 	then
-		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport $1 VOLUME_CLONE_NAME"
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport.sh $1 VOLUME_CLONE_NAME"
 	fi
     ;;
 
