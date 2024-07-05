@@ -1,7 +1,7 @@
 # bluexport
 Capture IBM Cloud POWERVS VSI and Export to COS or/and Image Catalog.  
 
-#### This script was made in GNU bash, version 5.2.21(1)-release.  
+###### This script was made in GNU bash, version 5.2.21(1)-release.  
 
 ## Usage:
 `./bluexport.sh [ -a | -x volumes_name_to_exclude ] [VSI_Name_to_Capture] [Capture_Image_Name] [both|image-catalog|cloud-storage] [hourly | daily | weekly | monthly | single]`  
