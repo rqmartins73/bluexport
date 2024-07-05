@@ -3,6 +3,9 @@
 # Usage for all volumes:	./bluexport.sh -a VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single
 # Usage for excluding volumes:	./bluexport.sh -x volumes_name_to_exclude VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single
 # Usage for monitoring job:	./bluexport -j VSI_NAME IMAGE_NAME
+# Usage to create a snapshot:	./bluexport -snapcr VSI_NAME SNAPSHOT_NAME 0|[DESCRIPTION] 0|[VOLUMES(Comma separated list)]
+# Usage to update a snapshot:	./bluexport -snapupd SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|[DESCRIPTION]
+# Usage to delete snapshot:	./bluexport -snapdel SNAPSHOT_NAME
 #
 # Example:  ./bluexport.sh -a vsiprd vsiprd_img image-catalog daily            ---- Includes all Volumes and exports to COS and image catalog
 # Example:  ./bluexport.sh -x ASP2_ vsiprd vsiprd_img both monthly             ---- Excludes Volumes with ASP2_ in the name and exports to image catalog and COS
@@ -18,7 +21,7 @@
        #####  START:CODE  #####
 
 ####  START: Constants Definition  #####
-Version=1.9.5
+Version=2.0.0
 bluexscrt="$HOME/bluexscrt"
 log_file="$HOME/bluexport.log"
 capture_time=`date +%Y-%m-%d_%H%M`
@@ -84,6 +87,12 @@ help() {
 	echo "Usage for excluding volumes:  ./bluexport.sh -x volumes_name_to_exclude VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single"
 	echo ""
 	echo "Usage for monitoring job:     ./bluexport -j VSI_NAME IMAGE_NAME"
+	echo ""
+	echo "Usage to create a snapshot:   ./bluexport -snapcr VSI_NAME SNAPSHOT_NAME 0|[DESCRIPTION] 0|[VOLUMES(Comma separated list)]"
+	echo ""
+	echo "Usage to update a snapshot:   ./bluexport -snapupd SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|[DESCRIPTION]"
+	echo ""
+	echo "Usage to delete snapshot:     ./bluexport -snapdel SNAPSHOT_NAME"
 	echo ""
 	echo "Example:  ./bluexport.sh -a vsiprd vsiprd_img image-catalog daily ---- Includes all Volumes and exports to COS and image catalog"
 	echo "Example:  ./bluexport.sh -x ASP2_ vsiprd vsiprd_img both monthly    ---- Excludes Volumes with ASP2_ in the name and exports to image catalog and COS"
@@ -211,7 +220,7 @@ job_monitor() {
 
 ####  START:FUNCTION - Login in IBM Cloud  ####
 cloud_login() {
-	/usr/local/bin/ibmcloud login --apikey $apikey -r $region 2>&1 > /dev/null
+	/usr/local/bin/ibmcloud login --apikey $apikey -r $region -g powervs 2>> $log_file | tee -a $log_file
 }
 ####  END:FUNCTION - Login in IBM Cloud  ####
 
@@ -282,7 +291,7 @@ check_VSI_exists() {
 			found=1
 			break
 		else
-			echo "`date +%Y-%m-%d_%H:%M:%S` - VSI $vsi_cloud_name not found in $full_ws_name!" >> $log_file
+			echo "`date +%Y-%m-%d_%H:%M:%S` - VSI $vsi not found in $full_ws_name!" >> $log_file
 		fi
 	done
 	if [ "$found" -eq 0 ]
@@ -291,6 +300,100 @@ check_VSI_exists() {
 	fi
 }
 ####  END:FUNCTION - Check if VSI exists and Get VSI IP and IASP NAME if exists  ####
+
+####  START:FUNCTION Flush ASPs and IASP Memory to Disk  ####
+flush_asps() {
+	if [ $test -eq 0 ]
+	then
+		echo "`date +%Y-%m-%d_%H:%M:%S` - Flushing Memory to Disk for SYSBAS..." >> $log_file
+		ssh -T -i $sshkeypath $vsi_user@$vsi_ip 'system "CHGASPACT ASPDEV(*SYSBAS) OPTION(*FRCWRT)"' >> $log_file | tee -a $log_file
+		if [[ $iasp_name != "" ]]
+		then
+			echo "`date +%Y-%m-%d_%H:%M:%S` - Flushing Memory to Disk for $iasp_name ..." >> $log_file
+			ssh -T -i $sshkeypath $vsi_user@$vsi_ip 'system "CHGASPACT ASPDEV('$iasp_name') OPTION(*FRCWRT)"' >> $log_file | tee -a $log_file
+		fi
+	else
+		echo "`date +%Y-%m-%d_%H:%M:%S` - Flushing Memory to Disk for SYSBAS..." >> $log_file
+		if [[ $iasp_name != "" ]]
+		then
+			echo "`date +%Y-%m-%d_%H:%M:%S` - Flushing Memory to Disk for $iasp_name ..." >> $log_file
+		fi
+	fi
+}
+####  END:FUNCTION Flush ASPs and IASP Memory to Disk  ####
+
+####  START:FUNCTION - Do the Snapshot Create  ####
+do_snap_create() {
+	flush_asps
+	echo "`date +%Y-%m-%d_%H:%M:%S` - == Executing Snapshot $snap_name of Instance $vsi with volumes $volumes_to_echo" >> $log_file
+	/usr/local/bin/ibmcloud pi snap cr $vsi_id --name $snap_name $description $volumes_to_snap 2>> $log_file | tee -a $log_file
+	if [ $? -eq 1 ]
+	then
+		abort "`date +%Y-%m-%d_%H:%M:%S` - FAILED - Oops something went wrong!... Check the log above this line..."
+	else
+		echo "`date +%Y-%m-%d_%H:%M:%S` - Waiting for Snapshot $snap_name to reach 100%..." >> $log_file
+		snap_percent=0
+		while [ $snap_percent -lt 100 ]
+		do
+			snap_percent_before=$snap_percent
+			sleep 10
+			snap_percent=$(/usr/local/bin/ibmcloud pi snap ls | grep -w $snap_name | awk {'print $7'})
+			if [[ "$snap_percent" == "" ]]
+			then
+				abort "`date +%Y-%m-%d_%H:%M:%S` - FAILED - Oops something went wrong!... Check the log above this line..."
+			fi
+			if [[ "$snap_percent" != "$snap_percent_before" ]]
+			then
+				if [[ "$snap_percent" == "100" ]]
+				then
+					echo "`date +%Y-%m-%d_%H:%M:%S` - Snapshot $snap_name reached 100% - Done!" >> $log_file
+				else
+					echo "`date +%Y-%m-%d_%H:%M:%S` - Snapshot $snap_name at $snap_percent%" >> $log_file
+				fi
+			fi
+		done
+	fi
+}
+####  END:FUNCTION - Do the Snapshot Create  ####
+
+####  START:FUNCTION - Do the Snapshot Update  ####
+do_snap_update() {
+	echo "`date +%Y-%m-%d_%H:%M:%S` - == Executing Snapshot $snap_name Update $new_name_echo" >> $log_file
+	snap_id=$(/usr/local/bin/ibmcloud pi snap ls | grep -w $snap_name | awk {'print $1'})
+	snap_upd_cmd="/usr/local/bin/ibmcloud pi snap upd $snap_id $description $new_name"
+	eval $snap_upd_cmd 2>> $log_file
+	if [ $? -eq 0 ]
+	then
+		echo "`date +%Y-%m-%d_%H:%M:%S` - Snapshot $snap_name updated $new_name_echo $new_description_echo - Done!" >> $log_file
+	else
+		abort "`date +%Y-%m-%d_%H:%M:%S` - FAILED - Oops something went wrong!... Check the log above this line..."
+	fi
+}
+####  END:FUNCTION - Do the Snapshot Update  ####
+
+####  START:FUNCTION - Do the Snapshot Delete  ####
+do_snap_delete() {
+	echo "`date +%Y-%m-%d_%H:%M:%S` - == Executing Snapshot $snap_name Delete" >> $log_file
+	snap_id=$(/usr/local/bin/ibmcloud pi snap ls | grep -w $snap_name | awk {'print $1'})
+	/usr/local/bin/ibmcloud pi snap del $snap_id 2>> $log_file
+	if [ $? -eq 0 ]
+	then
+		echo "`date +%Y-%m-%d_%H:%M:%S` - Snapshot $snap_name Deleted! - Done!"
+	else
+		abort "`date +%Y-%m-%d_%H:%M:%S` - FAILED - Oops something went wrong!... Check the log above this line..."
+	fi
+}
+####  END:FUNCTION - Do the Snapshot Delete  ####
+
+####  START:FUNCTION  Check if VSI ID exists in bluexscrt file  ####
+vsi_id_bluexscrt() {
+	vsi_id=`cat $bluexscrt | grep -i $vsi | awk {'print $3'}`
+	if [[ $vsi_id == "" ]]
+	then
+		abort "`date +%Y-%m-%d_%H:%M:%S` - VSI ID missing or VSI Name $vsi doesn't exist in $bluexscrt file, please insert it there..."
+	fi
+}
+####  END:FUNCTION  Check if VSI ID exists in bluexscrt file  ####
 
        ####  END - FUNCTIONS  ####
 
@@ -376,11 +479,7 @@ case $1 in
 		test=0
 	fi
 	vsi=$2
-	vsi_id=`cat $bluexscrt | grep -i $vsi | awk {'print $3'}`
-	if [[ $vsi_id == "" ]]
-	then
-		abort "`date +%Y-%m-%d_%H:%M:%S` - VSI ID missing in $bluexscrt file, please insert it there..."
-	fi
+	vsi_id_bluexscrt
 	echo "`date +%Y-%m-%d_%H:%M:%S` - Starting Capture&Export for VSI Name: $vsi ..." >> $log_file
 	echo "`date +%Y-%m-%d_%H:%M:%S` - Capture Name: $capture_name" >> $log_file
 	echo "`date +%Y-%m-%d_%H:%M:%S` - Export Destination: $destination" >> $log_file
@@ -444,11 +543,7 @@ case $1 in
 	done
 	echo "`date +%Y-%m-%d_%H:%M:%S` - Volumes Name to exclude: ${exclude_names[*]}" >> $log_file
 	vsi=$3
-	vsi_id=`cat $bluexscrt | grep -i $vsi | awk {'print $3'}`
-	if [[ $vsi_id == "" ]]
-	then
-		abort "`date +%Y-%m-%d_%H:%M:%S` - VSI ID missing in $bluexscrt file, please insert it there..."
-	fi
+	vsi_id_bluexscrt
 	echo "`date +%Y-%m-%d_%H:%M:%S` - Starting Capture&Export for VSI Name: $vsi ..." >> $log_file
 	echo "`date +%Y-%m-%d_%H:%M:%S` - Capture Name: $capture_name" >> $log_file
 	destination=$5
@@ -460,6 +555,141 @@ case $1 in
 		abort "`date +%Y-%m-%d_%H:%M:%S` - Export Destination $destination is NOT valid!"
 	fi
 	volumes_cmd="/usr/local/bin/ibmcloud pi ins vol ls $vsi_id $exclude_grep_opts | tail -n +2"
+    ;;
+
+  -snapcr)
+	if [ $# -lt 5 ]
+	then
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport $1 LPAR_NAME SNAPSHOT_NAME 0|\"DESCRIPTION\" 0|[Comma separated Volumes name list to snap]"
+	fi
+	vsi=$2
+	vsi_id_bluexscrt
+	test=0
+	snap_name=$3
+	snap_name_exists=$(/usr/local/bin/ibmcloud pi snap ls | grep -w $snap_name)
+	if [[ "$snap_name_exists" != "" ]]
+	then
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Already exists one Snapshot with name $snap_name, please choose a diferent name or use flag -snapupd."
+	fi
+	description=$4
+	if [ -n "$description" ] && [ "$description" -eq "$description" ] 2>/dev/null
+	then
+		if [ $4 -eq 0 ]
+		then
+			description=""
+		else
+			abort "`date +%Y-%m-%d_%H:%M:%S` - Argument DESCRIPTION must be 0 or a phrase inside quotation marks!! Syntax: bluexport $1 LPAR_NAME SNAPSHOT_NAME 0|[\"DESCRIPTION\"] 0|[VOLUMES - Comma separated Volumes name list to snap]"
+		fi
+	else
+		description="--description "$description
+	fi
+	volumes_to_snap=$5
+	if [ -n "$volumes_to_snap" ] && [ "$volumes_to_snap" -eq "$volumes_to_snap" ] 2>/dev/null
+	then
+		if [ $5 -eq 0 ]
+		then
+			volumes_to_snap=""
+			volumes_to_echo="ALL"
+		else
+			abort "`date +%Y-%m-%d_%H:%M:%S` - Argument VOLUMES must be 0 or comma separated names or IDs!! Syntax: bluexport $1 LPAR_NAME SNAPSHOT_NAME 0|[\"DESCRIPTION\"] 0|[VOLUMES - Comma separated Volumes name list to snap]"
+		fi
+	else
+		volumes_to_echo=$volumes_to_snap
+		volumes_to_snap="--volumes "$volumes_to_snap
+	fi
+	echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting Snapshot $snap_name of VSI $vsi with volumes: $volumes_to_echo !" >> $log_file
+	cloud_login
+	check_VSI_exists
+	do_snap_create
+	abort "`date +%Y-%m-%d_%H:%M:%S` - === Successfully finished Snapshot $snap_name of VSI $vsi with volumes: $volumes_to_echo !"
+    ;;
+
+  -snapupd)
+	if [ $# -lt 3 ]
+	then
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport $1 SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|[\"DESCRIPTION\"]"
+	fi
+	test=0
+	snap_name=$2
+	if [ $3 -eq 0 ] && [ $4 -eq 0 ]
+	then
+		abort "`date +%Y-%m-%d_%H:%M:%S` - You must pass at least one flag, DESCRIPTION or NEW_SNAPSHOT_NAME!..."
+	fi
+	echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting Snapshot $snap_name Update !" >> $log_file
+	cloud_login
+	snap_name_exists=$(/usr/local/bin/ibmcloud pi snap ls | grep -w $snap_name)
+	if [[ "$snap_name_exists" == "" ]]
+	then
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Snapshot with name $snap_name does not exist, please choose a diferent name or use flag -snapcr."
+	fi
+	description=$4
+	if [ -n "$description" ] && [ "$description" -eq "$description" ] 2>/dev/null
+	then
+		if [ $4 -eq 0 ]
+		then
+			description=""
+			new_description_echo=""
+		else
+			abort "`date +%Y-%m-%d_%H:%M:%S` - Argument DESCRIPTION must be 0 or a phrase inside quotation marks!! Syntax:  bluexport $1 SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|[\"DESCRIPTION\"]"
+		fi
+	else
+		description="--description \""$description"\""
+		new_description_echo="with new Description \"$4\""
+	fi
+	new_snap_name=$3
+	if [ -n "$new_snap_name" ] && [ "$new_snap_name" -eq "$new_snap_name" ] 2>/dev/null
+	then
+		if [ $3 -eq 0 ]
+		then
+			new_name_echo=""
+			new_name=""
+		else
+			abort "`date +%Y-%m-%d_%H:%M:%S` - Argument NEW_SNAPSHOT_NAME must be 0 or a name!! Syntax:  bluexport $1 SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|[\"DESCRIPTION\"]"
+		fi
+	else
+		if [[ "$new_snap_name" == "$snap_name" ]]
+		then
+			new_name_echo=""
+		else
+			new_name_echo="with new Name "$new_snap_name
+			snap_name_new=$new_snap_name
+			new_name="--name "$new_snap_name
+		fi
+	fi
+	do_snap_update
+	abort "`date +%Y-%m-%d_%H:%M:%S` - === Successfully finished Snapshot $snap_name Update $new_name_echo !"
+    ;;
+
+  -snapdel)
+	if [ $# -lt 2 ]
+	then
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport $1 SNAPSHOT_NAME"
+	fi
+	test=0
+	snap_name=$2
+	echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting Snapshot $snap_name Delete !" >> $log_file
+	cloud_login
+	snap_name_exists=$(/usr/local/bin/ibmcloud pi snap ls | grep -w $snap_name)
+	if [[ "$snap_name_exists" == "" ]]
+	then
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Snapshot with name $snap_name does not exist, please choose a diferent name or use flag -snapcr."
+	fi
+	do_snap_delete
+	abort "`date +%Y-%m-%d_%H:%M:%S` - === Successfully finished -  Snapshot $snap_name Deleted!"
+    ;;
+
+   -vclone)
+	if [ $# -lt 8 ]
+	then
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport $1 VOLUME_CLONE_NAME BASE_NAME LPAR_NAME True|False True|False STORAGE_TIER ALL|[Comma seperated Volumes name list to clone]"
+	fi
+    ;;
+
+   -vclonedel)
+	if [ $# -lt 2 ]
+	then
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport $1 VOLUME_CLONE_NAME"
+	fi
     ;;
 
    -v | --version)
@@ -487,22 +717,7 @@ echo "`date +%Y-%m-%d_%H:%M:%S` - Volumes Name Captured: $volumes_name" >> $log_
 ####  END: Get Volumes to capture  ####
 
 ####  START: Flush ASPs and IASP Memory to Disk  ####
-if [ $test -eq 0 ]
-then
-	echo "`date +%Y-%m-%d_%H:%M:%S` - Flushing Memory to Disk for SYSBAS..." >> $log_file
-	ssh -T -i $sshkeypath $vsi_user@$vsi_ip 'system "CHGASPACT ASPDEV(*SYSBAS) OPTION(*FRCWRT)"' >> $log_file | tee -a $log_file
-	if [[ $iasp_name != "" ]]
-	then
-		echo "`date +%Y-%m-%d_%H:%M:%S` - Flushing Memory to Disk for $iasp_name ..." >> $log_file
-		ssh -T -i $sshkeypath $vsi_user@$vsi_ip 'system "CHGASPACT ASPDEV('$iasp_name') OPTION(*FRCWRT)"' >> $log_file | tee -a $log_file
-	fi
-else
-	echo "`date +%Y-%m-%d_%H:%M:%S` - Flushing Memory to Disk for SYSBAS..." >> $log_file
-	if [[ $iasp_name != "" ]]
-	then
-		echo "`date +%Y-%m-%d_%H:%M:%S` - Flushing Memory to Disk for $iasp_name ..." >> $log_file
-	fi
-fi
+flush_asps
 ####  END: Flush ASPs and IASP Memory to Disk  ####
 
 ####  START: Make the Capture and Export  ####
