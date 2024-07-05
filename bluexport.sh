@@ -3,6 +3,7 @@
 # Usage for all volumes:	./bluexport.sh -a VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single
 # Usage for excluding volumes:	./bluexport.sh -x volumes_name_to_exclude VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single
 # Usage for monitoring job:	./bluexport.sh -j VSI_NAME IMAGE_NAME
+#
 # Usage to create a snapshot:	./bluexport.sh -snapcr VSI_NAME SNAPSHOT_NAME 0|["DESCRIPTION"] 0|[VOLUMES(Comma separated list)]
 # Usage to update a snapshot:	./bluexport.sh -snapupd SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|["DESCRIPTION"]
 # Usage to delete snapshot:	./bluexport.sh -snapdel SNAPSHOT_NAME
@@ -81,6 +82,7 @@ wsnames=$(grep '^WSNAMES' $bluexscrt | cut -d' ' -f2-)
 help() {
 	echo ""
 	echo "Capture IBM Cloud POWERVS VSI and Export to COS or/and Image Catalog"
+	echo "Version 2.x now supports the creation, update and delete Snapshots."
 	echo ""
 	echo "Usage for all volumes:        ./bluexport.sh -a VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single"
 	echo ""
