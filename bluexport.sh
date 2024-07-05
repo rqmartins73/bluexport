@@ -693,7 +693,7 @@ case $1 in
     ;;
 
    -v | --version)
-	echo "  ### bluexport by Ricardo Martins - Blue Chip © 2023-2024"
+	echo "  ### bluexport by Ricardo Martins - Blue Chip Portugal © 2023-2024"
 	echo "  ### Version: $Version"
 	exit 0
     ;;
