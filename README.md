@@ -69,6 +69,8 @@ VSI_USER vsi_user
 
 SSHKEYPATH /sshkeypath/.ssh/key
 
+RESOURCE_GRP Default # The resource group you want to use when logging in, in this case Default
+
 ```
 
 bluexscrt example:
@@ -92,8 +94,13 @@ VSI_USER bluexport
 
 SSHKEYPATH /home/<USER>/.ssh/bluexport_rsa
 
+RESOURCE_GRP powervs
+
 ```
 
 ***
+
+###### For this script to work you need to have IBM Cloud CLI installed.
+
 
  <sub>Ricardo Martins - [Blue Chip Portugal](http://www.bluechip.pt) © 2024</sub>  
