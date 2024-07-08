@@ -101,6 +101,7 @@ RESOURCE_GRP powervs
 ***
 
 ###### For this script to work you need to have IBM Cloud CLI installed.
+<a href="https://cloud.ibm.com/docs/cli?topic=cli-install-ibmcloud-cli" target="_blank">IBM Cloud CLI install instructions</a>
 [IBM Cloud CLI install instructions](https://cloud.ibm.com/docs/cli?topic=cli-install-ibmcloud-cli)
 
  <sub>Ricardo Martins - [Blue Chip Portugal](http://www.bluechip.pt) © 2024</sub>  
