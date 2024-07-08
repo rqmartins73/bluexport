@@ -381,7 +381,7 @@ do_snap_delete() {
 	/usr/local/bin/ibmcloud pi snap del $snap_id 2>> $log_file
 	if [ $? -eq 0 ]
 	then
-		echo "`date +%Y-%m-%d_%H:%M:%S` - Waiting for Deletion of Snapshot $snap_name to reach 100%..." >> $log_file
+		echo "`date +%Y-%m-%d_%H:%M:%S` - Waiting for Snapshot $snap_name deletion to reach 100%..." >> $log_file
 		snap_percent=0
 		while [ $snap_percent -lt 100 ] #|| [[ $snap_percent != "" ]]
 		do
@@ -390,7 +390,7 @@ do_snap_delete() {
 			snap_percent=$(/usr/local/bin/ibmcloud pi snap ls | grep -w $snap_name | awk {'print $7'})
 			if [[ $snap_percent == "" ]]
 			then
-				snap_percent=101
+				snap_percent=100
 			fi
 			if [[ "$snap_percent" != "$snap_percent_before" ]]
 			then
@@ -398,7 +398,7 @@ do_snap_delete() {
 				then
 					echo "`date +%Y-%m-%d_%H:%M:%S` - Snapshot $snap_name Deleted. - Done!" >> $log_file
 				else
-					echo "`date +%Y-%m-%d_%H:%M:%S` - Snapshot $snap_name at $snap_percent%" >> $log_file
+					echo "`date +%Y-%m-%d_%H:%M:%S` - Snapshot $snap_name deletion at $snap_percent%" >> $log_file
 				fi
 			fi
 		done
