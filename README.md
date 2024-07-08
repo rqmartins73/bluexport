@@ -33,7 +33,7 @@ Flag `t` before `a` or `x` makes it a test and do not makes the capture.
 - `[hourly | daily | weekly | monthly | single]` - This parameter allows the script to delete the image from the previous capture. 
 i.e. If weekly is selected it will try to delete the image from the week before.
   
- **Note:** Reocurrence "hourly" only permits captures to image-catalog
+ **Note:** Reocurrence `hourly` only permits captures to image-catalog
 
  <br>
   
