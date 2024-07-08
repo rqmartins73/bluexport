@@ -383,7 +383,7 @@ do_snap_delete() {
 	then
 		echo "`date +%Y-%m-%d_%H:%M:%S` - Waiting for Snapshot $snap_name deletion to reach 100%..." >> $log_file
 		snap_percent=0
-		while [ $snap_percent -lt 100 ] #|| [[ $snap_percent != "" ]]
+		while [ $snap_percent -lt 100 ]
 		do
 			snap_percent_before=$snap_percent
 			sleep 5
@@ -394,7 +394,7 @@ do_snap_delete() {
 			fi
 			if [[ "$snap_percent" != "$snap_percent_before" ]]
 			then
-				if [[ "$snap_percent" == "100" ]] || [[ $snap_percent == "" ]]
+				if [ $snap_percent -eq 100 ] # || [[ $snap_percent == "" ]]
 				then
 					echo "`date +%Y-%m-%d_%H:%M:%S` - Snapshot $snap_name Deleted. - Done!" >> $log_file
 				else
