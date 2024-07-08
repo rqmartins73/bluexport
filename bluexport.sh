@@ -394,7 +394,7 @@ do_snap_delete() {
 			fi
 			if [[ "$snap_percent" != "$snap_percent_before" ]]
 			then
-				if [ $snap_percent -eq 100 ] # || [[ $snap_percent == "" ]]
+				if [ $snap_percent -eq 100 ]
 				then
 					echo "`date +%Y-%m-%d_%H:%M:%S` - Snapshot $snap_name Deleted. - Done!" >> $log_file
 				else
@@ -592,7 +592,7 @@ case $1 in
 	snap_name_exists=$(/usr/local/bin/ibmcloud pi snap ls | grep -w $snap_name)
 	if [[ "$snap_name_exists" != "" ]]
 	then
-		abort "`date +%Y-%m-%d_%H:%M:%S` - Already exists one Snapshot with name $snap_name, please choose a diferent name or use flag -snapupd."
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Already exists one Snapshot with name $snap_name, please choose a diferent name or use flag -snapupd to change the name."
 	fi
 	description=$4
 	if [ -n "$description" ] && [ "$description" -eq "$description" ] 2>/dev/null
@@ -643,7 +643,7 @@ case $1 in
 	snap_name_exists=$(/usr/local/bin/ibmcloud pi snap ls | grep -w $snap_name)
 	if [[ "$snap_name_exists" == "" ]]
 	then
-		abort "`date +%Y-%m-%d_%H:%M:%S` - Snapshot with name $snap_name does not exist, please choose a diferent name or use flag -snapcr."
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Snapshot with name $snap_name does not exist, please choose a diferent name or use flag -snapcr to create one."
 	fi
 	description=$4
 	if [ -n "$description" ] && [ "$description" -eq "$description" ] 2>/dev/null
@@ -695,7 +695,7 @@ case $1 in
 	snap_name_exists=$(/usr/local/bin/ibmcloud pi snap ls | grep -w $snap_name)
 	if [[ "$snap_name_exists" == "" ]]
 	then
-		abort "`date +%Y-%m-%d_%H:%M:%S` - Snapshot with name $snap_name does not exist, please choose a diferent name or use flag -snapcr."
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Snapshot with name $snap_name does not exist, please choose a diferent name or use flag -snapcr to create one."
 	fi
 	do_snap_delete
 	abort "`date +%Y-%m-%d_%H:%M:%S` - === Successfully finished -  Snapshot $snap_name Deleted!"
