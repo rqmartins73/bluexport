@@ -1,4 +1,5 @@
 APYKEY REPLACE-ALL-THIS-WITH-YOUR-API-KEY
+
 WSFRADR REPLACE-ALL-THIS-WITH-YOUR-POWER-VIRTUAL-SERVER-CRN # i.e. crn:v1:bluemix:public:power-iaas:blablablablabla::
 WSFRAPRD REPLACE-ALL-THIS-WITH-YOUR-POWER-VIRTUAL-SERVER-CRN # i.e.  crn:v1:bluemix:public:power-iaas:blablablablabla::
 WSMADPRD REPLACE-ALL-THIS-WITH-YOUR-POWER-VIRTUAL-SERVER-CRN # i.e.  crn:v1:bluemix:public:power-iaas:blablablablabla::
