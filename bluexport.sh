@@ -14,7 +14,7 @@
 #
 # Note: Reocurrence "hourly" only permits captures to image-catalog
 #
-# Capture IBM Cloud POWERVS VSI and Export to COS or/and Image Catalog
+# Capture IBM Cloud POWERVS VSI and Export to COS or/and Image Catalog and Snapshots
 #
 # Ricardo Martins - Blue Chip Portugal © 2023-2024
 #######################################################################################
@@ -22,21 +22,21 @@
        #####  START:CODE  #####
 
 ####  START: Constants Definition  #####
-Version=2.0.0
-bluexscrt="$HOME/bluexscrt"
-log_file="$HOME/bluexport.log"
+Version=2.0.1
+bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
+log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 capture_time=`date +%Y-%m-%d_%H%M`
 capture_date=`date +%Y-%m-%d`
 capture_hour=`date "+%H"`
 flagj=0
-job_log="$HOME/bluex_job.log"
-job_test_log="$HOME/bluex_job_test.log"
-job_id="$HOME/bluex_job_id.log"
-job_log_short="$HOME/bluex_job"
-job_monitor="$HOME/bluex_job_monitor.tmp"
-vsi_list_id_tmp="$HOME/bluex_vsi_list_id.tmp"
-vsi_list_tmp="$HOME/bluex_vsi_list.tmp"
-volumes_file="$HOME/bluex_volumes_file.tmp"
+job_log=$(cat $HOME/bluexport.conf | grep -w "job_log" | awk {'print $2'})
+job_test_log=$(cat $HOME/bluexport.conf | grep -w "job_test_log" | awk {'print $2'})
+job_id=$(cat $HOME/bluexport.conf | grep -w "job_id" | awk {'print $2'})
+job_log_short=$(cat $HOME/bluexport.conf | grep -w "job_log_short" | awk {'print $2'})
+job_monitor=$(cat $HOME/bluexport.conf | grep -w "job_monitor" | awk {'print $2'})
+vsi_list_id_tmp=$(cat $HOME/bluexport.conf | grep -w "vsi_list_id_tmp" | awk {'print $2'})
+vsi_list_tmp=$(cat $HOME/bluexport.conf | grep -w "vsi_list_tmp" | awk {'print $2'})
+volumes_file=$(cat $HOME/bluexport.conf | grep -w "volumes_file" | awk {'print $2'})
 end_log_file='==== END ========= $timestamp ========='
 single=0
 vsi_user=$(cat $bluexscrt | grep "VSI_USER" | awk {'print $2'})
@@ -56,11 +56,12 @@ fi
 ####  END: Check if Config File exists  ####
 
 ####  START: Get Cloud Config Data  #####
-accesskey=$(cat $bluexscrt | grep "ACCESSKEY" | awk {'print $2'})
-secretkey=$(cat $bluexscrt | grep "SECRETKEY" | awk {'print $2'})
-bucket=$(cat $bluexscrt | grep "BUCKETNAME" | awk {'print $2'})
-apikey=$(cat $bluexscrt | grep "APYKEY" | awk {'print $2'})
-sshkeypath=$(cat $bluexscrt | grep "SSHKEYPATH" | awk {'print $2'})
+resource_grp=$(cat $bluexscrt | grep -w "RESOURCE_GRP" | awk {'print $2'})
+accesskey=$(cat $bluexscrt | grep -w "ACCESSKEY" | awk {'print $2'})
+secretkey=$(cat $bluexscrt | grep -w "SECRETKEY" | awk {'print $2'})
+bucket=$(cat $bluexscrt | grep -w "BUCKETNAME" | awk {'print $2'})
+apikey=$(cat $bluexscrt | grep -w "APYKEY" | awk {'print $2'})
+sshkeypath=$(cat $bluexscrt | grep -w "SSHKEYPATH" | awk {'print $2'})
 
    ### START: Dynamically create a variable with the name of the workspace ###
 read -r -a workspaces <<< $(grep "^ALLWS" "$bluexscrt" | cut -d ' ' -f2-) # Read the ALLWS line from bluexscrt file and create an array of workspace names
@@ -222,7 +223,7 @@ job_monitor() {
 
 ####  START:FUNCTION - Login in IBM Cloud  ####
 cloud_login() {
-	/usr/local/bin/ibmcloud login --apikey $apikey -r $region -g powervs 2>> $log_file | tee -a $log_file
+	/usr/local/bin/ibmcloud login --apikey $apikey -r $region -g $resource_grp 2>> $log_file | tee -a $log_file
 }
 ####  END:FUNCTION - Login in IBM Cloud  ####
 
@@ -412,7 +413,7 @@ fi
 case $1 in
    -h | --help)
 	help
-	exit 0
+	abort "`date +%Y-%m-%d_%H:%M:%S` - Help requested!!"
     ;;
 
    -j)
@@ -697,7 +698,7 @@ case $1 in
    -v | --version)
 	echo "  ### bluexport by Ricardo Martins - Blue Chip Portugal © 2023-2024"
 	echo "  ### Version: $Version"
-	exit 0
+	abort "`date +%Y-%m-%d_%H:%M:%S` - Version requested!!"
     ;;
 
     *)
