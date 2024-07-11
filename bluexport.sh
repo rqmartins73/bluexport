@@ -722,7 +722,7 @@ case $1 in
    -vclone)
 	if [ $# -lt 3 ]
 	then
-		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport.sh $1 VOLUME_CLONE_NAME Comma seperated Volumes name list to clone"
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport.sh $1 VOLUME_CLONE_NAME VOLUMES(Comma seperated Volumes name or IDs list to clone)"
 	fi
 	test=0
 	vclone_name=$2
