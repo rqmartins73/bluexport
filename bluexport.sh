@@ -730,7 +730,7 @@ case $1 in
 	echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting Volume Clone $vclone_name" >> $log_file
 	echo "`date +%Y-%m-%d_%H:%M:%S` - This is the list of volumes that will be cloned: $volumes_to_clone" >> $log_file
 	cloud_login
-	vclone_name_exists=$(/usr/local/bin/ibmcloud pi vol cl ls | grep -w $vclone_name
+	vclone_name_exists=$(/usr/local/bin/ibmcloud pi vol cl ls | grep -w $vclone_name)
 	if [[ "$vclone_name_exists" != "" ]]
 	then
 		abort "`date +%Y-%m-%d_%H:%M:%S` - Volume Clone with name $vclone_name already exists, please choose a diferent name!"
