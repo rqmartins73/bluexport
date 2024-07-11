@@ -410,16 +410,19 @@ do_snap_delete() {
 
 ####  START:FUNCTION - Do the Volume Clone Execute ####
 do_volume_clone_execute(){
+echo ""
 }
 ####  END:FUNCTION -  Do the Volume Clone Execute ####
 
 ####  START:FUNCTION - Do the Volume Clone Start ####
 do_volume_clone_start(){
+echo ""
 }
 ####  END:FUNCTION -  Do the Volume Clone Start ####
 
 ####  START:FUNCTION - Do the Volume Clone ####
 do_volume_clone(){
+echo ""
 }
 ####  END:FUNCTION -  Do the Volume Clone ####
 
@@ -717,7 +720,7 @@ case $1 in
     ;;
 
    -vclone)
-	if [ $# -lt 2 ]
+	if [ $# -lt 3 ]
 	then
 		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport.sh $1 VOLUME_CLONE_NAME BASE_NAME LPAR_NAME True|False True|False STORAGE_TIER ALL|[Comma seperated Volumes name list to clone]"
 	fi
