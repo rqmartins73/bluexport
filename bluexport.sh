@@ -22,7 +22,7 @@
        #####  START:CODE  #####
 
 ####  START: Constants Definition  #####
-Version=2.0.1
+Version=3.0.0
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 capture_time=`date +%Y-%m-%d_%H%M`
@@ -408,6 +408,21 @@ do_snap_delete() {
 }
 ####  END:FUNCTION - Do the Snapshot Delete  ####
 
+####  START:FUNCTION - Do the Volume Clone Execute ####
+do_volume_clone_execute(){
+}
+####  END:FUNCTION -  Do the Volume Clone Execute ####
+
+####  START:FUNCTION - Do the Volume Clone Start ####
+do_volume_clone_start(){
+}
+####  END:FUNCTION -  Do the Volume Clone Start ####
+
+####  START:FUNCTION - Do the Volume Clone ####
+do_volume_clone(){
+}
+####  END:FUNCTION -  Do the Volume Clone ####
+
 ####  START:FUNCTION  Check if VSI ID exists in bluexscrt file  ####
 vsi_id_bluexscrt() {
 	vsi_id=`cat $bluexscrt | grep -i $vsi | awk {'print $3'}`
@@ -601,7 +616,7 @@ case $1 in
 		then
 			description=""
 		else
-			abort "`date +%Y-%m-%d_%H:%M:%S` - Argument DESCRIPTION must be 0 or a phrase inside quotation marks!! Syntax: bluexport.sh $1 LPAR_NAME SNAPSHOT_NAME 0|[\"DESCRIPTION\"] 0|[VOLUMES - Comma separated Volumes name list to snap]"
+			abort "`date +%Y-%m-%d_%H:%M:%S` - Argument DESCRIPTION must be 0 or a phrase inside quotes!! Syntax: bluexport.sh $1 LPAR_NAME SNAPSHOT_NAME 0|[\"DESCRIPTION\"] 0|[VOLUMES - Comma separated Volumes name list to snap]"
 		fi
 	else
 		description="--description "$description
@@ -653,7 +668,7 @@ case $1 in
 			description=""
 			new_description_echo=""
 		else
-			abort "`date +%Y-%m-%d_%H:%M:%S` - Argument DESCRIPTION must be 0 or a phrase inside quotation marks!! Syntax:  bluexport.sh $1 SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|[\"DESCRIPTION\"]"
+			abort "`date +%Y-%m-%d_%H:%M:%S` - Argument DESCRIPTION must be 0 or a phrase inside quotes!! Syntax:  bluexport.sh $1 SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|[\"DESCRIPTION\"]"
 		fi
 	else
 		description="--description \""$description"\""
@@ -702,10 +717,23 @@ case $1 in
     ;;
 
    -vclone)
-	if [ $# -lt 8 ]
+	if [ $# -lt 2 ]
 	then
 		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport.sh $1 VOLUME_CLONE_NAME BASE_NAME LPAR_NAME True|False True|False STORAGE_TIER ALL|[Comma seperated Volumes name list to clone]"
 	fi
+	test=0
+	vclone_name=$2
+	volumes_to_clone=$3
+	echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting Volume Clone $vclone_name" >> $log_file
+	echo "`date +%Y-%m-%d_%H:%M:%S` - This is the list of volumes that will be cloned: $volumes_to_clone" >> $log_file
+	cloud_login
+	vclone_name_exists=$(/usr/local/bin/ibmcloud pi vol cl ls | grep -w $vclone_name
+	if [[ "$vclone_name_exists" != "" ]]
+	then
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Volume Clone with name $vclone_name already exists, please choose a diferent name!"
+	fi
+	do_volume_clone
+	abort "`date +%Y-%m-%d_%H:%M:%S` - === Successfully finished -  Volume Clone $vclone_name !"
     ;;
 
    -vclonedel)
