@@ -465,11 +465,11 @@ do_volume_clone_start() {
 
 ####  START:FUNCTION - Do the Volume Clone ####
 do_volume_clone() {
-	echo "`date +%Y-%m-%d_%H:%M:%S` - == Creating Volume Clone with name $vclone_name ..." >> $log_file
+	echo "`date +%Y-%m-%d_%H:%M:%S` - == Creating Volume Clone Request with name $vclone_name ..." >> $log_file
 	/usr/local/bin/ibmcloud pi vol cl cr --name $vclone_name --volumes $volumes_to_clone 2>> $log_file
 	if [ $? -eq 0 ]
 	then
-		echo "`date +%Y-%m-%d_%H:%M:%S` - Waiting for Volume Clone $vclone_name creation to finish..." >> $log_file
+		echo "`date +%Y-%m-%d_%H:%M:%S` - Waiting for Volume Clone Request $vclone_name creation to finish..." >> $log_file
 		vclone_percent=0
 		while [ $vclone_percent -lt 100 ]
 		do
@@ -480,9 +480,9 @@ do_volume_clone() {
 			then
 				if [ $vclone_percent -eq 100 ]
 				then
-					echo "`date +%Y-%m-%d_%H:%M:%S` - Volume Clone $vclone_name Done!" >> $log_file
+					echo "`date +%Y-%m-%d_%H:%M:%S` - Volume Clone Request $vclone_name Done!" >> $log_file
 				else
-					echo "`date +%Y-%m-%d_%H:%M:%S` - Volume Clone $vclone_name creation at $vclone_percent%" >> $log_file
+					echo "`date +%Y-%m-%d_%H:%M:%S` - Volume Clone Request $vclone_name creation at $vclone_percent%" >> $log_file
 				fi
 			fi
 		done
@@ -817,7 +817,7 @@ case $1 in
 	then
 		volumes_to_clone=$(/usr/local/bin/ibmcloud pi ins get $vsi_id | grep Volumes | sed -z 's/ //g' | sed -z 's/Volumes//g')
 	fi
-	echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting Volume Clone $vclone_name" >> $log_file
+	echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting the 3 processes of Volume Clone $vclone_name" >> $log_file
 	echo "`date +%Y-%m-%d_%H:%M:%S` - This is the list of volumes that will be cloned: $volumes_to_clone" >> $log_file
 	vclone_name_exists=$(/usr/local/bin/ibmcloud pi vol cl ls | grep -w $vclone_name)
 	if [[ "$vclone_name_exists" != "" ]]
@@ -826,7 +826,7 @@ case $1 in
 	fi
 	do_volume_clone
 	do_volume_clone_start
-	#do_volume_clone_execute
+	do_volume_clone_execute
 	abort "`date +%Y-%m-%d_%H:%M:%S` - === Successfully finished -  Volume Clone $vclone_name !"
     ;;
 
