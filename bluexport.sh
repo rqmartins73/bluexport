@@ -1,12 +1,13 @@
 #!/bin/bash
 #
-# Usage for all volumes:	./bluexport.sh -a VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single
-# Usage for excluding volumes:	./bluexport.sh -x volumes_name_to_exclude VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single
-# Usage for monitoring job:	./bluexport.sh -j VSI_NAME IMAGE_NAME
+# Usage for all volumes:		./bluexport.sh -a VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single
+# Usage for excluding volumes:		./bluexport.sh -x volumes_name_to_exclude VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single
+# Usage for monitoring job:		./bluexport.sh -j VSI_NAME IMAGE_NAME
 #
-# Usage to create a snapshot:	./bluexport.sh -snapcr VSI_NAME SNAPSHOT_NAME 0|["DESCRIPTION"] 0|[VOLUMES(Comma separated list)]
-# Usage to update a snapshot:	./bluexport.sh -snapupd SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|["DESCRIPTION"]
-# Usage to delete snapshot:	./bluexport.sh -snapdel SNAPSHOT_NAME
+# Usage to create a snapshot:		./bluexport.sh -snapcr VSI_NAME SNAPSHOT_NAME 0|["DESCRIPTION"] 0|[VOLUMES(Comma separated list)]
+# Usage to update a snapshot:		./bluexport.sh -snapupd SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|["DESCRIPTION"]
+# Usage to delete snapshot:		./bluexport.sh -snapdel SNAPSHOT_NAME
+# Usage to create a volume clone:   	./bluexport.sh -vclone VOLUME_CLONE_NAME BASE_NAME LPAR_NAME True|False True|False STORAGE_TIER ALL|(Comma seperated Volumes name list to clone)"
 #
 # Example:  ./bluexport.sh -a vsiprd vsiprd_img image-catalog daily            ---- Includes all Volumes and exports to COS and image catalog
 # Example:  ./bluexport.sh -x ASP2_ vsiprd vsiprd_img both monthly             ---- Excludes Volumes with ASP2_ in the name and exports to image catalog and COS
@@ -85,17 +86,19 @@ help() {
 	echo "Capture IBM Cloud POWERVS VSI and Export to COS or/and Image Catalog"
 	echo "Version 2.x now supports the creation, update and delete Snapshots."
 	echo ""
-	echo "Usage for all volumes:        ./bluexport.sh -a VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single"
+	echo "Usage for all volumes:        	./bluexport.sh -a VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single"
 	echo ""
-	echo "Usage for excluding volumes:  ./bluexport.sh -x volumes_name_to_exclude VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single"
+	echo "Usage for excluding volumes:  	./bluexport.sh -x volumes_name_to_exclude VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single"
 	echo ""
-	echo "Usage for monitoring job:     ./bluexport.sh -j VSI_NAME IMAGE_NAME"
+	echo "Usage for monitoring job:     	./bluexport.sh -j VSI_NAME IMAGE_NAME"
 	echo ""
-	echo "Usage to create a snapshot:   ./bluexport.sh -snapcr VSI_NAME SNAPSHOT_NAME 0|[DESCRIPTION] 0|[VOLUMES(Comma separated list)]"
+	echo "Usage to create a snapshot:   	./bluexport.sh -snapcr VSI_NAME SNAPSHOT_NAME 0|[DESCRIPTION] 0|[VOLUMES(Comma separated list)]"
 	echo ""
-	echo "Usage to update a snapshot:   ./bluexport.sh -snapupd SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|[DESCRIPTION]"
+	echo "Usage to update a snapshot:   	./bluexport.sh -snapupd SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|[DESCRIPTION]"
 	echo ""
-	echo "Usage to delete snapshot:     ./bluexport.sh -snapdel SNAPSHOT_NAME"
+	echo "Usage to delete snapshot:     	./bluexport.sh -snapdel SNAPSHOT_NAME"
+	echo ""
+	echo "Usage to create a volume clone:	./bluexport.sh -vclone VOLUME_CLONE_NAME BASE_NAME LPAR_NAME True|False True|False STORAGE_TIER ALL|(Comma seperated Volumes name list to clone)"
 	echo ""
 	echo "Example:  ./bluexport.sh -a vsiprd vsiprd_img image-catalog daily ---- Includes all Volumes and exports to COS and image catalog"
 	echo "Example:  ./bluexport.sh -x ASP2_ vsiprd vsiprd_img both monthly    ---- Excludes Volumes with ASP2_ in the name and exports to image catalog and COS"
@@ -410,19 +413,78 @@ do_snap_delete() {
 
 ####  START:FUNCTION - Do the Volume Clone Execute ####
 do_volume_clone_execute(){
-echo ""
+	flush_asps
+	echo "`date +%Y-%m-%d_%H:%M:%S` - == Executing Volume Clone with name $vclone_name ..." >> $log_file
+	/usr/local/bin/ibmcloud pi vol cl ex $vclone_id --name $base_name --replication-enabled=$replication --rollback-prepare=$rollback --target-tier $target_tier 2>> $log_file
+	if [ $? -eq 0 ]
+	then
+		echo "`date +%Y-%m-%d_%H:%M:%S` - Waiting for Volume Clone $vclone_name execution to finish..." >> $log_file
+		vcloneex_percent=0
+		while [ $vcloneex_percent -lt 100 ]
+		do
+			vcloneex_percent_before=$vcloneex_percent
+			sleep 5
+			vcloneex_percent=$(/usr/local/bin/ibmcloud pi vol cl ls | grep -A6 $vclone_name | grep "Percent Completed:" | awk {'print $3'}
+			if [[ "$vcloneex_percent" != "$vcloneex_percent_before" ]]
+			then
+				if [ $vcloneex_percent -eq 100 ]
+				then
+					echo "`date +%Y-%m-%d_%H:%M:%S` - Volume Clone $vclone_name Done and ready to be used!" >> $log_file
+				else
+					echo "`date +%Y-%m-%d_%H:%M:%S` - Volume Clone $vclone_name execution at $vcloneex_percent%" >> $log_file
+				fi
+			fi
+		done
+	else
+		abort "`date +%Y-%m-%d_%H:%M:%S` - FAILED - Oops something went wrong!... Check the log above this line..."
+	fi
 }
 ####  END:FUNCTION -  Do the Volume Clone Execute ####
 
 ####  START:FUNCTION - Do the Volume Clone Start ####
 do_volume_clone_start(){
-echo ""
+	echo "`date +%Y-%m-%d_%H:%M:%S` - == Starting Volume Clone with name $vclone_name ..." >> $log_file
+	vclone_id=$(/usr/local/bin/ibmcloud pi vol cl ls | grep -A6 $vclone_name | grep "Volume Clone Request ID:" | awk {'print $5'})
+	/usr/local/bin/ibmcloud pi vol cl st $vclone_id 2>> $log_file
+	if [ $? -eq 0 ]
+	then
+		vclone_start_action=$(/usr/local/bin/ibmcloud pi vol cl get $vclone_id | grep "Action" | awk {'print $2'})
+		vclone_start_status=$(/usr/local/bin/ibmcloud pi vol cl get $vclone_id | grep "Status" | awk {'print $2'})
+		if [[ "$vclone_start_action" == "start" ]] && [[ "$vclone_start_status" == "available" ]]
+		then
+			echo "`date +%Y-%m-%d_%H:%M:%S` - Volume Clone $vclone_name Started and ready to execute..." >> $log_file
+		else
+			abort "`date +%Y-%m-%d_%H:%M:%S` - FAILED - Oops something went wrong!... Check the log above this line..."
+		fi
 }
 ####  END:FUNCTION -  Do the Volume Clone Start ####
 
 ####  START:FUNCTION - Do the Volume Clone ####
 do_volume_clone(){
-echo ""
+	echo "`date +%Y-%m-%d_%H:%M:%S` - == Creating Volume Clone with name $vclone_name ..." >> $log_file
+	/usr/local/bin/ibmcloud pi vol cl cr --name $vclone_name --volumes $volumes_to_clone 2>> $log_file
+	if [ $? -eq 0 ]
+	then
+		echo "`date +%Y-%m-%d_%H:%M:%S` - Waiting for Volume Clone $vclone_name creation to finish..." >> $log_file
+		vclone_percent=0
+		while [ $vclone_percent -lt 100 ]
+		do
+			vclone_percent_before=$vclone_percent
+			sleep 5
+			vclone_percent=$(/usr/local/bin/ibmcloud pi vol cl ls | grep -A6 $vclone_name | grep "Percent Completed:" | awk {'print $3'}
+			if [[ "$vclone_percent" != "$vclone_percent_before" ]]
+			then
+				if [ $vclone_percent -eq 100 ]
+				then
+					echo "`date +%Y-%m-%d_%H:%M:%S` - Volume Clone $vclone_name Done!" >> $log_file
+				else
+					echo "`date +%Y-%m-%d_%H:%M:%S` - Volume Clone $vclone_name creation at $vclone_percent%" >> $log_file
+				fi
+			fi
+		done
+	else
+		abort "`date +%Y-%m-%d_%H:%M:%S` - FAILED - Oops something went wrong!... Check the log above this line..."
+	fi
 }
 ####  END:FUNCTION -  Do the Volume Clone ####
 
@@ -720,22 +782,46 @@ case $1 in
     ;;
 
    -vclone)
-	if [ $# -lt 3 ]
+	if [ $# -lt 8 ]
 	then
-		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport.sh $1 VOLUME_CLONE_NAME VOLUMES(Comma seperated Volumes name or IDs list to clone)"
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport.sh $1 VOLUME_CLONE_NAME BASE_NAME LPAR_NAME (Replication)True|False (Rollback)True|False TARGET_STORAGE_TIER ALL|VOLUMES(Comma seperated Volumes name or IDs list to clone)"
 	fi
 	test=0
 	vclone_name=$2
-	volumes_to_clone=$3
+	base_name=$3
+	vsi=$4
+	replication=$5
+	rollback=$6
+	target_tier=$7
+	volumes_to_clone=$8
+	cloud_login
+	check_VSI_exists
+	if [[ "$volumes_to_clone" == "ALL" ]]
+	then
+		volumes_to_clone=$(ic pi ins get $vsi_id | grep Volumes | sed -z 's/ //g' | sed -z 's/Volumes//g')
+	fi
+	if [[ "$replication" != "True" ]] && [[ "$replication" != "False" ]]
+	then
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Replication value must be True or False...!"
+	fi
+	if [[ "$rollback" != "True" ]] && [[ "$rollback" != "False" ]]
+	then
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Rollback value must be True or False...!"
+	fi
+	if [[ "$target_tier" != "tier0" ]] && [[ "$target_tier" != "tier1" ]] && [[ "$target_tier" != "tier3" ]] && [[ "$target_tier" != "tier5k" ]]
+	then
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Target Tier must be tier0 or tier1 or tier3 or tier5k...!"
+	fi
 	echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting Volume Clone $vclone_name" >> $log_file
 	echo "`date +%Y-%m-%d_%H:%M:%S` - This is the list of volumes that will be cloned: $volumes_to_clone" >> $log_file
-	cloud_login
 	vclone_name_exists=$(/usr/local/bin/ibmcloud pi vol cl ls | grep -w $vclone_name)
 	if [[ "$vclone_name_exists" != "" ]]
 	then
 		abort "`date +%Y-%m-%d_%H:%M:%S` - Volume Clone with name $vclone_name already exists, please choose a diferent name!"
 	fi
 	do_volume_clone
+	do_volume_clone_start
+	#do_volume_clone_execute
 	abort "`date +%Y-%m-%d_%H:%M:%S` - === Successfully finished -  Volume Clone $vclone_name !"
     ;;
 
