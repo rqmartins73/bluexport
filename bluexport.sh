@@ -456,6 +456,10 @@ do_volume_clone_start() {
 		else
 			abort "`date +%Y-%m-%d_%H:%M:%S` - FAILED - Oops something went wrong!... Check the log above this line..."
 		fi
+	else
+		abort "`date +%Y-%m-%d_%H:%M:%S` - FAILED - Oops something went wrong!... Check the log above this line..."
+	fi
+
 }
 ####  END:FUNCTION -  Do the Volume Clone Start ####
 
