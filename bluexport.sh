@@ -23,7 +23,7 @@
        #####  START:CODE  #####
 
 ####  START: Constants Definition  #####
-Version=3.0.0
+Version=3.0.1
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 capture_time=`date +%Y-%m-%d_%H%M`
@@ -798,12 +798,6 @@ case $1 in
 	rollback=$6
 	target_tier=$7
 	volumes_to_clone=$8
-	cloud_login
-	check_VSI_exists
-	if [[ "$volumes_to_clone" == "ALL" ]]
-	then
-		volumes_to_clone=$(ic pi ins get $vsi_id | grep Volumes | sed -z 's/ //g' | sed -z 's/Volumes//g')
-	fi
 	if [[ "$replication" != "True" ]] && [[ "$replication" != "False" ]]
 	then
 		abort "`date +%Y-%m-%d_%H:%M:%S` - Replication value must be True or False...!"
@@ -815,6 +809,12 @@ case $1 in
 	if [[ "$target_tier" != "tier0" ]] && [[ "$target_tier" != "tier1" ]] && [[ "$target_tier" != "tier3" ]] && [[ "$target_tier" != "tier5k" ]]
 	then
 		abort "`date +%Y-%m-%d_%H:%M:%S` - Target Tier must be tier0 or tier1 or tier3 or tier5k...!"
+	fi
+	cloud_login
+	check_VSI_exists
+	if [[ "$volumes_to_clone" == "ALL" ]]
+	then
+		volumes_to_clone=$(ic pi ins get $vsi_id | grep Volumes | sed -z 's/ //g' | sed -z 's/Volumes//g')
 	fi
 	echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting Volume Clone $vclone_name" >> $log_file
 	echo "`date +%Y-%m-%d_%H:%M:%S` - This is the list of volumes that will be cloned: $volumes_to_clone" >> $log_file
