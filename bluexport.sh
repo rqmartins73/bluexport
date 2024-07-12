@@ -8,6 +8,7 @@
 # Usage to update a snapshot:		./bluexport.sh -snapupd SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|["DESCRIPTION"]
 # Usage to delete snapshot:		./bluexport.sh -snapdel SNAPSHOT_NAME
 # Usage to create a volume clone:   	./bluexport.sh -vclone VOLUME_CLONE_NAME BASE_NAME LPAR_NAME True|False True|False STORAGE_TIER ALL|(Comma seperated Volumes name list to clone)"
+# Usage to delete a volume clone:	./bluexport.sh -vclonedel VOLUME_CLONE_NAME
 #
 # Example:  ./bluexport.sh -a vsiprd vsiprd_img image-catalog daily            ---- Includes all Volumes and exports to COS and image catalog
 # Example:  ./bluexport.sh -x ASP2_ vsiprd vsiprd_img both monthly             ---- Excludes Volumes with ASP2_ in the name and exports to image catalog and COS
@@ -23,7 +24,7 @@
        #####  START:CODE  #####
 
 ####  START: Constants Definition  #####
-Version=3.0.2
+Version=3.1.0
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 capture_time=`date +%Y-%m-%d_%H%M`
@@ -99,6 +100,8 @@ help() {
 	echo "Usage to delete snapshot:     	./bluexport.sh -snapdel SNAPSHOT_NAME"
 	echo ""
 	echo "Usage to create a volume clone:	./bluexport.sh -vclone VOLUME_CLONE_NAME BASE_NAME LPAR_NAME True|False True|False STORAGE_TIER ALL|(Comma seperated Volumes name list to clone)"
+	echo ""
+	echo "Usage to delete a volume clone:	./bluexport.sh -vclonedel VOLUME_CLONE_NAME"
 	echo ""
 	echo "Example:  ./bluexport.sh -a vsiprd vsiprd_img image-catalog daily ---- Includes all Volumes and exports to COS and image catalog"
 	echo "Example:  ./bluexport.sh -x ASP2_ vsiprd vsiprd_img both monthly    ---- Excludes Volumes with ASP2_ in the name and exports to image catalog and COS"
