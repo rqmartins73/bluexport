@@ -812,9 +812,10 @@ case $1 in
 	fi
 	cloud_login
 	check_VSI_exists
+	vsi_id=$(/usr/local/bin/ibmcloud pi ins ls | grep $vsi | awk {'print $1'})
 	if [[ "$volumes_to_clone" == "ALL" ]]
 	then
-		volumes_to_clone=$(ic pi ins get $vsi_id | grep Volumes | sed -z 's/ //g' | sed -z 's/Volumes//g')
+		volumes_to_clone=$(/usr/local/bin/ibmcloud pi ins get $vsi_id | grep Volumes | sed -z 's/ //g' | sed -z 's/Volumes//g')
 	fi
 	echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting Volume Clone $vclone_name" >> $log_file
 	echo "`date +%Y-%m-%d_%H:%M:%S` - This is the list of volumes that will be cloned: $volumes_to_clone" >> $log_file
