@@ -412,7 +412,7 @@ do_snap_delete() {
 ####  END:FUNCTION - Do the Snapshot Delete  ####
 
 ####  START:FUNCTION - Do the Volume Clone Execute ####
-do_volume_clone_execute(){
+do_volume_clone_execute() {
 	flush_asps
 	echo "`date +%Y-%m-%d_%H:%M:%S` - == Executing Volume Clone with name $vclone_name ..." >> $log_file
 	/usr/local/bin/ibmcloud pi vol cl ex $vclone_id --name $base_name --replication-enabled=$replication --rollback-prepare=$rollback --target-tier $target_tier 2>> $log_file
@@ -424,7 +424,7 @@ do_volume_clone_execute(){
 		do
 			vcloneex_percent_before=$vcloneex_percent
 			sleep 5
-			vcloneex_percent=$(/usr/local/bin/ibmcloud pi vol cl ls | grep -A6 $vclone_name | grep "Percent Completed:" | awk {'print $3'}
+			vcloneex_percent=$(/usr/local/bin/ibmcloud pi vol cl ls | grep -A6 $vclone_name | grep "Percent Completed:" | awk {'print $3'})
 			if [[ "$vcloneex_percent" != "$vcloneex_percent_before" ]]
 			then
 				if [ $vcloneex_percent -eq 100 ]
