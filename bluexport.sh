@@ -475,7 +475,7 @@ do_volume_clone() {
 		do
 			vclone_percent_before=$vclone_percent
 			sleep 5
-			vclone_percent=$(/usr/local/bin/ibmcloud pi vol cl ls | grep -A6 $vclone_name | grep "Percent Completed:" | awk {'print $3'}
+			vclone_percent=$(/usr/local/bin/ibmcloud pi vol cl ls | grep -A6 $vclone_name | grep "Percent Completed:" | awk {'print $3'})
 			if [[ "$vclone_percent" != "$vclone_percent_before" ]]
 			then
 				if [ $vclone_percent -eq 100 ]
