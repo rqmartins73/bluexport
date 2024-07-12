@@ -811,6 +811,11 @@ case $1 in
 		abort "`date +%Y-%m-%d_%H:%M:%S` - Target Tier must be tier0 or tier1 or tier3 or tier5k...!"
 	fi
 	cloud_login
+	vclone_name_exists=$(/usr/local/bin/ibmcloud pi vol cl ls | grep -w $vclone_name)
+	if [[ "$vclone_name_exists" != "" ]]
+	then
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Volume Clone with name $vclone_name already exists, please choose a diferent name!"
+	fi
 	check_VSI_exists
 	vsi_id=$(/usr/local/bin/ibmcloud pi ins ls | grep $vsi | awk {'print $1'})
 	if [[ "$volumes_to_clone" == "ALL" ]]
@@ -819,11 +824,6 @@ case $1 in
 	fi
 	echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting the 3 processes of Volume Clone $vclone_name" >> $log_file
 	echo "`date +%Y-%m-%d_%H:%M:%S` - This is the list of volumes that will be cloned: $volumes_to_clone" >> $log_file
-	vclone_name_exists=$(/usr/local/bin/ibmcloud pi vol cl ls | grep -w $vclone_name)
-	if [[ "$vclone_name_exists" != "" ]]
-	then
-		abort "`date +%Y-%m-%d_%H:%M:%S` - Volume Clone with name $vclone_name already exists, please choose a diferent name!"
-	fi
 	do_volume_clone
 	do_volume_clone_start
 	do_volume_clone_execute
