@@ -442,7 +442,7 @@ do_volume_clone_execute() {
 ####  END:FUNCTION -  Do the Volume Clone Execute ####
 
 ####  START:FUNCTION - Do the Volume Clone Start ####
-do_volume_clone_start(){
+do_volume_clone_start() {
 	echo "`date +%Y-%m-%d_%H:%M:%S` - == Starting Volume Clone with name $vclone_name ..." >> $log_file
 	vclone_id=$(/usr/local/bin/ibmcloud pi vol cl ls | grep -A6 $vclone_name | grep "Volume Clone Request ID:" | awk {'print $5'})
 	/usr/local/bin/ibmcloud pi vol cl st $vclone_id 2>> $log_file
@@ -460,7 +460,7 @@ do_volume_clone_start(){
 ####  END:FUNCTION -  Do the Volume Clone Start ####
 
 ####  START:FUNCTION - Do the Volume Clone ####
-do_volume_clone(){
+do_volume_clone() {
 	echo "`date +%Y-%m-%d_%H:%M:%S` - == Creating Volume Clone with name $vclone_name ..." >> $log_file
 	/usr/local/bin/ibmcloud pi vol cl cr --name $vclone_name --volumes $volumes_to_clone 2>> $log_file
 	if [ $? -eq 0 ]
