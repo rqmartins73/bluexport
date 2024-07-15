@@ -238,8 +238,7 @@ get_IASP_name() {
 	if [ $test -eq 0 ]
 	then
 		echo "`date +%Y-%m-%d_%H:%M:%S` - Getting $vsi IASP Name..." >> $log_file
-		vsi_ip=""
-		vsi_ip=$(cat $bluexscrt | grep -i $vsi | awk {'print $2'})
+		vsi_ip=$(cat $bluexscrt | grep -wi $vsi | awk {'print $2'})
 		if ping -c1 -w3 $vsi_ip &> /dev/null
 		then
 			echo "`date +%Y-%m-%d_%H:%M:%S` - Ping VSI $vsi OK." >> $log_file
