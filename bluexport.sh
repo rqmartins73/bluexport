@@ -238,6 +238,7 @@ get_IASP_name() {
 	if [ $test -eq 0 ]
 	then
 		echo "`date +%Y-%m-%d_%H:%M:%S` - Getting $vsi IASP Name..." >> $log_file
+		vsi_ip=""
 		vsi_ip=$(cat $bluexscrt | grep -i $vsi | awk {'print $2'})
 		if ping -c1 -w3 $vsi_ip &> /dev/null
 		then
@@ -838,6 +839,7 @@ case $1 in
 	then
 		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport.sh $1 VOLUME_CLONE_NAME"
 	fi
+	test=0
 	vclone_name=$2
 	cloud_login
 	vclone_name_exists=$(/usr/local/bin/ibmcloud pi vol cl ls | grep -w $vclone_name)
