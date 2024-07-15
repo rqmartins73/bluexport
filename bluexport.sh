@@ -126,10 +126,10 @@ abort() {
 
 #### START:FUNCTION - Check if image-catalog and Cloud Object has images from last time and deleted it ####
 delete_previous_img() {
-	img_id_old=$(/usr/local/bin/ibmcloud pi img ls | grep -i $vsi | grep $old_img | awk {'print $1'})
-	img_name_old=$(/usr/local/bin/ibmcloud pi img ls | grep -i $vsi | grep $old_img | awk {'print $2'})
-	objstg_img=$(/usr/local/bin/ibmcloud cos list-objects-v2 --bucket $bucket | grep -i $vsi | grep $old_img | awk {'print $1'})
-	today_img=$(/usr/local/bin/ibmcloud cos list-objects-v2 --bucket $bucket | grep -i $vsi | grep $capture_date | awk {'print $1'})
+	img_id_old=$(/usr/local/bin/ibmcloud pi img ls | grep -wi $vsi | grep $old_img | awk {'print $1'})
+	img_name_old=$(/usr/local/bin/ibmcloud pi img ls | grep -wi $vsi | grep $old_img | awk {'print $2'})
+	objstg_img=$(/usr/local/bin/ibmcloud cos list-objects-v2 --bucket $bucket | grep -wi $vsi | grep $old_img | awk {'print $1'})
+	today_img=$(/usr/local/bin/ibmcloud cos list-objects-v2 --bucket $bucket | grep -wi $vsi | grep $capture_date | awk {'print $1'})
 	if [ ! $img_id_old ]
 	then
 		echo "`date +%Y-%m-%d_%H:%M:%S` - There is no Image from $old_img - Nothing to delete in image catalog." >> $log_file
@@ -288,7 +288,7 @@ check_VSI_exists() {
 		full_ws_name="${wsmap[$ws]}" # Get the full workspace name from the map
 		echo "`date +%Y-%m-%d_%H:%M:%S` - Searching for VSI in $full_ws_name..." >> $log_file
 		dc_vsi_list "$shortnamecrn"
-		vsi_cloud_name=$(cat $vsi_list_tmp | grep -i $vsi | awk {'print $1'})
+		vsi_cloud_name=$(cat $vsi_list_tmp | grep -wi $vsi | awk {'print $1'})
 		if grep -qie ^$vsi$ $vsi_list_tmp
 		then
 			echo "`date +%Y-%m-%d_%H:%M:%S` - VSI $vsi_cloud_name was found in $full_ws_name..." >> $log_file
