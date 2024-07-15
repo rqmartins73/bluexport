@@ -157,7 +157,7 @@ dc_vsi_list() {
 	sh -c '/usr/local/bin/ibmcloud pi ws tg '$1 2>> $log_file
     # List all VSI in this POWERVS DC and Get VSI Name and ID #
 	sh -c '/usr/local/bin/ibmcloud pi ins ls | awk {'\''print $1" "$2'\''} | tail -n +2' > $vsi_list_id_tmp 2>> $log_file
-	vsi_id=$(cat $vsi_list_id_tmp | grep -i $vsi | awk {'print $1'})
+	vsi_id=$(cat $vsi_list_id_tmp | grep -wi $vsi | awk {'print $1'})
 	cat $vsi_list_id_tmp | awk {'print $2'} > $vsi_list_tmp
 }
 ####  END:FUNCTION - Target DC and List all VSI in the POWERVS DC and Get VSI Name and ID  ####
@@ -497,7 +497,7 @@ do_volume_clone() {
 
 ####  START:FUNCTION  Check if VSI ID exists in bluexscrt file  ####
 vsi_id_bluexscrt() {
-	vsi_id=`cat $bluexscrt | grep -i $vsi | awk {'print $3'}`
+	vsi_id=`cat $bluexscrt | grep -wi $vsi | awk {'print $3'}`
 	if [[ $vsi_id == "" ]]
 	then
 		abort "`date +%Y-%m-%d_%H:%M:%S` - VSI ID missing or VSI Name $vsi doesn't exist in $bluexscrt file, please insert it there..."
@@ -820,7 +820,7 @@ case $1 in
 		abort "`date +%Y-%m-%d_%H:%M:%S` - Volume Clone with name $vclone_name already exists, please choose a diferent name!"
 	fi
 	check_VSI_exists
-	vsi_id=$(/usr/local/bin/ibmcloud pi ins ls | grep $vsi | awk {'print $1'})
+	vsi_id=$(/usr/local/bin/ibmcloud pi ins ls | grep -wi $vsi | awk {'print $1'})
 	if [[ "$volumes_to_clone" == "ALL" ]]
 	then
 		volumes_to_clone=$(/usr/local/bin/ibmcloud pi ins get $vsi_id | grep Volumes | sed -z 's/ //g' | sed -z 's/Volumes//g')
