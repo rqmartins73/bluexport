@@ -243,7 +243,7 @@ get_IASP_name() {
 		then
 			echo "`date +%Y-%m-%d_%H:%M:%S` - Ping VSI $vsi OK." >> $log_file
 		else
-			abort "`date +%Y-%m-%d_%H:%M:%S` - Cannot ping VSI $vsi ! Aborting..."
+			abort "`date +%Y-%m-%d_%H:%M:%S` - Cannot ping VSI $vsi with IP $vsi_ip ! Aborting..."
 		fi
 		ssh -q -i $sshkeypath $vsi_user@$vsi_ip exit
 		if [ $? -eq 255 ]
