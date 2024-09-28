@@ -7,6 +7,8 @@
 # Usage to create a snapshot:		./bluexport.sh -snapcr VSI_NAME SNAPSHOT_NAME 0|["DESCRIPTION"] 0|[VOLUMES(Comma separated list)]
 # Usage to update a snapshot:		./bluexport.sh -snapupd SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|["DESCRIPTION"]
 # Usage to delete snapshot:		./bluexport.sh -snapdel SNAPSHOT_NAME
+# Usage to list all snapshot
+#        in all Workspaces:             ./bluexport.sh -snaplsall
 # Usage to create a volume clone:   	./bluexport.sh -vclone VOLUME_CLONE_NAME BASE_NAME LPAR_NAME True|False True|False STORAGE_TIER ALL|(Comma seperated Volumes name list to clone)"
 # Usage to delete a volume clone:	./bluexport.sh -vclonedel VOLUME_CLONE_NAME
 #
@@ -98,6 +100,9 @@ help() {
 	echo "Usage to update a snapshot:   	./bluexport.sh -snapupd SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|[DESCRIPTION]"
 	echo ""
 	echo "Usage to delete snapshot:     	./bluexport.sh -snapdel SNAPSHOT_NAME"
+	echo ""
+	echo "Usage to list all snapshot"
+	echo "   in all Workspaces:             ./bluexport.sh -snaplsall"
 	echo ""
 	echo "Usage to create a volume clone:	./bluexport.sh -vclone VOLUME_CLONE_NAME BASE_NAME LPAR_NAME True|False True|False STORAGE_TIER ALL|(Comma seperated Volumes name list to clone)"
 	echo ""
