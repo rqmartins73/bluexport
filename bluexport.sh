@@ -795,6 +795,8 @@ case $1 in
 
    -snaplsall)
 	test=0
+	echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting Listing all Snapshot in all Workspaces !" >> $log_file
+	cloud_login
 	# Convert 'wsnames' string to an array
 	IFS=':' read -r -a wsnames_array <<< "$wsnames"
 
@@ -812,7 +814,6 @@ case $1 in
 		crn=$(grep "^$ws " "$bluexscrt" | awk '{print $2}')
 		shortnamecrn="${!ws}"
 		full_ws_name="${wsmap[$ws]}" # Get the full workspace name from the map
-		echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting Listing all Snapshot in all Workspaces !" >> $log_file
 		echo "`date +%Y-%m-%d_%H:%M:%S` - Listing Snapshots at Workspace $full_ws_name :" >> $log_file
 		/usr/local/bin/ibmcloud pi ws tg $crn 2>> $log_file | tee -a $log_file
 		/usr/local/bin/ibmcloud pi ins snap ls 2>> $log_file | tee -a $log_file
