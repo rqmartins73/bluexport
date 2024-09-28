@@ -17,8 +17,11 @@
 # Usage to delete snapshot:		./bluexport.sh -snapdel SNAPSHOT_NAME
 # Usage to list all snapshot
 #        in all Workspaces:		./bluexport.sh -snaplsall
+#
 # Usage to create a volume clone:   	./bluexport.sh -vclone VOLUME_CLONE_NAME BASE_NAME LPAR_NAME True|False True|False STORAGE_TIER ALL|(Comma seperated Volumes name list to clone)"
 # Usage to delete a volume clone:	./bluexport.sh -vclonedel VOLUME_CLONE_NAME
+# Usage to list all volume clones
+#        in all Workspaces:		./bluexport.sh -vclonelsall
 #
 # Example:  ./bluexport.sh -a vsiprd vsiprd_img image-catalog daily            ---- Includes all Volumes and exports to COS and image catalog
 # Example:  ./bluexport.sh -x ASP2_ vsiprd vsiprd_img both monthly             ---- Excludes Volumes with ASP2_ in the name and exports to image catalog and COS
@@ -34,7 +37,7 @@
        #####  START:CODE  #####
 
 ####  START: Constants Definition  #####
-Version=3.2.3
+Version=3.2.4
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 capture_time=`date +%Y-%m-%d_%H%M`
@@ -119,6 +122,9 @@ help() {
 	echo "Usage to create a volume clone:	./bluexport.sh -vclone VOLUME_CLONE_NAME BASE_NAME LPAR_NAME True|False True|False STORAGE_TIER ALL|(Comma seperated Volumes name list to clone)"
 	echo ""
 	echo "Usage to delete a volume clone:	./bluexport.sh -vclonedel VOLUME_CLONE_NAME"
+	echo ""
+	echo "Usage to list all volume clones"
+	echo " in all Workspaces:		./bluexport.sh -vclonelsall"
 	echo ""
 	echo "Example:  ./bluexport.sh -a vsiprd vsiprd_img image-catalog daily ---- Includes all Volumes and exports to COS and image catalog"
 	echo "Example:  ./bluexport.sh -x ASP2_ vsiprd vsiprd_img both monthly    ---- Excludes Volumes with ASP2_ in the name and exports to image catalog and COS"
@@ -848,6 +854,34 @@ case $1 in
 		/usr/local/bin/ibmcloud pi ins snap ls 2>> $log_file | tee -a $log_file
 	done
 	abort "`date +%Y-%m-%d_%H:%M:%S` - === Finished Listing all Snapshots in all Workpsaces"
+    ;;
+
+   -vclonelsall)
+	test=0
+	echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting Listing all Volume Clones in all Workspaces !" >> $log_file
+	cloud_login
+	# Convert 'wsnames' string to an array
+	IFS=':' read -r -a wsnames_array <<< "$wsnames"
+
+	# Convert 'allws' string to an array
+	read -r -a allws_array <<< "$allws"
+
+	# Initialize an associative array to map workspace abbreviations to full names
+	declare -A wsmap
+	# Populate the wsmap with dynamic values from allws and wsnames_array
+	for i in "${!allws_array[@]}"; do
+		wsmap[${allws_array[i]}]="${wsnames_array[i]}"
+	done
+	for ws in "${allws_array[@]}"
+	do
+		crn=$(grep "^$ws " "$bluexscrt" | awk '{print $2}')
+		shortnamecrn="${!ws}"
+		full_ws_name="${wsmap[$ws]}" # Get the full workspace name from the map
+		echo "`date +%Y-%m-%d_%H:%M:%S` - === Listing Volume Clones at Workspace $full_ws_name :" | tee -a $log_file
+		/usr/local/bin/ibmcloud pi ws tg $crn 2>> $log_file | tee -a $log_file
+		/usr/local/bin/ibmcloud pi vol cl ls 2>> $log_file | tee -a $log_file
+	done
+	abort "`date +%Y-%m-%d_%H:%M:%S` - === Finished Listing all Volume Clones in all Workpsaces"
     ;;
 
    -vclone)
