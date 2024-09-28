@@ -814,7 +814,7 @@ case $1 in
 		crn=$(grep "^$ws " "$bluexscrt" | awk '{print $2}')
 		shortnamecrn="${!ws}"
 		full_ws_name="${wsmap[$ws]}" # Get the full workspace name from the map
-		echo "`date +%Y-%m-%d_%H:%M:%S` - === Listing Snapshots at Workspace $full_ws_name :" >> $log_file
+		echo "`date +%Y-%m-%d_%H:%M:%S` - === Listing Snapshots at Workspace $full_ws_name :" | tee -a $log_file
 		/usr/local/bin/ibmcloud pi ws tg $crn 2>> $log_file | tee -a $log_file
 		/usr/local/bin/ibmcloud pi ins snap ls 2>> $log_file | tee -a $log_file
 	done
