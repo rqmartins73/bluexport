@@ -4,7 +4,7 @@
 #
 # Version 2.x now supports the creation, update, delete and list Snapshots.
 #
-# Usage for changing secret file:	./bluexport.sh -chscrt bluexscrt_file_name
+# Usage for changing secret file:	./bluexport.sh -chscrt bluexscrt_file_name - Use the full path ex: /home/user/bluexscrt_new
 #
 # Usage for all volumes:		./bluexport.sh -a VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single
 # Usage for excluding volumes:		./bluexport.sh -x volumes_name_to_exclude VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single
@@ -95,7 +95,7 @@ help() {
 	echo "Capture IBM Cloud POWERVS VSI and Export to COS or/and Image Catalog"
 	echo "Version 2.x now supports the creation, update, delete and list Snapshots."
 	echo ""
-	echo "Usage for changing secret file:	./bluexport.sh -chscrt bluexscrt_file_name"
+	echo "Usage for changing secret file:	./bluexport.sh -chscrt bluexscrt_file_name - Use the full path ex: /home/user/bluexscrt_new"
 	echo ""
 	echo "Usage for all volumes:		./bluexport.sh -a VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single"
 	echo ""
@@ -679,6 +679,12 @@ case $1 in
 	fi
 	volumes_cmd="/usr/local/bin/ibmcloud pi ins vol ls $vsi_id $exclude_grep_opts | tail -n +2"
     ;;
+
+  -chscrt
+	if [ $# -lt 2 ]
+	then
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport.sh $1 bluexscrt_file_name - Use the full path ex: /home/user/bluexscrt_new"
+	fi
 
   -snapcr)
 	if [ $# -lt 5 ]
