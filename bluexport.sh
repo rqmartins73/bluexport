@@ -4,7 +4,7 @@
 #
 # Version 2.x now supports the creation, update, delete and list Snapshots.
 #
-# Usage for changing secret file:	./bluexport.sh -chscrt
+# Usage for changing secret file:	./bluexport.sh -chscrt bluexscrt_file_name
 #
 # Usage for all volumes:		./bluexport.sh -a VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single
 # Usage for excluding volumes:		./bluexport.sh -x volumes_name_to_exclude VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single
@@ -95,7 +95,7 @@ help() {
 	echo "Capture IBM Cloud POWERVS VSI and Export to COS or/and Image Catalog"
 	echo "Version 2.x now supports the creation, update, delete and list Snapshots."
 	echo ""
-	echo "Usage for changing secret file:	./bluexport.sh -chscrt"
+	echo "Usage for changing secret file:	./bluexport.sh -chscrt bluexscrt_file_name"
 	echo ""
 	echo "Usage for all volumes:		./bluexport.sh -a VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single"
 	echo ""
