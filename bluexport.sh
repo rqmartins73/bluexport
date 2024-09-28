@@ -34,7 +34,7 @@
        #####  START:CODE  #####
 
 ####  START: Constants Definition  #####
-Version=3.2.0
+Version=3.2.1
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 capture_time=`date +%Y-%m-%d_%H%M`
