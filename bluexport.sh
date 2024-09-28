@@ -256,23 +256,6 @@ cloud_login() {
 }
 ####  END:FUNCTION - Login in IBM Cloud  ####
 
-####  START:FUNCTION - Get all Workspaces  ####
-get_all_ws() {
-        # Convert 'wsnames' string to an array
-        IFS=':' read -r -a wsnames_array <<< "$wsnames"
-
-        # Convert 'allws' string to an array
-        read -r -a allws_array <<< "$allws"
-
-        # Initialize an associative array to map workspace abbreviations to full names
-        declare -A wsmap
-        # Populate the wsmap with dynamic values from allws and wsnames_array
-        for i in "${!allws_array[@]}"; do
-                wsmap[${allws_array[i]}]="${wsnames_array[i]}"
-        done
-}
-####  END:FUNCTION - Get all Workspaces  ####
-
 ####  START:FUNCTION - Get IASP name  ####
 get_IASP_name() {
 	if [ $test -eq 0 ]
@@ -307,20 +290,19 @@ get_IASP_name() {
 ####  START:FUNCTION - Check if VSI exists and Get VSI IP and IASP NAME if exists  ####
 check_VSI_exists() {
 	echo "" > $job_log
-	get_all_ws
 
-#	# Convert 'wsnames' string to an array
-#	IFS=':' read -r -a wsnames_array <<< "$wsnames"
-#
-#	# Convert 'allws' string to an array
-#	read -r -a allws_array <<< "$allws"
-#
-#	# Initialize an associative array to map workspace abbreviations to full names
-#	declare -A wsmap
-#	# Populate the wsmap with dynamic values from allws and wsnames_array
-#	for i in "${!allws_array[@]}"; do
-#		wsmap[${allws_array[i]}]="${wsnames_array[i]}"
-#	done
+	# Convert 'wsnames' string to an array
+	IFS=':' read -r -a wsnames_array <<< "$wsnames"
+
+	# Convert 'allws' string to an array
+	read -r -a allws_array <<< "$allws"
+
+	# Initialize an associative array to map workspace abbreviations to full names
+	declare -A wsmap
+	# Populate the wsmap with dynamic values from allws and wsnames_array
+	for i in "${!allws_array[@]}"; do
+		wsmap[${allws_array[i]}]="${wsnames_array[i]}"
+	done
 
 	found=0
 	for ws in "${allws_array[@]}"
@@ -850,25 +832,23 @@ case $1 in
 	test=0
 	echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting Listing all Snapshot in all Workspaces !" >> $log_file
 	cloud_login
-	get_all_ws
 
-#	# Convert 'wsnames' string to an array
-#	IFS=':' read -r -a wsnames_array <<< "$wsnames"
-#
-#	# Convert 'allws' string to an array
-#	read -r -a allws_array <<< "$allws"
-#
-#	# Initialize an associative array to map workspace abbreviations to full names
-#	declare -A wsmap
-#	# Populate the wsmap with dynamic values from allws and wsnames_array
-#	for i in "${!allws_array[@]}"; do
-#		wsmap[${allws_array[i]}]="${wsnames_array[i]}"
-#	done
+	# Convert 'wsnames' string to an array
+	IFS=':' read -r -a wsnames_array <<< "$wsnames"
+
+	# Convert 'allws' string to an array
+	read -r -a allws_array <<< "$allws"
+
+	# Initialize an associative array to map workspace abbreviations to full names
+	declare -A wsmap
+	# Populate the wsmap with dynamic values from allws and wsnames_array
+	for i in "${!allws_array[@]}"; do
+		wsmap[${allws_array[i]}]="${wsnames_array[i]}"
+	done
 
 	for ws in "${allws_array[@]}"
 	do
 		crn=$(grep "^$ws " "$bluexscrt" | awk '{print $2}')
-		shortnamecrn="${!ws}"
 		full_ws_name="${wsmap[$ws]}" # Get the full workspace name from the map
 		echo "`date +%Y-%m-%d_%H:%M:%S` - === Listing Snapshots at Workspace $full_ws_name :" | tee -a $log_file
 		/usr/local/bin/ibmcloud pi ws tg $crn 2>> $log_file | tee -a $log_file
@@ -881,24 +861,22 @@ case $1 in
 	test=0
 	echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting Listing all Volume Clones in all Workspaces !" >> $log_file
 	cloud_login
-	get_all_ws
-#	# Convert 'wsnames' string to an array
-#	IFS=':' read -r -a wsnames_array <<< "$wsnames"
-#
-#	# Convert 'allws' string to an array
-#	read -r -a allws_array <<< "$allws"
-#
-#	# Initialize an associative array to map workspace abbreviations to full names
-#	declare -A wsmap
-#	# Populate the wsmap with dynamic values from allws and wsnames_array
-#	for i in "${!allws_array[@]}"; do
-#		wsmap[${allws_array[i]}]="${wsnames_array[i]}"
-#	done
+	# Convert 'wsnames' string to an array
+	IFS=':' read -r -a wsnames_array <<< "$wsnames"
+
+	# Convert 'allws' string to an array
+	read -r -a allws_array <<< "$allws"
+
+	# Initialize an associative array to map workspace abbreviations to full names
+	declare -A wsmap
+	# Populate the wsmap with dynamic values from allws and wsnames_array
+	for i in "${!allws_array[@]}"; do
+		wsmap[${allws_array[i]}]="${wsnames_array[i]}"
+	done
 
 	for ws in "${allws_array[@]}"
 	do
 		crn=$(grep "^$ws " "$bluexscrt" | awk '{print $2}')
-		shortnamecrn="${!ws}"
 		full_ws_name="${wsmap[$ws]}" # Get the full workspace name from the map
 		echo "`date +%Y-%m-%d_%H:%M:%S` - === Listing Volume Clones at Workspace $full_ws_name :" | tee -a $log_file
 		/usr/local/bin/ibmcloud pi ws tg $crn 2>> $log_file | tee -a $log_file
