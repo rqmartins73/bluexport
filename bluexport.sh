@@ -102,7 +102,7 @@ help() {
 	echo "Usage to delete snapshot:     	./bluexport.sh -snapdel SNAPSHOT_NAME"
 	echo ""
 	echo "Usage to list all snapshot"
-	echo "   in all Workspaces:             ./bluexport.sh -snaplsall"
+	echo " in all Workspaces:               ./bluexport.sh -snaplsall"
 	echo ""
 	echo "Usage to create a volume clone:	./bluexport.sh -vclone VOLUME_CLONE_NAME BASE_NAME LPAR_NAME True|False True|False STORAGE_TIER ALL|(Comma seperated Volumes name list to clone)"
 	echo ""
