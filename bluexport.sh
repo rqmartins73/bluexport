@@ -5,6 +5,7 @@
 # Version 2.x now supports the creation, update, delete and list Snapshots.
 #
 # Usage for changing secret file:	./bluexport.sh -chscrt bluexscrt_file_name - Use the full path ex: /home/user/bluexscrt_new
+# Usage to view secret file in use:	./bluexport.sh -viewscrt
 #
 # Usage for all volumes:		./bluexport.sh -a VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single
 # Usage for excluding volumes:		./bluexport.sh -x volumes_name_to_exclude VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single
@@ -32,7 +33,7 @@
        #####  START:CODE  #####
 
 ####  START: Constants Definition  #####
-Version=3.1.0
+Version=3.2.0
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 capture_time=`date +%Y-%m-%d_%H%M`
@@ -96,6 +97,7 @@ help() {
 	echo "Version 2.x now supports the creation, update, delete and list Snapshots."
 	echo ""
 	echo "Usage for changing secret file:	./bluexport.sh -chscrt bluexscrt_file_name - Use the full path ex: /home/user/bluexscrt_new"
+	echo "Usage to view secret file in use:     ./bluexport.sh -viewscrt"
 	echo ""
 	echo "Usage for all volumes:		./bluexport.sh -a VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single"
 	echo ""
@@ -689,6 +691,12 @@ case $1 in
 	new_scrt=$2
 	sed -i -e "s|$bluexscrt|$new_scrt|g" $HOME/bluexport.conf
 	abort "`date +%Y-%m-%d_%H:%M:%S` - Secret file change to $new_scrt !"
+    ;;
+
+  -viewscrt)
+	scrt_in_use=$(cat $HOME/bluexport.conf | grep bluexscrt | awk {'print $2'})
+	echo "Secret file in use is $scrt_in_use"
+	abort "`date +%Y-%m-%d_%H:%M:%S` - Secret file in use is $scrt_in_use"
     ;;
 
   -snapcr)
