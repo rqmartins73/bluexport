@@ -809,11 +809,12 @@ case $1 in
 	done
 	for ws in "${allws_array[@]}"
 	do
+		crn=$(grep "^$ws " "$bluexscrt" | awk '{print $2}')
 		shortnamecrn="${!ws}"
 		full_ws_name="${wsmap[$ws]}" # Get the full workspace name from the map
 		echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting Listing all Snapshot in all Workspaces !" >> $log_file
 		echo "`date +%Y-%m-%d_%H:%M:%S` - Listing Snapshots at Workspace $full_ws_name :" >> $log_file
-		/usr/local/bin/ibmcloud pi ws tg $ws 2>> $log_file | tee -a $log_file
+		/usr/local/bin/ibmcloud pi ws tg $crn 2>> $log_file | tee -a $log_file
 		/usr/local/bin/ibmcloud pi ins snap ls 2>> $log_file | tee -a $log_file
 	done
 	abort "`date +%Y-%m-%d_%H:%M:%S` - === Finished Listing all Snapshots in all Workpsaces"
