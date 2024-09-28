@@ -70,9 +70,6 @@ then
 fi
 ####  END: Check if Config File exists  ####
 
-declare -a wsmap
-declare -a allws_array
-
 ####  START: Get Cloud Config Data  #####
 resource_grp=$(cat $bluexscrt | grep -w "RESOURCE_GRP" | awk {'print $2'})
 accesskey=$(cat $bluexscrt | grep -w "ACCESSKEY" | awk {'print $2'})
@@ -289,25 +286,6 @@ get_IASP_name() {
 	fi
 }
 ####  END:FUNCTION - Get IASP name  ####
-
-####  START:FUNCTION - Get all Workspaces  ####
-get_all_ws() {
-	# Convert 'wsnames' string to an array
-	IFS=':' read -r -a wsnames_array <<< "$wsnames"
-
-	# Convert 'allws' string to an array
-	read -r -a allws_array <<< "$allws"
-
-	# Initialize an associative array to map workspace abbreviations to full names
-#	declare -A wsmap
-#	declare -A allws_array
-
-	# Populate the wsmap with dynamic values from allws and wsnames_array
-	for i in "${!allws_array[@]}"; do
-		wsmap[${allws_array[i]}]="${wsnames_array[i]}"
-	done
-}
-####  END:FUNCTION - Get all Workspaces  ####
 
 ####  START:FUNCTION - Check if VSI exists and Get VSI IP and IASP NAME if exists  ####
 check_VSI_exists() {
@@ -854,20 +832,19 @@ case $1 in
 	test=0
 	echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting Listing all Snapshot in all Workspaces !" >> $log_file
 	cloud_login
-	get_all_ws
 
-#	# Convert 'wsnames' string to an array
-#	IFS=':' read -r -a wsnames_array <<< "$wsnames"
-#
-#	# Convert 'allws' string to an array
-#	read -r -a allws_array <<< "$allws"
-#
-#	# Initialize an associative array to map workspace abbreviations to full names
-#	declare -A wsmap
-#	# Populate the wsmap with dynamic values from allws and wsnames_array
-#	for i in "${!allws_array[@]}"; do
-#		wsmap[${allws_array[i]}]="${wsnames_array[i]}"
-#	done
+	# Convert 'wsnames' string to an array
+	IFS=':' read -r -a wsnames_array <<< "$wsnames"
+
+	# Convert 'allws' string to an array
+	read -r -a allws_array <<< "$allws"
+
+	# Initialize an associative array to map workspace abbreviations to full names
+	declare -A wsmap
+	# Populate the wsmap with dynamic values from allws and wsnames_array
+	for i in "${!allws_array[@]}"; do
+		wsmap[${allws_array[i]}]="${wsnames_array[i]}"
+	done
 
 	for ws in "${allws_array[@]}"
 	do
