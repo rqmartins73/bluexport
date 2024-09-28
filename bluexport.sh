@@ -683,6 +683,7 @@ case $1 in
   -chscrt)
 	if [ $# -lt 2 ]
 	then
+		echo "Arguments Missing!! Syntax: bluexport.sh $1 bluexscrt_file_name - Use the full path ex: /home/user/bluexscrt_new"
 		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport.sh $1 bluexscrt_file_name - Use the full path ex: /home/user/bluexscrt_new"
 	fi
 	abort "`date +%Y-%m-%d_%H:%M:%S` - Secret file change to $new_scrt !"
