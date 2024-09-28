@@ -680,7 +680,7 @@ case $1 in
 	volumes_cmd="/usr/local/bin/ibmcloud pi ins vol ls $vsi_id $exclude_grep_opts | tail -n +2"
     ;;
 
-  -chscrt
+  -chscrt)
 	if [ $# -lt 2 ]
 	then
 		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport.sh $1 bluexscrt_file_name - Use the full path ex: /home/user/bluexscrt_new"
