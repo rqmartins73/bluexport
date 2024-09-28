@@ -788,6 +788,32 @@ case $1 in
 	abort "`date +%Y-%m-%d_%H:%M:%S` - === Successfully finished -  Snapshot $snap_name Deleted!"
     ;;
 
+  -snaplsall)
+	test=0
+	# Convert 'wsnames' string to an array
+	IFS=':' read -r -a wsnames_array <<< "$wsnames"
+
+	# Convert 'allws' string to an array
+	read -r -a allws_array <<< "$allws"
+
+	# Initialize an associative array to map workspace abbreviations to full names
+	declare -A wsmap
+	# Populate the wsmap with dynamic values from allws and wsnames_array
+	for i in "${!allws_array[@]}"; do
+		wsmap[${allws_array[i]}]="${wsnames_array[i]}"
+	done
+	for ws in "${allws_array[@]}"
+	do
+		shortnamecrn="${!ws}"
+		full_ws_name="${wsmap[$ws]}" # Get the full workspace name from the map
+		echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting Listing all Snapshot in all Workspaces !" >> $log_file
+		echo "`date +%Y-%m-%d_%H:%M:%S` - Listing Snapshots at Workspace $full_ws_name :" >> $log_file
+		/usr/local/bin/ibmcloud pi ws tg $ws 2>> $log_file | tee -a $log_file
+		/usr/local/bin/ibmcloud pi ins snap ls 2>> $log_file | tee -a $log_file
+	done
+	abort "`date +%Y-%m-%d_%H:%M:%S` - === Finished Listing all Snapshots in all Workpsaces"
+
+
    -vclone)
 	if [ $# -lt 8 ]
 	then
