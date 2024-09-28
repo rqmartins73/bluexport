@@ -335,7 +335,7 @@ flush_asps() {
 do_snap_create() {
 	flush_asps
 	echo "`date +%Y-%m-%d_%H:%M:%S` - == Executing Snapshot $snap_name of Instance $vsi with volumes $volumes_to_echo" >> $log_file
-	/usr/local/bin/ibmcloud pi snap cr $vsi_id --name $snap_name $description $volumes_to_snap 2>> $log_file | tee -a $log_file
+	/usr/local/bin/ibmcloud pi ins snap cr $vsi_id --name $snap_name $description $volumes_to_snap 2>> $log_file | tee -a $log_file
 	if [ $? -eq 1 ]
 	then
 		abort "`date +%Y-%m-%d_%H:%M:%S` - FAILED - Oops something went wrong!... Check the log above this line..."
@@ -346,7 +346,7 @@ do_snap_create() {
 		do
 			snap_percent_before=$snap_percent
 			sleep 10
-			snap_percent=$(/usr/local/bin/ibmcloud pi snap ls | grep -w $snap_name | awk {'print $7'})
+			snap_percent=$(/usr/local/bin/ibmcloud pi ins snap ls | grep -w $snap_name | awk {'print $7'})
 			if [[ "$snap_percent" == "" ]]
 			then
 				abort "`date +%Y-%m-%d_%H:%M:%S` - FAILED - Oops something went wrong!... Check the log above this line..."
@@ -368,8 +368,8 @@ do_snap_create() {
 ####  START:FUNCTION - Do the Snapshot Update  ####
 do_snap_update() {
 	echo "`date +%Y-%m-%d_%H:%M:%S` - == Executing Snapshot $snap_name Update $new_name_echo" >> $log_file
-	snap_id=$(/usr/local/bin/ibmcloud pi snap ls | grep -w $snap_name | awk {'print $1'})
-	snap_upd_cmd="/usr/local/bin/ibmcloud pi snap upd $snap_id $description $new_name"
+	snap_id=$(/usr/local/bin/ibmcloud pi ins snap ls | grep -w $snap_name | awk {'print $1'})
+	snap_upd_cmd="/usr/local/bin/ibmcloud pi ins snap upd $snap_id $description $new_name"
 	eval $snap_upd_cmd 2>> $log_file
 	if [ $? -eq 0 ]
 	then
@@ -383,8 +383,8 @@ do_snap_update() {
 ####  START:FUNCTION - Do the Snapshot Delete  ####
 do_snap_delete() {
 	echo "`date +%Y-%m-%d_%H:%M:%S` - == Executing Snapshot $snap_name Delete" >> $log_file
-	snap_id=$(/usr/local/bin/ibmcloud pi snap ls | grep -w $snap_name | awk {'print $1'})
-	/usr/local/bin/ibmcloud pi snap del $snap_id 2>> $log_file
+	snap_id=$(/usr/local/bin/ibmcloud pi ins snap ls | grep -w $snap_name | awk {'print $1'})
+	/usr/local/bin/ibmcloud pi ins snap del $snap_id 2>> $log_file
 	if [ $? -eq 0 ]
 	then
 		echo "`date +%Y-%m-%d_%H:%M:%S` - Waiting for Snapshot $snap_name deletion to reach 100%..." >> $log_file
@@ -393,7 +393,7 @@ do_snap_delete() {
 		do
 			snap_percent_before=$snap_percent
 			sleep 5
-			snap_percent=$(/usr/local/bin/ibmcloud pi snap ls | grep -w $snap_name | awk {'print $7'})
+			snap_percent=$(/usr/local/bin/ibmcloud pi ins snap ls | grep -w $snap_name | awk {'print $7'})
 			if [[ $snap_percent == "" ]]
 			then
 				snap_percent=100
@@ -676,7 +676,7 @@ case $1 in
 	vsi_id_bluexscrt
 	test=0
 	snap_name=$3
-	snap_name_exists=$(/usr/local/bin/ibmcloud pi snap ls | grep -w $snap_name)
+	snap_name_exists=$(/usr/local/bin/ibmcloud pi ins snap ls | grep -w $snap_name)
 	if [[ "$snap_name_exists" != "" ]]
 	then
 		abort "`date +%Y-%m-%d_%H:%M:%S` - Already exists one Snapshot with name $snap_name, please choose a diferent name or use flag -snapupd to change the name."
@@ -727,7 +727,7 @@ case $1 in
 	fi
 	echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting Snapshot $snap_name Update !" >> $log_file
 	cloud_login
-	snap_name_exists=$(/usr/local/bin/ibmcloud pi snap ls | grep -w $snap_name)
+	snap_name_exists=$(/usr/local/bin/ibmcloud pi ins snap ls | grep -w $snap_name)
 	if [[ "$snap_name_exists" == "" ]]
 	then
 		abort "`date +%Y-%m-%d_%H:%M:%S` - Snapshot with name $snap_name does not exist, please choose a diferent name or use flag -snapcr to create one."
@@ -779,7 +779,7 @@ case $1 in
 	snap_name=$2
 	echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting Snapshot $snap_name Delete !" >> $log_file
 	cloud_login
-	snap_name_exists=$(/usr/local/bin/ibmcloud pi snap ls | grep -w $snap_name)
+	snap_name_exists=$(/usr/local/bin/ibmcloud pi ins snap ls | grep -w $snap_name)
 	if [[ "$snap_name_exists" == "" ]]
 	then
 		abort "`date +%Y-%m-%d_%H:%M:%S` - Snapshot with name $snap_name does not exist, please choose a diferent name or use flag -snapcr to create one."
