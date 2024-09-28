@@ -861,6 +861,7 @@ case $1 in
 	test=0
 	echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting Listing all Volume Clones in all Workspaces !" >> $log_file
 	cloud_login
+
 	# Convert 'wsnames' string to an array
 	IFS=':' read -r -a wsnames_array <<< "$wsnames"
 
