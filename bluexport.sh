@@ -297,7 +297,7 @@ get_all_ws() {
 
 	# Initialize an associative array to map workspace abbreviations to full names
 	declare -A wsmap
-	declare -a allws_array
+	declare -A allws_array
 
 	# Populate the wsmap with dynamic values from allws and wsnames_array
 	for i in "${!allws_array[@]}"; do
