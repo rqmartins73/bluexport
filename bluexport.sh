@@ -793,7 +793,7 @@ case $1 in
 	abort "`date +%Y-%m-%d_%H:%M:%S` - === Successfully finished -  Snapshot $snap_name Deleted!"
     ;;
 
-  -snaplsall)
+   -snaplsall)
 	test=0
 	# Convert 'wsnames' string to an array
 	IFS=':' read -r -a wsnames_array <<< "$wsnames"
@@ -817,7 +817,7 @@ case $1 in
 		/usr/local/bin/ibmcloud pi ins snap ls 2>> $log_file | tee -a $log_file
 	done
 	abort "`date +%Y-%m-%d_%H:%M:%S` - === Finished Listing all Snapshots in all Workpsaces"
-
+    ;;
 
    -vclone)
 	if [ $# -lt 8 ]
