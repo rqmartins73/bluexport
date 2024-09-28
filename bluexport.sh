@@ -1,5 +1,11 @@
 #!/bin/bash
 #
+# Capture IBM Cloud POWERVS VSI and Export to COS or/and Image Catalog
+#
+# Version 2.x now supports the creation, update, delete and list Snapshots.
+#
+# Usage for changing secret file:	./bluexport.sh -chscrt
+#
 # Usage for all volumes:		./bluexport.sh -a VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single
 # Usage for excluding volumes:		./bluexport.sh -x volumes_name_to_exclude VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single
 # Usage for monitoring job:		./bluexport.sh -j VSI_NAME IMAGE_NAME
@@ -8,7 +14,7 @@
 # Usage to update a snapshot:		./bluexport.sh -snapupd SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|["DESCRIPTION"]
 # Usage to delete snapshot:		./bluexport.sh -snapdel SNAPSHOT_NAME
 # Usage to list all snapshot
-#        in all Workspaces:             ./bluexport.sh -snaplsall
+#        in all Workspaces:		./bluexport.sh -snaplsall
 # Usage to create a volume clone:   	./bluexport.sh -vclone VOLUME_CLONE_NAME BASE_NAME LPAR_NAME True|False True|False STORAGE_TIER ALL|(Comma seperated Volumes name list to clone)"
 # Usage to delete a volume clone:	./bluexport.sh -vclonedel VOLUME_CLONE_NAME
 #
@@ -87,22 +93,24 @@ wsnames=$(grep '^WSNAMES' $bluexscrt | cut -d' ' -f2-)
 help() {
 	echo ""
 	echo "Capture IBM Cloud POWERVS VSI and Export to COS or/and Image Catalog"
-	echo "Version 2.x now supports the creation, update and delete Snapshots."
+	echo "Version 2.x now supports the creation, update, delete and list Snapshots."
 	echo ""
-	echo "Usage for all volumes:        	./bluexport.sh -a VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single"
+	echo "Usage for changing secret file:	./bluexport.sh -chscrt"
 	echo ""
-	echo "Usage for excluding volumes:  	./bluexport.sh -x volumes_name_to_exclude VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single"
+	echo "Usage for all volumes:		./bluexport.sh -a VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single"
 	echo ""
-	echo "Usage for monitoring job:     	./bluexport.sh -j VSI_NAME IMAGE_NAME"
+	echo "Usage for excluding volumes:	./bluexport.sh -x volumes_name_to_exclude VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single"
 	echo ""
-	echo "Usage to create a snapshot:   	./bluexport.sh -snapcr VSI_NAME SNAPSHOT_NAME 0|[DESCRIPTION] 0|[VOLUMES(Comma separated list)]"
+	echo "Usage for monitoring job:		./bluexport.sh -j VSI_NAME IMAGE_NAME"
 	echo ""
-	echo "Usage to update a snapshot:   	./bluexport.sh -snapupd SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|[DESCRIPTION]"
+	echo "Usage to create a snapshot:	./bluexport.sh -snapcr VSI_NAME SNAPSHOT_NAME 0|[DESCRIPTION] 0|[VOLUMES(Comma separated list)]"
 	echo ""
-	echo "Usage to delete snapshot:     	./bluexport.sh -snapdel SNAPSHOT_NAME"
+	echo "Usage to update a snapshot:	./bluexport.sh -snapupd SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|[DESCRIPTION]"
+	echo ""
+	echo "Usage to delete snapshot:		./bluexport.sh -snapdel SNAPSHOT_NAME"
 	echo ""
 	echo "Usage to list all snapshot"
-	echo " in all Workspaces:             ./bluexport.sh -snaplsall"
+	echo " in all Workspaces:		./bluexport.sh -snaplsall"
 	echo ""
 	echo "Usage to create a volume clone:	./bluexport.sh -vclone VOLUME_CLONE_NAME BASE_NAME LPAR_NAME True|False True|False STORAGE_TIER ALL|(Comma seperated Volumes name list to clone)"
 	echo ""
