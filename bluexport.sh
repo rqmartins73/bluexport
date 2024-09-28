@@ -70,8 +70,8 @@ then
 fi
 ####  END: Check if Config File exists  ####
 
-declare -A wsmap
-declare -A allws_array
+declare -a wsmap
+declare -a allws_array
 
 ####  START: Get Cloud Config Data  #####
 resource_grp=$(cat $bluexscrt | grep -w "RESOURCE_GRP" | awk {'print $2'})
