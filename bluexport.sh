@@ -5,6 +5,7 @@
 # Version 2.x now supports the creation, update, delete and list Snapshots.
 #
 # Usage for changing secret file:	./bluexport.sh -chscrt bluexscrt_file_name - Use the full path ex: /home/user/bluexscrt_new
+#
 # Usage to view secret file in use:	./bluexport.sh -viewscrt
 #
 # Usage for all volumes:		./bluexport.sh -a VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single
@@ -97,6 +98,7 @@ help() {
 	echo "Version 2.x now supports the creation, update, delete and list Snapshots."
 	echo ""
 	echo "Usage for changing secret file:	./bluexport.sh -chscrt bluexscrt_file_name - Use the full path ex: /home/user/bluexscrt_new"
+	echo ""
 	echo "Usage to view secret file in use:     ./bluexport.sh -viewscrt"
 	echo ""
 	echo "Usage for all volumes:		./bluexport.sh -a VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single"
