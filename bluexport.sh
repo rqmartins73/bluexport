@@ -70,30 +70,30 @@ then
 		echo "" >> $log_file
 		exit 0
 	fi
-fi
 ####  END: Check if Config File exists  ####
 
-####  START: Get Cloud Config Data  #####
-resource_grp=$(cat $bluexscrt | grep -w "RESOURCE_GRP" | awk {'print $2'})
-accesskey=$(cat $bluexscrt | grep -w "ACCESSKEY" | awk {'print $2'})
-secretkey=$(cat $bluexscrt | grep -w "SECRETKEY" | awk {'print $2'})
-bucket=$(cat $bluexscrt | grep -w "BUCKETNAME" | awk {'print $2'})
-apikey=$(cat $bluexscrt | grep -w "APYKEY" | awk {'print $2'})
-sshkeypath=$(cat $bluexscrt | grep -w "SSHKEYPATH" | awk {'print $2'})
+	####  START: Get Cloud Config Data  #####
+	resource_grp=$(cat $bluexscrt | grep -w "RESOURCE_GRP" | awk {'print $2'})
+	accesskey=$(cat $bluexscrt | grep -w "ACCESSKEY" | awk {'print $2'})
+	secretkey=$(cat $bluexscrt | grep -w "SECRETKEY" | awk {'print $2'})
+	bucket=$(cat $bluexscrt | grep -w "BUCKETNAME" | awk {'print $2'})
+	apikey=$(cat $bluexscrt | grep -w "APYKEY" | awk {'print $2'})
+	sshkeypath=$(cat $bluexscrt | grep -w "SSHKEYPATH" | awk {'print $2'})
 
-   ### START: Dynamically create a variable with the name of the workspace ###
-read -r -a workspaces <<< $(grep "^ALLWS" "$bluexscrt" | cut -d ' ' -f2-) # Read the ALLWS line from bluexscrt file and create an array of workspace names
-for ws in "${workspaces[@]}" # Loop through the array of workspace names
-do
-    crn=$(grep "^$ws " "$bluexscrt" | awk '{print $2}') # For each workspace, find its corresponding CRN
-    declare "$ws=$crn" # Dynamically create a variable with the name of the workspace and assign the CRN as its value
-done
-   ### END: Dynamically create a variable with the name of the workspace ###
+	   ### START: Dynamically create a variable with the name of the workspace ###
+	read -r -a workspaces <<< $(grep "^ALLWS" "$bluexscrt" | cut -d ' ' -f2-) # Read the ALLWS line from bluexscrt file and create an array of workspace names
+	for ws in "${workspaces[@]}" # Loop through the array of workspace names
+	do
+	    crn=$(grep "^$ws " "$bluexscrt" | awk '{print $2}') # For each workspace, find its corresponding CRN
+	    declare "$ws=$crn" # Dynamically create a variable with the name of the workspace and assign the CRN as its value
+	done
+	   ### END: Dynamically create a variable with the name of the workspace ###
 
-region=$(cat $bluexscrt | grep "REGION" | awk {'print $2'})
-allws=$(grep '^ALLWS' $bluexscrt | cut -d' ' -f2-)
-wsnames=$(grep '^WSNAMES' $bluexscrt | cut -d' ' -f2-)
-####  END: Get Cloud Config Data  #####
+	region=$(cat $bluexscrt | grep "REGION" | awk {'print $2'})
+	allws=$(grep '^ALLWS' $bluexscrt | cut -d' ' -f2-)
+	wsnames=$(grep '^WSNAMES' $bluexscrt | cut -d' ' -f2-)
+	####  END: Get Cloud Config Data  #####
+fi
 
        #####  START: FUNCTIONS  #####
 
