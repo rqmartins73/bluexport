@@ -763,7 +763,7 @@ case $1 in
   -snapupd)
 	if [ $# -lt 4 ]
 	then
-		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport.sh $1 SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|[\"DESCRIPTION\"]"
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport.sh $1 VSI_NAME SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|[\"DESCRIPTION\"]"
 	fi
 	test=0
 	vsi=$2
@@ -814,6 +814,7 @@ case $1 in
 			new_name="--name \""$new_snap_name"\""
 		fi
 	fi
+	cloud_login
 	check_VSI_exists
 	do_snap_update
 	abort "`date +%Y-%m-%d_%H:%M:%S` - === Successfully finished Snapshot $snap_name Update $new_name_echo !"
