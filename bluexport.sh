@@ -832,6 +832,7 @@ case $1 in
 		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport.sh $1 VSI_NAME SNAPSHOT_NAME"
 	fi
 	test=0
+	flagj=1
 	vsi_name=$2
 	snap_name=$3
 	vsi_ws=$(cat $bluexscrt | grep $vsi_name | awk {'print $4'})
