@@ -36,7 +36,7 @@
 
        #####  START:CODE  #####
 
-Version=3.2.6
+Version=3.2.7
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 end_log_file='==== END ========= $timestamp ========='
@@ -826,6 +826,7 @@ case $1 in
 	vsi_id=$(cat $bluexscrt | grep $vsi_name | awk {'print $3'})
 	echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting Snapshot Delete $snap_name from VSI $vsi_name !" >> $log_file
 	cloud_login
+	/usr/local/bin/ibmcloud pi ws tg $vsi_ws_id
 	snap_name_exists=$(/usr/local/bin/ibmcloud pi ins snap ls $vsi_id | grep -w $snap_name)
 	if [[ "$snap_name_exists" == "" ]]
 	then
