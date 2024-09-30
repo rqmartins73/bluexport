@@ -766,7 +766,7 @@ case $1 in
 		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport.sh $1 VSI_NAME SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|[\"DESCRIPTION\"]"
 	fi
 	test=0
-	flagj=0
+	flagj=1
 	vsi=$2
 	vsi_id_bluexscrt
 	snap_name=$3
