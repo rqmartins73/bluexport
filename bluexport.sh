@@ -58,7 +58,7 @@ vsi_user=$(cat $bluexscrt | grep "VSI_USER" | awk {'print $2'})
 ####  END: Constants Definition  #####
 
 ####  START: Check if Config File exists  ####
-if [[ $1 != "-chscrt" ]] || [[ $1 != "-viewscrt" ]] || [[ $1 != "-v" ]] || [[ $1 != "-h" ]]
+if [[ $1 != "-chscrt" ]] && [[ $1 != "-viewscrt" ]] && [[ $1 != "-v" ]] && [[ $1 != "-h" ]]
 then
 	if [ ! -f $bluexscrt ]
 	then
