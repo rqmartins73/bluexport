@@ -39,6 +39,7 @@
 Version=3.2.4
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
+end_log_file='==== END ========= $timestamp ========='
 if [[ $1 != "-chscrt" ]] && [[ $1 != "-viewscrt" ]] && [[ $1 != "-v" ]] && [[ $1 != "-h" ]]
 then
 	####  START: Constants Definition  #####
@@ -54,7 +55,6 @@ then
 	vsi_list_id_tmp=$(cat $HOME/bluexport.conf | grep -w "vsi_list_id_tmp" | awk {'print $2'})
 	vsi_list_tmp=$(cat $HOME/bluexport.conf | grep -w "vsi_list_tmp" | awk {'print $2'})
 	volumes_file=$(cat $HOME/bluexport.conf | grep -w "volumes_file" | awk {'print $2'})
-	end_log_file='==== END ========= $timestamp ========='
 	single=0
 	vsi_user=$(cat $bluexscrt | grep "VSI_USER" | awk {'print $2'})
 	####  END: Constants Definition  #####
