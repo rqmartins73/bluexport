@@ -761,7 +761,7 @@ case $1 in
     ;;
 
   -snapupd)
-	if [ $# -lt 4 ]
+	if [ $# -lt 5 ]
 	then
 		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport.sh $1 VSI_NAME SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|[\"DESCRIPTION\"]"
 	fi
@@ -769,10 +769,10 @@ case $1 in
 	vsi=$2
 	vsi_id_bluexscrt
 	snap_name=$3
-#	if [ $4 -eq 0 ] && [ $5 -eq 0 ]
-#	then
-#		abort "`date +%Y-%m-%d_%H:%M:%S` - You must pass at least one flag, DESCRIPTION or NEW_SNAPSHOT_NAME!..."
-#	fi
+	if [ $4 -eq 0 ] && [ $5 -eq 0 ]
+	then
+		abort "`date +%Y-%m-%d_%H:%M:%S` - You must pass at least one flag, DESCRIPTION or NEW_SNAPSHOT_NAME!..."
+	fi
 	echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting Snapshot $snap_name Update !" >> $log_file
 	cloud_login
 	snap_name_exists=$(/usr/local/bin/ibmcloud pi ins snap ls | grep -w $snap_name)
