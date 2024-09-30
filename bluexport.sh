@@ -58,15 +58,18 @@ vsi_user=$(cat $bluexscrt | grep "VSI_USER" | awk {'print $2'})
 ####  END: Constants Definition  #####
 
 ####  START: Check if Config File exists  ####
-if [ ! -f $bluexscrt ]
+if [[ $1 != "-chscrt" ]] || [[ $1 != "-viewscrt" ]]
 then
-	echo "" >> $log_file
-	timestamp=$(date +%F" "%T" "%Z)
-	echo "==== START ======= $timestamp =========" >> $log_file
-	echo "`date +%Y-%m-%d_%H:%M:%S` - Config file $bluexscrt Missing!! Aborting!..." >> $log_file
-	echo "==== END ========= $timestamp =========" >> $log_file
-	echo "" >> $log_file
-	exit 0
+	if [ ! -f $bluexscrt ]
+	then
+		echo "" >> $log_file
+		timestamp=$(date +%F" "%T" "%Z)
+		echo "==== START ======= $timestamp =========" >> $log_file
+		echo "`date +%Y-%m-%d_%H:%M:%S` - Config file $bluexscrt Missing!! Aborting!..." >> $log_file
+		echo "==== END ========= $timestamp =========" >> $log_file
+		echo "" >> $log_file
+		exit 0
+	fi
 fi
 ####  END: Check if Config File exists  ####
 
