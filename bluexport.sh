@@ -38,7 +38,6 @@
 
 ####  START: Constants Definition  #####
 Version=3.2.4
-bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 capture_time=`date +%Y-%m-%d_%H%M`
 capture_date=`date +%Y-%m-%d`
@@ -60,6 +59,7 @@ vsi_user=$(cat $bluexscrt | grep "VSI_USER" | awk {'print $2'})
 ####  START: Check if Config File exists  ####
 if [[ $1 != "-chscrt" ]] && [[ $1 != "-viewscrt" ]] && [[ $1 != "-v" ]] && [[ $1 != "-h" ]]
 then
+	bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 	if [ ! -f $bluexscrt ]
 	then
 		echo "" >> $log_file
