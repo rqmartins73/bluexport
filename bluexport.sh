@@ -769,9 +769,13 @@ case $1 in
 	vsi=$2
 	vsi_id_bluexscrt
 	snap_name=$3
-	if [ $4 -eq 0 ] && [ $5 -eq 0 ]
+	desc=$5
+	if [ -n "$desc" ] && [ "$desc" -eq "$desc" ] 2>/dev/null
 	then
-		abort "`date +%Y-%m-%d_%H:%M:%S` - You must pass at least one flag, DESCRIPTION or NEW_SNAPSHOT_NAME!..."
+		if [ $4 -eq 0 ] && [ $5 -eq 0 ]
+		then
+			abort "`date +%Y-%m-%d_%H:%M:%S` - You must pass at least one flag, DESCRIPTION or NEW_SNAPSHOT_NAME!..."
+		fi
 	fi
 	echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting Snapshot $snap_name Update !" >> $log_file
 	cloud_login
@@ -788,7 +792,7 @@ case $1 in
 			description=""
 			new_description_echo=""
 		else
-			abort "`date +%Y-%m-%d_%H:%M:%S` - Argument DESCRIPTION must be 0 or a phrase inside quotes!! Syntax:  bluexport.sh $1 SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|[\"DESCRIPTION\"]"
+			abort "`date +%Y-%m-%d_%H:%M:%S` - Argument DESCRIPTION must be 0 or a phrase inside quotes!! Syntax:  bluexport.sh $1 VSI_NAME SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|[\"DESCRIPTION\"]"
 		fi
 	else
 		description="--description \""$description"\""
@@ -800,9 +804,9 @@ case $1 in
 		if [ $4 -eq 0 ]
 		then
 			new_name_echo=""
-			new_name=""
+			new_name="--name \""$snap_name"\""
 		else
-			abort "`date +%Y-%m-%d_%H:%M:%S` - Argument NEW_SNAPSHOT_NAME must be 0 or a name!! Syntax:  bluexport.sh $1 SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|[\"DESCRIPTION\"]"
+			abort "`date +%Y-%m-%d_%H:%M:%S` - Argument NEW_SNAPSHOT_NAME must be 0 or a name!! Syntax:  bluexport.sh $1 VSI_NAME SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|[\"DESCRIPTION\"]"
 		fi
 	else
 		if [[ "$new_snap_name" == "$snap_name" ]]
