@@ -36,30 +36,30 @@
 
        #####  START:CODE  #####
 
-####  START: Constants Definition  #####
 Version=3.2.4
-log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
-capture_time=`date +%Y-%m-%d_%H%M`
-capture_date=`date +%Y-%m-%d`
-capture_hour=`date "+%H"`
-flagj=0
-job_log=$(cat $HOME/bluexport.conf | grep -w "job_log" | awk {'print $2'})
-job_test_log=$(cat $HOME/bluexport.conf | grep -w "job_test_log" | awk {'print $2'})
-job_id=$(cat $HOME/bluexport.conf | grep -w "job_id" | awk {'print $2'})
-job_log_short=$(cat $HOME/bluexport.conf | grep -w "job_log_short" | awk {'print $2'})
-job_monitor=$(cat $HOME/bluexport.conf | grep -w "job_monitor" | awk {'print $2'})
-vsi_list_id_tmp=$(cat $HOME/bluexport.conf | grep -w "vsi_list_id_tmp" | awk {'print $2'})
-vsi_list_tmp=$(cat $HOME/bluexport.conf | grep -w "vsi_list_tmp" | awk {'print $2'})
-volumes_file=$(cat $HOME/bluexport.conf | grep -w "volumes_file" | awk {'print $2'})
-end_log_file='==== END ========= $timestamp ========='
-single=0
-vsi_user=$(cat $bluexscrt | grep "VSI_USER" | awk {'print $2'})
-####  END: Constants Definition  #####
-
-####  START: Check if Config File exists  ####
 if [[ $1 != "-chscrt" ]] && [[ $1 != "-viewscrt" ]] && [[ $1 != "-v" ]] && [[ $1 != "-h" ]]
 then
+	####  START: Constants Definition  #####
 	bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
+	log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
+	capture_time=`date +%Y-%m-%d_%H%M`
+	capture_date=`date +%Y-%m-%d`
+	capture_hour=`date "+%H"`
+	flagj=0
+	job_log=$(cat $HOME/bluexport.conf | grep -w "job_log" | awk {'print $2'})
+	job_test_log=$(cat $HOME/bluexport.conf | grep -w "job_test_log" | awk {'print $2'})
+	job_id=$(cat $HOME/bluexport.conf | grep -w "job_id" | awk {'print $2'})
+	job_log_short=$(cat $HOME/bluexport.conf | grep -w "job_log_short" | awk {'print $2'})
+	job_monitor=$(cat $HOME/bluexport.conf | grep -w "job_monitor" | awk {'print $2'})
+	vsi_list_id_tmp=$(cat $HOME/bluexport.conf | grep -w "vsi_list_id_tmp" | awk {'print $2'})
+	vsi_list_tmp=$(cat $HOME/bluexport.conf | grep -w "vsi_list_tmp" | awk {'print $2'})
+	volumes_file=$(cat $HOME/bluexport.conf | grep -w "volumes_file" | awk {'print $2'})
+	end_log_file='==== END ========= $timestamp ========='
+	single=0
+	vsi_user=$(cat $bluexscrt | grep "VSI_USER" | awk {'print $2'})
+	####  END: Constants Definition  #####
+
+	####  START: Check if Config File exists  ####
 	if [ ! -f $bluexscrt ]
 	then
 		echo "" >> $log_file
@@ -70,7 +70,7 @@ then
 		echo "" >> $log_file
 		exit 0
 	fi
-####  END: Check if Config File exists  ####
+	####  END: Check if Config File exists  ####
 
 	####  START: Get Cloud Config Data  #####
 	resource_grp=$(cat $bluexscrt | grep -w "RESOURCE_GRP" | awk {'print $2'})
