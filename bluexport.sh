@@ -700,7 +700,7 @@ case $1 in
 		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport.sh $1 bluexscrt_file_name - Use the full path ex: /home/user/bluexscrt_new"
 	fi
 	new_scrt=$2
-	sed -i -e "s|$bluexscrt|$new_scrt|g" $HOME/bluexport.conf
+	sed -i -e "s|bluexscrt $bluexscrt|bluexscrt $new_scrt|g" $HOME/bluexport.conf
 	abort "`date +%Y-%m-%d_%H:%M:%S` - Secret file change to $new_scrt !"
     ;;
 
