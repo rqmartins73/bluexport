@@ -13,7 +13,7 @@
 # Usage for monitoring job:		./bluexport.sh -j VSI_NAME IMAGE_NAME
 #
 # Usage to create a snapshot:		./bluexport.sh -snapcr VSI_NAME SNAPSHOT_NAME 0|["DESCRIPTION"] 0|[VOLUMES(Comma separated list)]
-# Usage to update a snapshot:		./bluexport.sh -snapupd SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|["DESCRIPTION"]
+# Usage to update a snapshot:		./bluexport.sh -snapupd VSI_NAME SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|["DESCRIPTION"]
 # Usage to delete snapshot:		./bluexport.sh -snapdel VSI_NAME SNAPSHOT_NAME
 # Usage to list all snapshot
 #        in all Workspaces:		./bluexport.sh -snaplsall
@@ -36,7 +36,7 @@
 
        #####  START:CODE  #####
 
-Version=3.2.14
+Version=3.2.15
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 end_log_file='==== END ========= $timestamp ========='
@@ -115,7 +115,7 @@ help() {
 	echo ""
 	echo "Usage to create a snapshot:	./bluexport.sh -snapcr VSI_NAME SNAPSHOT_NAME 0|[DESCRIPTION] 0|[VOLUMES(Comma separated list)]"
 	echo ""
-	echo "Usage to update a snapshot:	./bluexport.sh -snapupd SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|[DESCRIPTION]"
+	echo "Usage to update a snapshot:	./bluexport.sh -snapupd VSI_NAME SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|[DESCRIPTION]"
 	echo ""
 	echo "Usage to delete snapshot:	./bluexport.sh -snapdel VSI_NAME SNAPSHOT_NAME"
 	echo ""
@@ -761,13 +761,15 @@ case $1 in
     ;;
 
   -snapupd)
-	if [ $# -lt 3 ]
+	if [ $# -lt 4 ]
 	then
 		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport.sh $1 SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|[\"DESCRIPTION\"]"
 	fi
 	test=0
-	snap_name=$2
-	if [ $3 -eq 0 ] && [ $4 -eq 0 ]
+	vsi=$2
+	vsi_id_bluexscrt
+	snap_name=$3
+	if [ $4 -eq 0 ] && [ $5 -eq 0 ]
 	then
 		abort "`date +%Y-%m-%d_%H:%M:%S` - You must pass at least one flag, DESCRIPTION or NEW_SNAPSHOT_NAME!..."
 	fi
@@ -778,10 +780,10 @@ case $1 in
 	then
 		abort "`date +%Y-%m-%d_%H:%M:%S` - Snapshot with name $snap_name does not exist, please choose a diferent name or use flag -snapcr to create one."
 	fi
-	description=$4
+	description=$5
 	if [ -n "$description" ] && [ "$description" -eq "$description" ] 2>/dev/null
 	then
-		if [ $4 -eq 0 ]
+		if [ $5 -eq 0 ]
 		then
 			description=""
 			new_description_echo=""
@@ -790,12 +792,12 @@ case $1 in
 		fi
 	else
 		description="--description \""$description"\""
-		new_description_echo="with new Description \"$4\""
+		new_description_echo="with new Description \"$5\""
 	fi
-	new_snap_name=$3
+	new_snap_name=$4
 	if [ -n "$new_snap_name" ] && [ "$new_snap_name" -eq "$new_snap_name" ] 2>/dev/null
 	then
-		if [ $3 -eq 0 ]
+		if [ $4 -eq 0 ]
 		then
 			new_name_echo=""
 			new_name=""
@@ -812,6 +814,7 @@ case $1 in
 			new_name="--name "$new_snap_name
 		fi
 	fi
+	check_VSI_exists
 	do_snap_update
 	abort "`date +%Y-%m-%d_%H:%M:%S` - === Successfully finished Snapshot $snap_name Update $new_name_echo !"
     ;;
