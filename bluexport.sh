@@ -773,7 +773,7 @@ case $1 in
 	snap_name=$3
 	desc=$5
 	sname=$4
-	if ([ -n "$desc" ] && [ "$desc" -eq "$desc" ] || [ -n "$sname" ] && [ "$sname" -eq "$sname" ])2>/dev/null
+	if ([ -n "$desc" ] && [ "$desc" -eq "$desc" ] && [ -n "$sname" ] && [ "$sname" -eq "$sname" ])2>/dev/null
 	then
 		if [ $4 -eq 0 ] && [ $5 -eq 0 ]
 		then
