@@ -36,7 +36,7 @@
 
        #####  START:CODE  #####
 
-Version=3.2.10
+Version=3.2.11
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 end_log_file='==== END ========= $timestamp ========='
@@ -363,7 +363,7 @@ do_snap_create() {
 	echo "`date +%Y-%m-%d_%H:%M:%S` - == Executing Snapshot $snap_name of Instance $vsi with volumes $volumes_to_echo" >> $log_file
 #	snap_cr_cmd=$(/usr/local/bin/ibmcloud pi ins snap cr $vsi_id --name $snap_name $description $volumes_to_snap)
 #	eval $snap_cr_cmd 2>> $log_file
-	/usr/local/bin/ibmcloud pi ins snap cr $vsi_id --name $snap_name --description $description --volumes $volumes_to_snap 2>> $log_file | tee -a $log_file
+	/usr/local/bin/ibmcloud pi ins snap cr $vsi_id --name $snap_name $description $flag_volumes $volumes_to_snap 2>> $log_file | tee -a $log_file
 	if [ $? -eq 1 ]
 	then
 		abort "`date +%Y-%m-%d_%H:%M:%S` - FAILED - Oops something went wrong!... Check the log above this line..."
@@ -743,12 +743,14 @@ case $1 in
 	then
 		if [ $5 -eq 0 ]
 		then
+			flag_volumes=""
 			volumes_to_snap=""
 			volumes_to_echo="ALL"
 		else
 			abort "`date +%Y-%m-%d_%H:%M:%S` - Argument VOLUMES must be 0 or comma separated names or IDs!! Syntax: bluexport.sh $1 LPAR_NAME SNAPSHOT_NAME 0|[\"DESCRIPTION\"] 0|[VOLUMES - Comma separated Volumes name list to snap]"
 		fi
 	else
+		flag_volumes="--volumes"
 		volumes_to_echo=$volumes_to_snap
 		volumes_to_snap="--volumes "$volumes_to_snap
 	fi
