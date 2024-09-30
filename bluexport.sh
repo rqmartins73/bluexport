@@ -769,10 +769,10 @@ case $1 in
 	vsi=$2
 	vsi_id_bluexscrt
 	snap_name=$3
-	if [ $4 -eq 0 ] && [ $5 -eq 0 ]
-	then
-		abort "`date +%Y-%m-%d_%H:%M:%S` - You must pass at least one flag, DESCRIPTION or NEW_SNAPSHOT_NAME!..."
-	fi
+#	if [ $4 -eq 0 ] && [ $5 -eq 0 ]
+#	then
+#		abort "`date +%Y-%m-%d_%H:%M:%S` - You must pass at least one flag, DESCRIPTION or NEW_SNAPSHOT_NAME!..."
+#	fi
 	echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting Snapshot $snap_name Update !" >> $log_file
 	cloud_login
 	snap_name_exists=$(/usr/local/bin/ibmcloud pi ins snap ls | grep -w $snap_name)
@@ -814,7 +814,6 @@ case $1 in
 			new_name="--name \""$new_snap_name"\""
 		fi
 	fi
-	cloud_login
 	check_VSI_exists
 	do_snap_update
 	abort "`date +%Y-%m-%d_%H:%M:%S` - === Successfully finished Snapshot $snap_name Update $new_name_echo !"
