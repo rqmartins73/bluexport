@@ -36,7 +36,7 @@
 
        #####  START:CODE  #####
 
-Version=3.2.7
+Version=3.2.8
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 end_log_file='==== END ========= $timestamp ========='
