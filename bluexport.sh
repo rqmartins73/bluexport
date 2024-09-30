@@ -14,7 +14,7 @@
 #
 # Usage to create a snapshot:		./bluexport.sh -snapcr VSI_NAME SNAPSHOT_NAME 0|["DESCRIPTION"] 0|[VOLUMES(Comma separated list)]
 # Usage to update a snapshot:		./bluexport.sh -snapupd SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|["DESCRIPTION"]
-# Usage to delete snapshot:		./bluexport.sh -snapdel SNAPSHOT_NAME
+# Usage to delete snapshot:		./bluexport.sh -snapdel VSI_NAME SNAPSHOT_NAME
 # Usage to list all snapshot
 #        in all Workspaces:		./bluexport.sh -snaplsall
 #
@@ -117,7 +117,7 @@ help() {
 	echo ""
 	echo "Usage to update a snapshot:	./bluexport.sh -snapupd SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|[DESCRIPTION]"
 	echo ""
-	echo "Usage to delete snapshot:	./bluexport.sh -snapdel SNAPSHOT_NAME"
+	echo "Usage to delete snapshot:	./bluexport.sh -snapdel VSI_NAME SNAPSHOT_NAME"
 	echo ""
 	echo "Usage to list all snapshot"
 	echo " in all Workspaces:		./bluexport.sh -snaplsall"
@@ -814,15 +814,17 @@ case $1 in
     ;;
 
   -snapdel)
-	if [ $# -lt 2 ]
+	if [ $# -lt 3 ]
 	then
-		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport.sh $1 SNAPSHOT_NAME"
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport.sh $1 VSI_NAME SNAPSHOT_NAME"
 	fi
 	test=0
-	snap_name=$2
-	echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting Snapshot $snap_name Delete !" >> $log_file
+	vsi_name=$2
+	snap_name=$3
+	vsi_id=$(cat $bluexscrt | grep $vsi_name | awk {'print $3'})
+	echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting Snapshot Delete $snap_name from VSI $vsi_name !" >> $log_file
 	cloud_login
-	snap_name_exists=$(/usr/local/bin/ibmcloud pi ins snap ls | grep -w $snap_name)
+	snap_name_exists=$(/usr/local/bin/ibmcloud pi ins snap ls $vsi_id | grep -w $snap_name)
 	if [[ "$snap_name_exists" == "" ]]
 	then
 		abort "`date +%Y-%m-%d_%H:%M:%S` - Snapshot with name $snap_name does not exist, please choose a diferent name or use flag -snapcr to create one."
