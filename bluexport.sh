@@ -835,13 +835,15 @@ case $1 in
 	flagj=1
 	vsi_name=$2
 	snap_name=$3
-	vsi_ws=$(cat $bluexscrt | grep $vsi_name | awk {'print $4'})
-	vsi_ws_id=$(cat $bluexscrt | grep -m 1 $vsi_ws | awk {'print $2'})
-	vsi_id=$(cat $bluexscrt | grep $vsi_name | awk {'print $3'})
+#	vsi_ws=$(cat $bluexscrt | grep $vsi_name | awk {'print $4'})
+#	vsi_ws_id=$(cat $bluexscrt | grep -m 1 $vsi_ws | awk {'print $2'})
+#	vsi_id=$(cat $bluexscrt | grep $vsi_name | awk {'print $3'})
 	echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting Snapshot Delete $snap_name from VSI $vsi_name !" >> $log_file
 	cloud_login
-	/usr/local/bin/ibmcloud pi ws tg $vsi_ws_id
-	snap_name_exists=$(/usr/local/bin/ibmcloud pi ins snap ls $vsi_id | grep -w $snap_name)
+	check_VSI_exists
+#	/usr/local/bin/ibmcloud pi ws tg $vsi_ws_id
+	snap_name_exists=$(/usr/local/bin/ibmcloud pi ins snap ls | grep -w $snap_name)
+#	snap_name_exists=$(/usr/local/bin/ibmcloud pi ins snap ls $vsi_id | grep -w $snap_name)
 	if [[ "$snap_name_exists" == "" ]]
 	then
 		abort "`date +%Y-%m-%d_%H:%M:%S` - Snapshot with name $snap_name does not exist, please choose a diferent name or use flag -snapcr to create one."
