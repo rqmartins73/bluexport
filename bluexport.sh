@@ -811,7 +811,7 @@ case $1 in
 		else
 			new_name_echo="with new Name "$new_snap_name
 			snap_name_new=$new_snap_name
-			new_name="--name "$new_snap_name
+			new_name="--name \""$new_snap_name"\""
 		fi
 	fi
 	check_VSI_exists
