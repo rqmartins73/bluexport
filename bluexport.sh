@@ -38,10 +38,10 @@
 
 Version=3.2.4
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
+bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 if [[ $1 != "-chscrt" ]] && [[ $1 != "-viewscrt" ]] && [[ $1 != "-v" ]] && [[ $1 != "-h" ]]
 then
 	####  START: Constants Definition  #####
-	bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 	capture_time=`date +%Y-%m-%d_%H%M`
 	capture_date=`date +%Y-%m-%d`
 	capture_hour=`date "+%H"`
