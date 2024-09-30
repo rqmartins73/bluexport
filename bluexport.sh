@@ -820,8 +820,9 @@ case $1 in
 	fi
 	test=0
 	vsi_name=$2
-	check_VSI_exists
 	snap_name=$3
+	vsi_ws=$(cat $bluexscrt | grep $vsi_name | awk {'print $4'})
+	vsi_ws_id=$(cat $bluexscrt | grep -m 1 $vsi_ws | awk {'print $2'})
 	vsi_id=$(cat $bluexscrt | grep $vsi_name | awk {'print $3'})
 	echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting Snapshot Delete $snap_name from VSI $vsi_name !" >> $log_file
 	cloud_login
