@@ -318,9 +318,10 @@ check_VSI_exists() {
 		if grep -qie ^$vsi$ $vsi_list_tmp
 		then
 			echo "`date +%Y-%m-%d_%H:%M:%S` - VSI $vsi_cloud_name was found in $full_ws_name..." >> $log_file
-			echo "`date +%Y-%m-%d_%H:%M:%S` - VSI to Capture: $vsi_cloud_name" >> $log_file
+#			echo "`date +%Y-%m-%d_%H:%M:%S` - VSI to Capture: $vsi_cloud_name" >> $log_file
 			if [ $flagj -eq 0 ]
 			then
+				echo "`date +%Y-%m-%d_%H:%M:%S` - VSI to Capture: $vsi_cloud_name" >> $log_file
 				get_IASP_name
 			fi
 			found=1
