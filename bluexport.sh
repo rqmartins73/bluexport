@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Capture IBM Cloud POWERVS VSI and Export to COS or/and Image Catalog
+# Capture IBM Cloud POWERVS IBM i VSI and Export to COS or/and Image Catalog
 #
 # Version 2.x now supports the creation, update, delete and list Snapshots.
 #
@@ -100,7 +100,7 @@ fi
 #### START:FUNCTION - Help  ####
 help() {
 	echo ""
-	echo "Capture IBM Cloud POWERVS VSI and Export to COS or/and Image Catalog"
+	echo "Capture IBM Cloud POWERVS IBM i VSI and Export to COS or/and Image Catalog"
 	echo "Version 2.x now supports the creation, update, delete and list Snapshots."
 	echo ""
 	echo "Changing secret file:		./bluexport.sh -chscrt bluexscrt_file_name - Use the full path ex: /home/user/bluexscrt_new"
