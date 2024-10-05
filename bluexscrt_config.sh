@@ -7,7 +7,7 @@
 # Ricardo Martins - Blue Chip Portugal © 2024-2024
 #######################################################################################
 
-Version=0.1.14
+Version=0.1.15
 
 vsi_name_id_tmp_file="$HOME/vsi_name_file.tmp"
 
@@ -88,7 +88,7 @@ do
 	count=$((scrtkey_count-6))
 	echo "COS Secret Key: "$scrtkey | sed -E "s/(.{19})(.{$count})/\1***********************/"
 	echo "Bucket Name: "$bucket
-	echo "VSI User: "$vsi_user
+	echo "LPAR User: "$vsi_user
 	echo "SSH Key Full Path: "$ssh_key_path
 	echo ""
 	read -p "Are this data correct? (Y/N) " continue
@@ -137,6 +137,7 @@ do
 #	echo "WSID:   "${wsid[$index]}
 	echo ""
 	index=$((index + 1))
+	ws_short_name=""
 done
 
 ### Building $file_name file
