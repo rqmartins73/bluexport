@@ -4,10 +4,10 @@
 # Script to help populate the bluexscrt file
 #
 #
-# Ricardo Martins - Blue Chip Portugal © 2023-2024
+# Ricardo Martins - Blue Chip Portugal © 2024-2024
 #######################################################################################
 
-Version=0.1.11
+Version=0.1.12
 
 vsi_name_id_tmp_file="$HOME/vsi_name_file.tmp"
 
@@ -168,12 +168,12 @@ chmod 600 $file_name
 ### Adding LPARs and their IP to the config file
 
 echo ""
-echo "Now let's add the LPARs and their IP to the config file..."
+echo "   #### Now let's add the LPARs and their IP to the config file..."
 echo ""
 indexvsi=0
 for ws in $allws
 do
-	echo "Targetting Workspace $ws..."
+	echo "Targetting Workspace $ws and checking existent LPARs, please wait..."
 	echo ""
 	wscrn=$(cat $file_name | grep -m 1 $ws | awk {'print $2'})
 	/usr/local/bin/ibmcloud pi ws tg $wscrn
@@ -181,7 +181,8 @@ do
 	vsis=$(cat $vsi_name_id_tmp_file)
 	if [[ "$vsis" == "" ]]
 	then
-		echo "No LPARs in Workspace $ws, moving on..."
+		echo ""
+		echo "None LPARs in Workspace $ws, moving on..."
 		echo ""
 	fi
 	while IFS= read -r -u 3 line
@@ -195,13 +196,13 @@ do
 		if [[ $ibmi != ""  ]]
 		then
 			rm='"ip": '
-			echo "Getting LPAR ${vsi_name[$indexvsi]} IPs, please wait..."
+			echo "Yes it is! Getting LPAR ${vsi_name[$indexvsi]} IPs, please wait..."
 			vsi_ips=$(/usr/local/bin/ibmcloud pi ins get ${vsi_id[$indexvsi]} --json | grep '"ip":' | awk 'BEGIN{RS=ORS=" "}{ if (a[$0] == 0){ a[$0] += 1; print $0}}'| sed s/"$rm"//| sed s/\"// | sed s/\",//)
 			ok="n"
 			while [[ "$ok" != "y" ]] && [[ "$ok" != "Y" ]]
 			do
 				echo ""
-				echo "IPs available for LPAR ${vsi_name[$indexvsi]}:"
+				echo "IPs available for LPAR ${vsi_name[$indexvsi]} (Copy/paste one of them) :"
 				echo $vsi_ips
 				read -p "Enter IP for LPAR ${vsi_name[$indexvsi]}: " vsi_ip[$indexvsi]
 				read -p "Is this IP ${vsi_ip[$indexvsi]} correct? (y/n) " ok
