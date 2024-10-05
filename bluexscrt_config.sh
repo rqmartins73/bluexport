@@ -7,7 +7,7 @@
 # Ricardo Martins - Blue Chip Portugal © 2024-2024
 #######################################################################################
 
-Version=0.1.12
+Version=0.1.14
 
 vsi_name_id_tmp_file="$HOME/vsi_name_file.tmp"
 
@@ -46,7 +46,7 @@ do
 	done
 	read -p "Region: " region
 	read -p "Bucket Name: " bucket
-	read -p "VSI User: " vsi_user
+	read -p "LPAR User: " vsi_user
 
 	while true
 	do
@@ -125,7 +125,10 @@ index=0
 for i in "${wsnames_array[@]}"
 do
 	full_ws_name=$i # Get the full workspace name from the map
-	read -p "Enter Shortname for Workspace $i : " ws_short_name
+	while [[ "$ws_short_name" == "" ]]
+	do
+		read -p "Enter Shortname for Workspace $i : " ws_short_name
+	done
 	allws=${allws}" "$ws_short_name
 	crn[$index]=$ws_short_name" "${crns_array[$index]}
 	wsid[$index]=$ws_short_name"ID "${wsids_array[$index]}
