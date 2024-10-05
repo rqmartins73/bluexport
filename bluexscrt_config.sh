@@ -7,9 +7,14 @@
 # Ricardo Martins - Blue Chip Portugal © 2024-2024
 #######################################################################################
 
-Version=0.1.15
+Version=0.1.16
 
 vsi_name_id_tmp_file="$HOME/vsi_name_file.tmp"
+
+echo ""
+echo "   ####  Welcome to your bluexport secrets file configuration helper version $Version"
+echo "Let's start with the basics for this to work..."
+echo ""
 
 while true
 do
@@ -98,7 +103,7 @@ do
 	fi
 done
 echo ""
-echo "Checking IBM Cloud credentials and getting Workspaces, please wait..."
+echo "   #### Checking IBM Cloud credentials and getting Workspaces, please wait..."
 echo ""
 
 /usr/local/bin/ibmcloud login --apikey $apikey -r $region -g $resource_grp
