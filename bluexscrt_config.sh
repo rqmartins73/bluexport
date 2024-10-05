@@ -7,12 +7,13 @@
 # Ricardo Martins - Blue Chip Portugal © 2024-2024
 #######################################################################################
 
-Version=0.1.16
+Version=0.1.17
 
 vsi_name_id_tmp_file="$HOME/vsi_name_file.tmp"
 
 echo ""
 echo "   ####  Welcome to your bluexport secrets file configuration helper version $Version"
+echo ""
 echo "Let's start with the basics for this to work..."
 echo ""
 
@@ -127,12 +128,27 @@ IFS=':' read -r -a wsnames_array <<< "$wsnames"
 IFS='@' read -r -a crns_array <<< "$crns"
 IFS='@' read -r -a wsids_array <<< "$wsids"
 index=0
+echo ""
+echo "   ####  Let's give the Workspaces a shortname..."
+echo ""
+echo "I'm not checking, so don't give the same shortname to more than 1 Workspace"
+echo ""
 for i in "${wsnames_array[@]}"
 do
 	full_ws_name=$i # Get the full workspace name from the map
-	while [[ "$ws_short_name" == "" ]]
+	ok="n"
+	while [[ "$ok" != "y" ]] && [[ "$ok" != "Y" ]]
 	do
-		read -p "Enter Shortname for Workspace $i : " ws_short_name
+		ws_short_name=""
+		while [[ "$ws_short_name" == "" ]] 
+		do
+			read -p "Enter Shortname for Workspace $i : " ws_short_name
+			if [[ "$ws_short_name" == "" ]]
+			then
+				echo "Shortname cannot be <blank>...!"
+			fi
+		done
+		read -p "Are you OK with this shortname $ws_short_name (y/n) " ok
 	done
 	allws=${allws}" "$ws_short_name
 	crn[$index]=$ws_short_name" "${crns_array[$index]}
