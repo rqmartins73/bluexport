@@ -7,7 +7,7 @@
 # Ricardo Martins - Blue Chip Portugal © 2023-2024
 #######################################################################################
 
-Version=0.1.10
+Version=0.1.11
 
 vsi_name_id_tmp_file="$HOME/vsi_name_file.tmp"
 
@@ -98,7 +98,7 @@ do
 	fi
 done
 echo ""
-echo "Checking IBM Cloud credentials and getting Workspaces..."
+echo "Checking IBM Cloud credentials and getting Workspaces, please wait..."
 echo ""
 
 /usr/local/bin/ibmcloud login --apikey $apikey -r $region -g $resource_grp
@@ -178,18 +178,24 @@ do
 	wscrn=$(cat $file_name | grep -m 1 $ws | awk {'print $2'})
 	/usr/local/bin/ibmcloud pi ws tg $wscrn
 	/usr/local/bin/ibmcloud pi ins ls | tail -n +2 | awk {'print $2" "$1'} > $vsi_name_id_tmp_file
+	vsis=$(cat $vsi_name_id_tmp_file)
+	if [[ "$vsis" == "" ]]
+	then
+		echo "No LPARs in Workspace $ws, moving on..."
+		echo ""
+	fi
 	while IFS= read -r -u 3 line
 	do
 		vsi_name[$indexvsi]=$(echo $line|awk {'print $1'})
 		vsi_id[$indexvsi]=$(echo $line|awk {'print $2'})
 		vsi_ws[$indexvsi]=$ws
 		echo ""
-		echo "Checking if LPAR ${vsi_name[$indexvsi]} is an IBMi LPAR..."
+		echo "Checking if LPAR ${vsi_name[$indexvsi]} is an IBMi LPAR, please wait..."
 		ibmi=$(/usr/local/bin/ibmcloud pi ins get ${vsi_id[$indexvsi]} --json | grep '"osType": "ibmi"')
 		if [[ $ibmi != ""  ]]
 		then
 			rm='"ip": '
-			echo "Getting LPAR ${vsi_name[$indexvsi]} IPs..."
+			echo "Getting LPAR ${vsi_name[$indexvsi]} IPs, please wait..."
 			vsi_ips=$(/usr/local/bin/ibmcloud pi ins get ${vsi_id[$indexvsi]} --json | grep '"ip":' | awk 'BEGIN{RS=ORS=" "}{ if (a[$0] == 0){ a[$0] += 1; print $0}}'| sed s/"$rm"//| sed s/\"// | sed s/\",//)
 			ok="n"
 			while [[ "$ok" != "y" ]] && [[ "$ok" != "Y" ]]
@@ -220,7 +226,7 @@ done
 oldbluexscrt=$(cat $HOME/bluexport.conf | grep bluexscrt | awk {'print $2'})
 newbluexscrt=$file_name
 read -p "Do you want to update bluexport.conf with $file_name (Y/N) " use_file
-if [[ $use_file=="Y" ]] || [[ $use_file=="y" ]]
+if [[ "$use_file" == "Y" ]] || [[ "$use_file" == "y" ]]
 then
 	echo "Updating file $HOME/bluexport.conf ..."
 	sed -i "s|$oldbluexscrt|$newbluexscrt|g" $HOME/bluexport.conf
