@@ -7,7 +7,7 @@
 # Ricardo Martins - Blue Chip Portugal © 2023-2024
 #######################################################################################
 
-Version=0.1.8
+Version=0.1.9
 vsi_name_id_tmp_file="$HOME/vsi_name_file.tmp"
 
 while true
@@ -181,6 +181,7 @@ do
 	do
 		vsi_name[$indexvsi]=$(echo $line|awk {'print $1'})
 		vsi_id[$indexvsi]=$(echo $line|awk {'print $2'})
+		vsi_ws[$indexvsi]=$ws
 		echo ""
 		echo "Checking if LPAR ${vsi_name[$indexvsi]} is an IBMi LPAR..."
 		ibmi=$(/usr/local/bin/ibmcloud pi ins get ${vsi_id[$indexvsi]} --json | grep '"osType": "ibmi"')
@@ -210,10 +211,8 @@ echo "" >> $HOME/$file_name
 len=${#vsi_name[@]}
 for (( i=0; i<$len; i++ ))
 do
-	echo ${vsi_name[$i]}" "${vsi_ip[$i]}" "${vsi_id[$i]}" "LPAR$i >> $HOME/$file_name
+	echo ${vsi_name[$i]}" "${vsi_ip[$i]}" "${vsi_id[$i]}" "${vsi_ws[$i]}" "LPAR$i >> $HOME/$file_name
 done
-
-exit
 
 ### Updating bluexport.conf file
 
