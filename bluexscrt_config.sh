@@ -7,14 +7,15 @@
 # Ricardo Martins - Blue Chip Portugal © 2023-2024
 #######################################################################################
 
-Version=0.1.9
+Version=0.1.10
+
 vsi_name_id_tmp_file="$HOME/vsi_name_file.tmp"
 
 while true
 do
 	while true
 	do
-		read -p "File Name: " file_name
+		read -p "File Name (Full /path/to/file) : " file_name
 		if [ -f $file_name ]; then
 			echo "File name $file_name exists. This file will be overwritten!"
 			read -p "Are you sure? (Y/N) " continue
@@ -128,41 +129,41 @@ do
 	allws=${allws}" "$ws_short_name
 	crn[$index]=$ws_short_name" "${crns_array[$index]}
 	wsid[$index]=$ws_short_name"ID "${wsids_array[$index]}
-	echo "ALLWS:   "$allws
-	echo "CRN:   "${crn[$index]}
-	echo "WSID:   "${wsid[$index]}
+#	echo "ALLWS:   "$allws
+#	echo "CRN:   "${crn[$index]}
+#	echo "WSID:   "${wsid[$index]}
 	echo ""
 	index=$((index + 1))
 done
 
-### Building $HOME/$file_name file
+### Building $file_name file
 
-echo "APYKEY $apikey" > $HOME/$file_name
+echo "APYKEY $apikey" > $file_name
 for crn_print in "${crn[@]}"
 do
-	echo $crn_print >> $HOME/$file_name
+	echo $crn_print >> $file_name
 done
-echo "" >> $HOME/$file_name
-echo "ACCESSKEY $acckey" >> $HOME/$file_name
-echo "SECRETKEY $scrtkey" >> $HOME/$file_name
+echo "" >> $file_name
+echo "ACCESSKEY $acckey" >> $file_name
+echo "SECRETKEY $scrtkey" >> $file_name
 
-echo "BUCKETNAME $bucket" >> $HOME/$file_name
-echo "REGION $region" >> $HOME/$file_name
-echo "" >> $HOME/$file_name
-echo "ALLWS$allws" >> $HOME/$file_name
-echo "WSNAMES $wsnames" >> $HOME/$file_name
-echo "" >> $HOME/$file_name
-echo "VSI_USER $vsi_user" >> $HOME/$file_name
-echo "" >> $HOME/$file_name
-echo "SSHKEYPATH $ssh_key_path" >> $HOME/$file_name
-echo "" >> $HOME/$file_name
+echo "BUCKETNAME $bucket" >> $file_name
+echo "REGION $region" >> $file_name
+echo "" >> $file_name
+echo "ALLWS$allws" >> $file_name
+echo "WSNAMES $wsnames" >> $file_name
+echo "" >> $file_name
+echo "VSI_USER $vsi_user" >> $file_name
+echo "" >> $file_name
+echo "SSHKEYPATH $ssh_key_path" >> $file_name
+echo "" >> $file_name
 for wsid_print in "${wsid[@]}"
 do
-	echo $wsid_print >> $HOME/$file_name
+	echo $wsid_print >> $file_name
 done
-echo "" >> $HOME/$file_name
-echo "RESOURCE_GRP $resource_grp" >> $HOME/$file_name
-chmod 600 $HOME/$file_name
+echo "" >> $file_name
+echo "RESOURCE_GRP $resource_grp" >> $file_name
+chmod 600 $file_name
 
 ### Adding LPARs and their IP to the config file
 
@@ -174,7 +175,7 @@ for ws in $allws
 do
 	echo "Targetting Workspace $ws..."
 	echo ""
-	wscrn=$(cat $HOME/$file_name | grep -m 1 $ws | awk {'print $2'})
+	wscrn=$(cat $file_name | grep -m 1 $ws | awk {'print $2'})
 	/usr/local/bin/ibmcloud pi ws tg $wscrn
 	/usr/local/bin/ibmcloud pi ins ls | tail -n +2 | awk {'print $2" "$1'} > $vsi_name_id_tmp_file
 	while IFS= read -r -u 3 line
@@ -207,23 +208,23 @@ do
 	echo ""
 done
 
-echo "" >> $HOME/$file_name
+echo "" >> $file_name
 len=${#vsi_name[@]}
 for (( i=0; i<$len; i++ ))
 do
-	echo ${vsi_name[$i]}" "${vsi_ip[$i]}" "${vsi_id[$i]}" "${vsi_ws[$i]}" "LPAR$i >> $HOME/$file_name
+	echo ${vsi_name[$i]}" "${vsi_ip[$i]}" "${vsi_id[$i]}" "${vsi_ws[$i]}" "LPAR$i >> $file_name
 done
 
 ### Updating bluexport.conf file
 
 oldbluexscrt=$(cat $HOME/bluexport.conf | grep bluexscrt | awk {'print $2'})
-newbluexscrt=$HOME/$file_name
+newbluexscrt=$file_name
 read -p "Do you want to update bluexport.conf with $file_name (Y/N) " use_file
 if [[ $use_file=="Y" ]] || [[ $use_file=="y" ]]
 then
-	echo "Updating file $HOME/bluexport.conf..."
+	echo "Updating file $HOME/bluexport.conf ..."
 	sed -i "s|$oldbluexscrt|$newbluexscrt|g" $HOME/bluexport.conf
 	echo "Done!"
 else
-	echo "If you want to use this file $HOME/$file_name as your bluexscrt file, don't forget to update $HOME/bluexport.conf file"
+	echo "If you want to use this file $file_name as your bluexscrt file, don't forget to update $HOME/bluexport.conf file"
 fi
