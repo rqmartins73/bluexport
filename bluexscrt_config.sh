@@ -7,113 +7,95 @@
 # Ricardo Martins - Blue Chip Portugal © 2023-2024
 #######################################################################################
 
-Version=0.1.5
+Version=0.1.8
+vsi_name_id_tmp_file="$HOME/vsi_name_file.tmp"
 
-####  START:FUNCTION - Target DC and List all VSI in the POWERVS DC and Get VSI Name and ID  ####
-dc_vsi_list() {
-        sh -c '/usr/local/bin/ibmcloud pi ws tg '$1 2>> $log_file
-    # List all VSI in this POWERVS DC and Get VSI Name and ID #
-        sh -c '/usr/local/bin/ibmcloud pi ins ls | awk {'\''print $1" "$2'\''} | tail -n +2' > $vsi_list_id_tmp 2>> $log_file
-        vsi_id=$(cat $vsi_list_id_tmp | grep -wi $vsi | awk {'print $1'})
-        cat $vsi_list_id_tmp | awk {'print $2'} > $vsi_list_tmp
-}
-####  END:FUNCTION - Target DC and List all VSI in the POWERVS DC and Get VSI Name and ID  ####
-####  START:FUNCTION - Check if VSI exists and Get VSI IP and IASP NAME if exists  ####
-check_VSI_exists() {
-	echo "" > $job_log
-
-	# Convert 'wsnames' string to an array
-	IFS=':' read -r -a wsnames_array <<< "$wsnames"
-
-	# Convert 'allws' string to an array
-	read -r -a allws_array <<< "$allws"
-
-	# Initialize an associative array to map workspace abbreviations to full names
-	declare -A wsmap
-	# Populate the wsmap with dynamic values from allws and wsnames_array
-	for i in "${!allws_array[@]}"; do
-		wsmap[${allws_array[i]}]="${wsnames_array[i]}"
-	done
-
-	found=0
-	for ws in "${allws_array[@]}"
+while true
+do
+	while true
 	do
-		shortnamecrn="${!ws}"
-		full_ws_name="${wsmap[$ws]}" # Get the full workspace name from the map
-		echo "`date +%Y-%m-%d_%H:%M:%S` - Searching for VSI in $full_ws_name..." >> $log_file
-		dc_vsi_list "$shortnamecrn"
-		vsi_cloud_name=$(cat $vsi_list_tmp | grep -wi $vsi | awk {'print $1'})
-		if grep -qie ^$vsi$ $vsi_list_tmp
-		then
-			echo "`date +%Y-%m-%d_%H:%M:%S` - VSI $vsi_cloud_name was found in $full_ws_name..." >> $log_file
-			echo "`date +%Y-%m-%d_%H:%M:%S` - VSI to Capture: $vsi_cloud_name" >> $log_file
+		read -p "File Name: " file_name
+		if [ -f $file_name ]; then
+			echo "File name $file_name exists. This file will be overwritten!"
+			read -p "Are you sure? (Y/N) " continue
+			if [[ $continue == "Y" ]] || [[ $continue == "y" ]]
+			then
+				break
+			fi
 		else
-			echo "`date +%Y-%m-%d_%H:%M:%S` - VSI $vsi not found in $full_ws_name!" >> $log_file
+			break
 		fi
 	done
-	if [ "$found" -eq 0 ]
-	then
-		abort "$(date +%Y-%m-%d_%H:%M:%S) - VSI $vsi_cloud_name not found in any of the workspaces available in bluexscrt file!"
-	fi
-}
-####  END:FUNCTION - Check if VSI exists and Get VSI IP and IASP NAME if exists  ####
-
-while true
-do
-	read -p "File Name: " file_name
-	if [ -f $file_name ]; then
-		echo "File name $file_name exists. This file will be overwritten!"
-		read -p "Are you sure? (Y/N) " continue
-		if [[ $continue == "Y" ]] || [[ $continue == "y" ]]
-		then
-			break
-		fi
-	else
-		break
-	fi
-done
-
-read -s -p "APIKEY: " apikey
-echo ""
-read -p "Resource Group: " resource_grp
-read -s -p "COS Access Key: " acckey
-echo ""
-read -s -p "COS Secret Key: " scrtkey
-echo ""
-read -p "Region: " region
-read -p "Bucket Name: " bucket
-read -p "VSI User: " vsi_user
-echo ""
-while true
-do
-	read -p "SSH Key Full Path: " ssh_key_path
+	while [[ "$apikey" == "" ]]
+	do
+		read -s -p "APIKEY: " apikey
+		echo ""
+	done
+	read -p "Resource Group: " resource_grp
+	while [[ "$acckey" == "" ]]
+	do
+		read -s -p "COS Access Key: " acckey
+		echo""
+	done
 	echo ""
-	if [ ! -f $ssh_key_path ]
-	then
-		echo "File name $ssh_key_path does not exists!"
-		read -p "Are you sure you want to use this file ? (Y/N) " continue
-		if [[ $continue == "Y" ]] || [[ $continue == "y" ]]
+	while [[ "$scrtkey" == "" ]]
+	do
+		read -s -p "COS Secret Key: " scrtkey
+		echo ""
+	done
+	read -p "Region: " region
+	read -p "Bucket Name: " bucket
+	read -p "VSI User: " vsi_user
+
+	while true
+	do
+		read -p "SSH Key Full Path: " ssh_key_path
+		echo ""
+		if [ ! -f $ssh_key_path ]
 		then
-			echo ""
-			echo "Don't forget to create ssh key named $ssh_key_path !"
-			sleep 3
-			echo ""
+			echo "File name $ssh_key_path does not exists!"
+			read -p "Are you sure you want to use this file ? (Y/N) " continue
+			if [[ $continue == "Y" ]] || [[ $continue == "y" ]]
+			then
+				echo ""
+				read -p "Do you want to create $ssh_key_path key now ? " createnow
+				if [[ $createnow == "Y" ]] || [[ $createnow == "y" ]]
+				then
+					ssh-keygen -N "" -t rsa -f $ssh_key_path
+					break
+				else
+					echo "Don't forget to create ssh key named $ssh_key_path !"
+					sleep 3
+					echo ""
+					break
+				fi
+			fi
+		else
 			break
 		fi
-	else
+	done
+
+	apikey_count=$(echo -n "$apikey" | wc -c)
+	count=$((apikey_count-6))
+	echo "APIKEY: "$apikey | sed -E "s/(.{11})(.{$count})/\1***********************/"
+	echo "Resource Group: "$resource_grp
+	echo "Region: "$region
+	acckey_count=$(echo -n "$acckey" | wc -c)
+	count=$((acckey_count-6))
+	echo "COS Access Key: "$acckey | sed -E "s/(.{19})(.{$count})/\1***********************/"
+	scrtkey_count=$(echo -n "$scrtkey" | wc -c)
+	count=$((scrtkey_count-6))
+	echo "COS Secret Key: "$scrtkey | sed -E "s/(.{19})(.{$count})/\1***********************/"
+	echo "Bucket Name: "$bucket
+	echo "VSI User: "$vsi_user
+	echo "SSH Key Full Path: "$ssh_key_path
+	echo ""
+	read -p "Are this data correct? (Y/N) " continue
+	if [[ $continue == "Y" ]] || [[ $continue == "y" ]]
+	then
 		break
 	fi
 done
-
-echo "APIKEY: "$apikey
-echo "Resource Group: "$resource_grp
-echo "Region: "$region
-echo "COS Access Key: "$acckey
-echo "COS Secret Key: "$scrtkey
-echo "Bucket Name: "$bucket
-echo "VSI User: "$vsi_user
-echo "SSH Key Full Path: "$ssh_key_path
-
 echo ""
 echo "Checking IBM Cloud credentials and getting Workspaces..."
 echo ""
@@ -121,7 +103,6 @@ echo ""
 /usr/local/bin/ibmcloud login --apikey $apikey -r $region -g $resource_grp
 /usr/local/bin/ibmcloud pi ws ls
 ret=$?
-#echo $ret
 if [ $ret -eq 1 ]
 then
 	echo "    FAILED - Oops something went wrong!... Check messages above this line..."
@@ -135,14 +116,10 @@ crns=$(/usr/local/bin/ibmcloud pi ws ls | awk {'print $1'}| tail -n +2)
 crns=$(echo $crns | sed 's/[[:space:]]/@/g')
 wsnames=$(echo $wsnames | sed 's/\:[[:space:]]/:/g')
 
-#echo "WSNAMES: "$wsnames
-#echo "CRNS: "$crns
-#echo "WSID: "$wsids
 echo ""
 IFS=':' read -r -a wsnames_array <<< "$wsnames"
 IFS='@' read -r -a crns_array <<< "$crns"
 IFS='@' read -r -a wsids_array <<< "$wsids"
-#declare -A wsmap
 index=0
 for i in "${wsnames_array[@]}"
 do
@@ -158,16 +135,6 @@ do
 	index=$((index + 1))
 done
 
-read -p "Do you want to add now the LPARs? (Y/N)? " ask_lpar
-if [[ $ask_lpar=="Y" ]] || [[ $ask_lpar=="y" ]]
-then
-	index=0
-	add_more="Y"
-	while [[ "$add_more" == "Y" || "$add_more" == "y" ]]
-	do
-		read -p "LPAR$index Name ? (as is in IBM Cloud) " lpar[$index]
-
-fi
 ### Building $HOME/$file_name file
 
 echo "APYKEY $apikey" > $HOME/$file_name
@@ -182,7 +149,7 @@ echo "SECRETKEY $scrtkey" >> $HOME/$file_name
 echo "BUCKETNAME $bucket" >> $HOME/$file_name
 echo "REGION $region" >> $HOME/$file_name
 echo "" >> $HOME/$file_name
-echo "ALLWS $allws" >> $HOME/$file_name
+echo "ALLWS$allws" >> $HOME/$file_name
 echo "WSNAMES $wsnames" >> $HOME/$file_name
 echo "" >> $HOME/$file_name
 echo "VSI_USER $vsi_user" >> $HOME/$file_name
@@ -197,17 +164,56 @@ echo "" >> $HOME/$file_name
 echo "RESOURCE_GRP $resource_grp" >> $HOME/$file_name
 chmod 600 $HOME/$file_name
 
-read -p "Do you want to add now the LPARs? (Y/N)? " ask_lpar
-if [[ $ask_lpar=="Y" ]] || [[ $ask_lpar=="y" ]]
-then
-	index=0
-	add_more="Y"
-	while [[ "$add_more" == "Y" || "$add_more" == "y" ]]
-	do
-		read -p "LPAR$index Name ? (as is in IBM Cloud) " lpar[$index]
+### Adding LPARs and their IP to the config file
 
-	done
-fi
+echo ""
+echo "Now let's add the LPARs and their IP to the config file..."
+echo ""
+indexvsi=0
+for ws in $allws
+do
+	echo "Targetting Workspace $ws..."
+	echo ""
+	wscrn=$(cat $HOME/$file_name | grep -m 1 $ws | awk {'print $2'})
+	/usr/local/bin/ibmcloud pi ws tg $wscrn
+	/usr/local/bin/ibmcloud pi ins ls | tail -n +2 | awk {'print $2" "$1'} > $vsi_name_id_tmp_file
+	while IFS= read -r -u 3 line
+	do
+		vsi_name[$indexvsi]=$(echo $line|awk {'print $1'})
+		vsi_id[$indexvsi]=$(echo $line|awk {'print $2'})
+		echo ""
+		echo "Checking if LPAR ${vsi_name[$indexvsi]} is an IBMi LPAR..."
+		ibmi=$(/usr/local/bin/ibmcloud pi ins get ${vsi_id[$indexvsi]} --json | grep '"osType": "ibmi"')
+		if [[ $ibmi != ""  ]]
+		then
+			rm='"ip": '
+			echo "Getting LPAR ${vsi_name[$indexvsi]} IPs..."
+			vsi_ips=$(/usr/local/bin/ibmcloud pi ins get ${vsi_id[$indexvsi]} --json | grep '"ip":' | awk 'BEGIN{RS=ORS=" "}{ if (a[$0] == 0){ a[$0] += 1; print $0}}'| sed s/"$rm"//| sed s/\"// | sed s/\",//)
+			ok="n"
+			while [[ "$ok" != "y" ]] && [[ "$ok" != "Y" ]]
+			do
+				echo ""
+				echo "IPs available for LPAR ${vsi_name[$indexvsi]}:"
+				echo $vsi_ips
+				read -p "Enter IP for LPAR ${vsi_name[$indexvsi]}: " vsi_ip[$indexvsi]
+				read -p "Is this IP ${vsi_ip[$indexvsi]} correct? (y/n) " ok
+			done
+			indexvsi=$((indexvsi + 1))
+		else
+			echo "LPAR ${vsi_name[$indexvsi]} is not an IBMi LPAR, moving on..."
+		fi
+	done 3< "$vsi_name_id_tmp_file"
+	echo ""
+done
+
+echo "" >> $HOME/$file_name
+len=${#vsi_name[@]}
+for (( i=0; i<$len; i++ ))
+do
+	echo ${vsi_name[$i]}" "${vsi_ip[$i]}" "${vsi_id[$i]}" "LPAR$i >> $HOME/$file_name
+done
+
+exit
 
 ### Updating bluexport.conf file
 
