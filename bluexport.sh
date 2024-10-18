@@ -36,7 +36,7 @@
 
        #####  START:CODE  #####
 
-Version=3.3.1
+Version=3.3.2
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 end_log_file='==== END ========= $timestamp ========='
@@ -922,6 +922,10 @@ case $1 in
 	vclone_name=$2
 	base_name=$3
 	vsi=$4
+	vsi_id_bluexscrt
+	vsi_ws=$(cat $bluexscrt | grep $vsi | awk {'print $4'})
+	vsi_ws_id=$(cat $bluexscrt | grep -m 1 $vsi_ws | awk {'print $2'})
+	vsi_id=$(cat $bluexscrt | grep $vsi | awk {'print $3'})
 	replication=$5
 	rollback=$6
 	target_tier=$7
@@ -944,8 +948,9 @@ case $1 in
 	then
 		abort "`date +%Y-%m-%d_%H:%M:%S` - Volume Clone with name $vclone_name already exists, please choose a diferent name!"
 	fi
-	check_VSI_exists
-	vsi_id=$(/usr/local/bin/ibmcloud pi ins ls | grep -wi $vsi | awk {'print $1'})
+	/usr/local/bin/ibmcloud pi ws tg $vsi_ws_id
+#	check_VSI_exists
+#	vsi_id=$(/usr/local/bin/ibmcloud pi ins ls | grep -wi $vsi | awk {'print $1'})
 	if [[ "$volumes_to_clone" == "ALL" ]]
 	then
 		volumes_to_clone=$(/usr/local/bin/ibmcloud pi ins get $vsi_id | grep Volumes | sed -z 's/ //g' | sed -z 's/Volumes//g')
