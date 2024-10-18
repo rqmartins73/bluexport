@@ -36,7 +36,7 @@
 
        #####  START:CODE  #####
 
-Version=3.2.15
+Version=3.3.0
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 end_log_file='==== END ========= $timestamp ========='
@@ -55,6 +55,7 @@ then
 	vsi_list_id_tmp=$(cat $HOME/bluexport.conf | grep -w "vsi_list_id_tmp" | awk {'print $2'})
 	vsi_list_tmp=$(cat $HOME/bluexport.conf | grep -w "vsi_list_tmp" | awk {'print $2'})
 	volumes_file=$(cat $HOME/bluexport.conf | grep -w "volumes_file" | awk {'print $2'})
+	snap_ret=$(cat $HOME/bluexport.conf | grep -w "snap_ret" | awk {'print $2'}))
 	single=0
 	vsi_user=$(cat $bluexscrt | grep "VSI_USER" | awk {'print $2'})
 	####  END: Constants Definition  #####
@@ -833,19 +834,19 @@ case $1 in
 	fi
 	test=0
 	flagj=1
-#	vsi_name=$2
-	vsi=$2
+	vsi_name=$2
+#	vsi=$2
 	vsi_id_bluexscrt
 	snap_name=$3
-#	vsi_ws=$(cat $bluexscrt | grep $vsi_name | awk {'print $4'})
-#	vsi_ws_id=$(cat $bluexscrt | grep -m 1 $vsi_ws | awk {'print $2'})
-#	vsi_id=$(cat $bluexscrt | grep $vsi_name | awk {'print $3'})
+	vsi_ws=$(cat $bluexscrt | grep $vsi_name | awk {'print $4'})
+	vsi_ws_id=$(cat $bluexscrt | grep -m 1 $vsi_ws | awk {'print $2'})
+	vsi_id=$(cat $bluexscrt | grep $vsi_name | awk {'print $3'})
 	echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting Snapshot Delete $snap_name from VSI $vsi_name !" >> $log_file
 	cloud_login
-	check_VSI_exists
-#	/usr/local/bin/ibmcloud pi ws tg $vsi_ws_id
-	snap_name_exists=$(/usr/local/bin/ibmcloud pi ins snap ls | grep -w $snap_name)
-#	snap_name_exists=$(/usr/local/bin/ibmcloud pi ins snap ls $vsi_id | grep -w $snap_name)
+#	check_VSI_exists
+	/usr/local/bin/ibmcloud pi ws tg $vsi_ws_id
+#	snap_name_exists=$(/usr/local/bin/ibmcloud pi ins snap ls | grep -w $snap_name)
+	snap_name_exists=$(/usr/local/bin/ibmcloud pi ins snap ls $vsi_id | grep -w $snap_name)
 	if [[ "$snap_name_exists" == "" ]]
 	then
 		abort "`date +%Y-%m-%d_%H:%M:%S` - Snapshot with name $snap_name does not exist, please choose a diferent name or use flag -snapcr to create one."
