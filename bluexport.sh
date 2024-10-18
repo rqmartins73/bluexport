@@ -837,18 +837,12 @@ case $1 in
 	fi
 	test=0
 	flagj=1
-#	vsi_name=$2
 	vsi=$2
 	vsi_id_bluexscrt
 	snap_name=$3
-#	vsi_ws=$(cat $bluexscrt | grep $vsi | awk {'print $4'})
-#	vsi_ws_id=$(cat $bluexscrt | grep -m 1 $vsi_ws | awk {'print $2'})
-#	vsi_id=$(cat $bluexscrt | grep $vsi | awk {'print $3'})
 	echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting Snapshot Delete $snap_name from VSI $vsi !" >> $log_file
 	cloud_login
-#	check_VSI_exists
 	/usr/local/bin/ibmcloud pi ws tg $vsi_ws_id
-#	snap_name_exists=$(/usr/local/bin/ibmcloud pi ins snap ls | grep -w $snap_name)
 	snap_name_exists=$(/usr/local/bin/ibmcloud pi ins snap ls $vsi_id | grep -w $snap_name)
 	if [[ "$snap_name_exists" == "" ]]
 	then
