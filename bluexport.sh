@@ -920,9 +920,6 @@ case $1 in
 	base_name=$3
 	vsi=$4
 	vsi_id_bluexscrt
-	vsi_ws=$(cat $bluexscrt | grep $vsi | awk {'print $4'})
-	vsi_ws_id=$(cat $bluexscrt | grep -m 1 $vsi_ws | awk {'print $2'})
-	vsi_id=$(cat $bluexscrt | grep $vsi | awk {'print $3'})
 	replication=$5
 	rollback=$6
 	target_tier=$7
