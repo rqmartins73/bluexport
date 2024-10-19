@@ -7,7 +7,7 @@
 # Ricardo Martins - Blue Chip Portugal © 2024-2024
 #######################################################################################
 
-Version=0.2.0
+Version=0.2.1
 
 vsi_name_id_tmp_file="$HOME/vsi_name_file.tmp"
 
@@ -15,7 +15,9 @@ if [[ $1 == "-v" ]]
 then
 	echo ""
 	echo "   ####  Welcome to your bluexport secrets file configuration helper version $Version"
+	echo "   ####  by Ricardo Martins - Blue Chip Portugal - 2024-2024"
 	echo ""
+	exit 0
 fi
 
 echo ""
