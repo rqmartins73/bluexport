@@ -7,7 +7,7 @@
 # Ricardo Martins - Blue Chip Portugal © 2024-2024
 #######################################################################################
 
-Version=0.2.2
+Version=0.2.3
 
 vsi_name_id_tmp_file="$HOME/vsi_name_file.tmp"
 
@@ -318,24 +318,28 @@ then
 					sshkey="-i $usr_name_sshkey"
 				fi
 				echo "Checking if user $vsi_user exists in LPAR ${vsi_name[$i]}, please wait..."
+				ssh $sshkey -o ConnectTimeout=1 -o ConnectionAttempts=1 $usr_name@${vsi_ip[$i]} exit 0
+				ret=$?
+				if [ $ret -ne 0 ]
+				then
+					echo "    FAILED - Oops something went wrong!... Check messages above this line..."
+					echo ""
+					continue
+				fi
 				lpar_user_exists=$(ssh $sshkey $usr_name@${vsi_ip[$i]} 'system "DSPUSRPRF USRPRF('$vsi_user')"'| head -n 1 | awk {'print $1'})
-				if [[ "$lpar_user_exists" == "" ]]
+				if [[ "$lpar_user_exists" == "" ]] #&& [ $ret -eq 0 ]
 				then
 					ssh $sshkey $usr_name@${vsi_ip[$i]} 'system "CRTUSRPRF USRPRF('$vsi_user') PASSWORD(*NONE) USRCLS(*USER) SPCAUT(*ALLOBJ *JOBCTL)"'
-					ret=$?
-					if [ $ret -eq 1 ]
-					then
-						echo "    FAILED - Oops something went wrong!... Check messages above this line..."
-						echo ""
-					fi
+					echo "Preparing user $vsi_user environment, please wait..."
+						
 				else
-					echo "   ## User $vsi_user already exists in LPAR ${vsi_name[$i]}, moving on..."
+					echo "   ## User $vsi_user already exists in LPAR ${vsi_name[$i]} ..."
 					echo ""
 #exit 0
 				fi
 			else
 				echo ""
-				echo "  ## Don't forget to create user $vsi_user in LPAR ${vsi_name[$i]}, moving on..."
+				echo "  ## Don't forget to create user $vsi_user in LPAR ${vsi_name[$i]} ..."
 				echo ""
 			fi
 		else
