@@ -7,9 +7,16 @@
 # Ricardo Martins - Blue Chip Portugal © 2024-2024
 #######################################################################################
 
-Version=0.1.17
+Version=0.2.0
 
 vsi_name_id_tmp_file="$HOME/vsi_name_file.tmp"
+
+if [[ $1 == "-v" ]]
+then
+	echo ""
+	echo "   ####  Welcome to your bluexport secrets file configuration helper version $Version"
+	echo ""
+fi
 
 echo ""
 echo "   ####  Welcome to your bluexport secrets file configuration helper version $Version"
@@ -131,7 +138,7 @@ index=0
 echo ""
 echo "   ####  Let's give the Workspaces a shortname..."
 echo ""
-echo "I'm not checking, so don't give the same shortname to more than 1 Workspace"
+echo "I'm not checking, so don't give the same shortname to more than 1 Workspace, and give shortname different from any LPAR name."
 echo ""
 for i in "${wsnames_array[@]}"
 do
@@ -258,5 +265,85 @@ then
 	sed -i "s|$oldbluexscrt|$newbluexscrt|g" $HOME/bluexport.conf
 	echo "Done!"
 else
-	echo "If you want to use this file $file_name as your bluexscrt file, don't forget to update $HOME/bluexport.conf file"
+	echo "  ## If you want to use this file $file_name as your bluexscrt file, don't forget to update $HOME/bluexport.conf file"
+fi
+
+#### START:FUNCTION - Ping LPAR  ####
+ping_lpar() {
+
+	if ping -c1 -w3 $1 &> /dev/null
+	then
+		ping="OK"
+	else
+		ping=""
+	fi
+}
+
+### Create VSI User and prepare ssh login credentials
+
+echo ""
+echo "   #### Now let's take care of the LPAR user and prepare it to be able to login into the LPAR..."
+echo ""
+read -p "Do you want to create the user $vsi_user in the LPARs now (Y/N) " lpar_user
+if [[ "$lpar_user" == "Y" ]] || [[ "$lpar_user" == "y" ]]
+then
+	echo ""
+	echo "OK, let's go then..."
+	echo ""
+	len=${#vsi_name[@]}
+	for (( i=0; i<$len; i++ ))
+	do
+		echo ""
+		echo "Moving on to the next LPAR..."
+		echo ""
+		ping_lpar "${vsi_ip[$i]}"
+		if [[ "$ping" == "OK" ]]
+		then
+			echo ""
+			read -p "Do you want to create the user $vsi_user in LPAR ${vsi_name[$i]} (Y/N) " crt_user
+			if [[ "$crt_user" == "Y" ]] || [[ "$crt_user" == "y" ]]
+			then
+				echo ""
+				echo "To create the user in ${vsi_name[$i]} I need a user name with permissions to create users and able to ssh into ${vsi_name[$i]}..."
+				echo ""
+				read -p "${vsi_name[$i]} User Name: " usr_name
+				echo ""
+				echo "If you have an ssh key for user $usr_name, please supply full path... if you don't leave it blank and just do <ENTER>"
+				read -p "$usr_name SSH Key: " usr_name_sshkey
+				if [[ "$usr_name_sshkey" == "" ]]
+				then
+					sshkey=""
+				else
+					sshkey="-i $usr_name_sshkey"
+				fi
+				echo "Checking if user $vsi_user exists in LPAR ${vsi_name[$i]}, please wait..."
+				lpar_user_exists=$(ssh $sshkey $usr_name@${vsi_ip[$i]} 'system "DSPUSRPRF USRPRF('$vsi_user')"'| head -n 1 | awk {'print $1'})
+				if [[ "$lpar_user_exists" == "" ]]
+				then
+					ssh $sshkey $usr_name@${vsi_ip[$i]} 'system "CRTUSRPRF USRPRF('$vsi_user') PASSWORD(*NONE) USRCLS(*USER) SPCAUT(*ALLOBJ *JOBCTL)"'
+					ret=$?
+					if [ $ret -eq 1 ]
+					then
+						echo "    FAILED - Oops something went wrong!... Check messages above this line..."
+						echo ""
+					fi
+				else
+					echo "   ## User $vsi_user already exists in LPAR ${vsi_name[$i]}, moving on..."
+					echo ""
+#exit 0
+				fi
+			else
+				echo ""
+				echo "  ## Don't forget to create user $vsi_user in LPAR ${vsi_name[$i]}, moving on..."
+				echo ""
+			fi
+		else
+			echo "  ## LPAR ${vsi_name[$i]} with IP ${vsi_ip[$i]} not reachable!..."
+			echo "  ## Please confirm the IP is correct, or if the LPAR is IPLed."
+			echo ""
+		fi
+	done
+	echo "Done!"
+else
+	echo "Don't forget to create user $vsi_user and update file authorized_keys in each LPAR!..."
 fi
