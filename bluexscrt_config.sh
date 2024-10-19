@@ -7,7 +7,7 @@
 # Ricardo Martins - Blue Chip Portugal © 2024-2024
 #######################################################################################
 
-Version=0.2.1
+Version=0.2.2
 
 vsi_name_id_tmp_file="$HOME/vsi_name_file.tmp"
 
@@ -138,9 +138,9 @@ IFS='@' read -r -a crns_array <<< "$crns"
 IFS='@' read -r -a wsids_array <<< "$wsids"
 index=0
 echo ""
-echo "   ####  Let's give the Workspaces a shortname..."
+echo "   ####  Let's give the Workspaces a short name..."
 echo ""
-echo "I'm not checking, so don't give the same shortname to more than 1 Workspace, and give shortname different from any LPAR name."
+echo "I'm not checking, so don't give the same short name to more than 1 Workspace, and different from any LPAR name."
 echo ""
 for i in "${wsnames_array[@]}"
 do
@@ -151,13 +151,13 @@ do
 		ws_short_name=""
 		while [[ "$ws_short_name" == "" ]] 
 		do
-			read -p "Enter Shortname for Workspace $i : " ws_short_name
+			read -p "Enter short name for Workspace $i : " ws_short_name
 			if [[ "$ws_short_name" == "" ]]
 			then
-				echo "Shortname cannot be <blank>...!"
+				echo "short name cannot be <blank>...!"
 			fi
 		done
-		read -p "Are you OK with this shortname $ws_short_name (y/n) " ok
+		read -p "Are you OK with this short name $ws_short_name (y/n) " ok
 	done
 	allws=${allws}" "$ws_short_name
 	crn[$index]=$ws_short_name" "${crns_array[$index]}
@@ -197,7 +197,6 @@ do
 done
 echo "" >> $file_name
 echo "RESOURCE_GRP $resource_grp" >> $file_name
-chmod 600 $file_name
 
 ### Adding LPARs and their IP to the config file
 
@@ -267,7 +266,7 @@ then
 	sed -i "s|$oldbluexscrt|$newbluexscrt|g" $HOME/bluexport.conf
 	echo "Done!"
 else
-	echo "  ## If you want to use this file $file_name as your bluexscrt file, don't forget to update $HOME/bluexport.conf file"
+	echo "## If you want to use this file $file_name as your bluexscrt file, don't forget to update $HOME/bluexport.conf file"
 fi
 
 #### START:FUNCTION - Ping LPAR  ####
@@ -349,3 +348,5 @@ then
 else
 	echo "Don't forget to create user $vsi_user and update file authorized_keys in each LPAR!..."
 fi
+
+chmod 600 $file_name
