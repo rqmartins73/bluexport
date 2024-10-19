@@ -7,7 +7,7 @@
 # Ricardo Martins - Blue Chip Portugal © 2024-2024
 #######################################################################################
 
-Version=0.2.3
+Version=0.2.5
 
 vsi_name_id_tmp_file="$HOME/vsi_name_file.tmp"
 
@@ -291,6 +291,11 @@ then
 	echo ""
 	echo "OK, let's go then..."
 	echo ""
+	usr_folder="/home/${vsi_user^^}"
+	usr_folder_ssh="$usr_folder/.ssh"
+	auth_keys_path="$usr_folder_ssh/authorized_keys"
+	pub_ssh_key_path="$ssh_key_path.pub"
+	pub_ssh_key=$(cat $pub_ssh_key_path)
 	len=${#vsi_name[@]}
 	for (( i=0; i<$len; i++ ))
 	do
@@ -331,7 +336,28 @@ then
 				then
 					ssh $sshkey $usr_name@${vsi_ip[$i]} 'system "CRTUSRPRF USRPRF('$vsi_user') PASSWORD(*NONE) USRCLS(*USER) SPCAUT(*ALLOBJ *JOBCTL)"'
 					echo "Preparing user $vsi_user environment, please wait..."
-						
+					ssh $sshkey $usr_name@${vsi_ip[$i]} 'mkdir '$usr_folder ';chmod 755 '$usr_folder ';mkdir '$usr_folder_ssh';chmod 700 '$usr_folder_ssh';echo "'$pub_ssh_key'">>'$auth_keys_path';chmod 600 '$auth_keys_path';chown -R '$vsi_user' '$usr_folder';exit 0'
+					ret=$?
+					if [ $ret -ne 0 ]
+					then
+						echo "    FAILED - Oops something went wrong!... Check messages above this line..."
+						echo ""
+						continue
+					fi
+					echo ""
+					echo "User $vsi_user environment in LPAR ${vsi_name[$i]} prepared!"
+					echo "Testing credentials and environment, please wait..."
+					ssh $sshkey $usr_name@${vsi_ip[0]} 'exit 0'
+					ret=$?
+					if [ $ret -ne 0 ]
+					then
+						echo "    FAILED - Oops something went wrong!... Check messages above this line..."
+						echo ""
+						continue
+					fi
+					echo ""
+					echo "Test done! Successfully ssh logged in in LPAR ${vsi_name[$i]} with user $vsi_user! All good to go!"
+					echo ""
 				else
 					echo "   ## User $vsi_user already exists in LPAR ${vsi_name[$i]} ..."
 					echo ""
