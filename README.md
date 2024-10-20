@@ -48,11 +48,11 @@ Version 3.x now supports the creation, update, delete and list Snapshots.
 <br>
 
 > [!NOTE]  
-> <sub> `[hourly | daily | weekly | monthly | single]` - This parameter allows the script to delete the image from the previous capture.</sub>
-> <sub> i.e. If weekly is selected it will try to delete the image from the week before.</sub>
+> ###### <sub> `[hourly | daily | weekly | monthly | single]` - This parameter allows the script to delete the image from the previous capture.</sub>  
+> ###### <sub> i.e. If weekly is selected it will try to delete the image from the week before.</sub>
   
-> [!NOTE]
-> <sub> Reocurrence `hourly` only permits captures to image-catalog</sub>
+> [!NOTE]  
+> ###### <sub> Reocurrence `hourly` only permits captures to image-catalog</sub>
 <br>
 <br>
 
