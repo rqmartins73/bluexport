@@ -41,8 +41,6 @@ Version 3.x now supports the creation, update, delete and list Snapshots.
 
 - `./bluexport.sh -snaplsall`   ---- It will list to terminal and log file all existent snapshots in all Workspaces.
 
-###### Flag `t` before `a` or `x` makes it a test and do not makes the capture.
-
 **Example:** 
 - `./bluexport.sh -tx "ASP2_ IASP" vsi_name capture_img_name both single` ---- Does not makes the export, and makes log in a different log file.
  
