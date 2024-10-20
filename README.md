@@ -97,7 +97,6 @@ WSMADDRID abcdefgh-1234-1a2b-1234-abcd-123abc5def4
 WSMADPRDID abxptogh-1234-1a2b-1234-abcd-123xptodef6  
 WSFRADRID abxptigh-1234-1a2b-1234-abcd-123xptidef6  
 
-  
 ALLWS WSMADDR WSMADPRD WSFRADR  
 WSNAMES Power VS Workspace Mad DR:Power VS Workspace Mad PRD:Power VS Workspace Fra DR  
   
