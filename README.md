@@ -48,7 +48,7 @@ i.e. If weekly is selected it will try to delete the image from the week before.
   
 > [!NOTE]
 >  **Note:** Reocurrence `hourly` only permits captures to image-catalog
-
+  
   
   
 **Content of file bluexscrt before edit:**
