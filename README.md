@@ -45,6 +45,7 @@ Version 3.x now supports the creation, update, delete and list Snapshots.
 - `./bluexport.sh -snapdel IBMi75_snap`   ---- Deletes the snapshot named IBMi75_snap.
 
 - `./bluexport.sh -snaplsall`   ---- It will list to terminal and log file all existent snapshots in all Workspaces.  
+<br>
 
 > [!NOTE]  
 > `[hourly | daily | weekly | monthly | single]` - This parameter allows the script to delete the image from the previous capture. 
