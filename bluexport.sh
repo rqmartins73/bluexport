@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Capture IBM Cloud POWERVS IBM i VSI and Export to COS or/and Image Catalog
+# Capture IBM Cloud POWERVS VSI and Export to COS or/and Image Catalog and Snapshots
 #
 # Version 3.x now supports the creation, update, delete and list Snapshots.
 #
@@ -29,7 +29,6 @@
 #
 # Note: Reocurrence "hourly" only permits captures to image-catalog
 #
-# Capture IBM Cloud POWERVS VSI and Export to COS or/and Image Catalog and Snapshots
 #
 # Ricardo Martins - Blue Chip Portugal - 2023-2024
 ########################################################################################
@@ -101,7 +100,7 @@ fi
 #### START:FUNCTION - Help  ####
 help() {
 	echo ""
-	echo "Capture IBM Cloud POWERVS IBM i VSI and Export to COS or/and Image Catalog"
+	echo "Capture IBM Cloud POWERVS IBM i VSI and Export to COS or/and Image Catalog and Snapshots"
 	echo "Version 3.x now supports the creation, update, delete and list Snapshots."
 	echo ""
 	echo "Changing secret file:		./bluexport.sh -chscrt bluexscrt_file_name - Use the full path ex: /home/user/bluexscrt_new"
