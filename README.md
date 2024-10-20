@@ -13,7 +13,7 @@ Version 3.x now supports the creation, update, delete and list Snapshots.
 > [!IMPORTANT]
 > ###### Before running `bluexport.sh`:
 > * First you must configure the file `bluexscrt` with your IBM Cloud Data.  
->   - You can use `bluexscrt_config.sh` to help you create and customize your `bluexscrt` file.  
+>   * You can use `bluexscrt_config.sh` to help you create and customize your `bluexscrt` file.  
 > * You must fill in the file `bluexport.conf` with the paths.  
 > ###### File `bluexport.conf` must reside in your $HOME folder.
 
