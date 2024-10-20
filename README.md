@@ -115,7 +115,7 @@ RESOURCE_GRP powervs
 ```
 
 > [!NOTE]
->  *This file is to be run in crontab or in background, so it will produce little or no output to screen, it will log in a file.*
+> ######  *This file is to be run in crontab or in background, so it will produce little or no output to screen, it will log in a file.*
 
 ***
 
