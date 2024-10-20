@@ -50,10 +50,6 @@ i.e. If weekly is selected it will try to delete the image from the week before.
 >  **Note:** Reocurrence `hourly` only permits captures to image-catalog
 
   
-> [!IMPORTANT]
-> ###### Before running `bluexport.sh`, first you must configure the file `bluexscrt` with your IBM Cloud Data (you can use `bluexscrt_config.sh` to help you create the `bluexscrt` file), and the file `bluexport.conf` with the paths. File `bluexport.conf` must reside in your $HOME folder.
-
-<br>
   
 **Content of file bluexscrt before edit:**
 ```
