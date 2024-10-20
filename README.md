@@ -27,7 +27,7 @@ Version 3.x now supports the creation, update, delete and list Snapshots.
   
 `./bluexport.sh -snapdel SNAPSHOT_NAME`  
 
-**Generic examples:**
+**Examples:**
 
 - `./bluexport.sh -a vsi_name capture_img_name image-catalog daily` ---- Includes all Volumes and exports to image catalog, and deletes yesterday image if exists.
  
