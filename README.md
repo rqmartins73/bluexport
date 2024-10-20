@@ -57,13 +57,17 @@ SECRETKEY REPLACE-ALL-THIS-WITH-YOUR-SECRET-KEY
 BUCKETNAME REPLACE-ALL-THIS-WITH-YOUR-BUCKET-NAME  
 REGION REPLACE-ALL-THIS-WITH-YOUR-REGION  
   
-SERVER1 XXX.XXX.XXX.XXX SERVER1_VSI_ID
-SERVER2 XXX.XXX.XXX.XXX SERVER2_VSI_ID
-SERVER3 XXX.XXX.XXX.XXX SERVER3_VSI_ID
+WSFRADRID REPLACE-ALL-THIS-WITH-YOUR-POWER-VIRTUAL-SERVER-ID     - If you use bluexscrt_config.sh helper these IDs will be automatically filled in...  
+POWERVSPRDID REPLACE-ALL-THIS-WITH-YOUR-POWER-VIRTUAL-SERVER-ID  - ...if you do it manually it has to be the workspace short name plus the word "ID" all together  
+WSFRAPRDID REPLACE-ALL-THIS-WITH-YOUR-POWER-VIRTUAL-SERVER-ID  
+  
+SERVER1 XXX.XXX.XXX.XXX SERVER1_VSI_ID WSFRADR LPAR0  
+SERVER2 XXX.XXX.XXX.XXX SERVER2_VSI_ID POWERVSPRD LPAR1  
+SERVER3 XXX.XXX.XXX.XXX SERVER3_VSI_ID POWERVSPRD LPAR2  
 .  
 .  
-SERVERN XXX.XXX.XXX.XXX SERVERN_VSI_ID
-
+SERVERn XXX.XXX.XXX.XXX SERVERN_VSI_ID WSSHORTNAME LPARn  
+  
 ALLWS WSFRADR POWERVSPRD WSFRAPRD                                                                                                   - The shortnames in this line...
 WSNAMES Power VS Workspace Name of the WSFRADR:Power VS Workspace Name of the POWERVSPRD:Power VS Workspace Name of the WSFRAPRD  - ...and the long names in this line must be in the same order
 
@@ -86,18 +90,23 @@ SECRETKEY bla123BLAblaBLAbla
 BUCKETNAME mybucket  
 REGION eu-de  
   
-SERVER1 192.168.111.111 abcdefgh-1234-1a2b-1234-abc123def123
-SERVER2 192.168.111.112 abcdefgh-1234-1a2b-1234-abc123def123
+SERVER1 192.168.111.111 abcdefgh-1234-1a2b-1234-abc123def123 WSMADPRD LPAR0  
+SERVER2 192.168.111.112 abcdefgh-1234-1a2b-1234-abc123def123 WSMADDR LPAR1  
+  
+WSMADDRID abcdefgh-1234-1a2b-1234-abcd-123abc5def4  
+WSMADPRDID abxptogh-1234-1a2b-1234-abcd-123xptodef6  
+WSFRADRID abxptigh-1234-1a2b-1234-abcd-123xptidef6  
 
-ALLWS WSMADDR WSMADPRD WSFRADR
-WSNAMES Power VS Workspace Mad DR:Power VS Workspace Mad PRD:Power VS Workspace Fra DR
-
-VSI_USER bluexport
-
-SSHKEYPATH /home/<USER>/.ssh/bluexport_rsa
-
-RESOURCE_GRP powervs
-
+  
+ALLWS WSMADDR WSMADPRD WSFRADR  
+WSNAMES Power VS Workspace Mad DR:Power VS Workspace Mad PRD:Power VS Workspace Fra DR  
+  
+VSI_USER bluexport  
+  
+SSHKEYPATH /home/<USER>/.ssh/bluexport_rsa  
+  
+RESOURCE_GRP powervs  
+  
 ```
 
 ***
