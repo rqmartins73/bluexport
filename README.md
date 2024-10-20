@@ -27,7 +27,7 @@ Version 3.x now supports the creation, update, delete and list Snapshots.
   
 `./bluexport.sh -snapdel SNAPSHOT_NAME`  
 
-**Examples:**
+**Generic examples:**
 
 - `./bluexport.sh -a vsi_name capture_img_name image-catalog daily` ---- Includes all Volumes and exports to image catalog, and deletes yesterday image if exists.
  
@@ -40,15 +40,13 @@ Version 3.x now supports the creation, update, delete and list Snapshots.
 - `./bluexport.sh -snapdel IBMi75_snap`   ---- Deletes the snapshot named IBMi75_snap.
 
 - `./bluexport.sh -snaplsall`   ---- It will list to terminal and log file all existent snapshots in all Workspaces.
-
-**Example:** 
-- `./bluexport.sh -tx "ASP2_ IASP" vsi_name capture_img_name both single` ---- Does not makes the export, and makes log in a different log file.
- 
-- `[hourly | daily | weekly | monthly | single]` - This parameter allows the script to delete the image from the previous capture. 
-i.e. If weekly is selected it will try to delete the image from the week before.
   
-> [!NOTE]
->  **Note:** Reocurrence `hourly` only permits captures to image-catalog
+> [!NOTE]  
+> `[hourly | daily | weekly | monthly | single]` - This parameter allows the script to delete the image from the previous capture. 
+> i.e. If weekly is selected it will try to delete the image from the week before.
+  
+> [!WARNING]
+>  Reocurrence `hourly` only permits captures to image-catalog
 <br>
 <br>
 
