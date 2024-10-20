@@ -126,4 +126,4 @@ RESOURCE_GRP powervs
 
 ***
 
- <sub>Ricardo Martins - [Blue Chip Portugal](http://www.bluechip.pt) - 2024</sub>  
+ <sub>[Ricardo Martins](mailto://ricardo.martins@bluechip.pt) - [Blue Chip Portugal](http://www.bluechip.pt) - 2024</sub>  
