@@ -118,7 +118,7 @@ RESOURCE_GRP powervs
 <br>
   
 > [!NOTE]
-> ######  *This script was made with the aim of running in crontab or in background, it will produce few output to screen, instead it will output to a log file.*
+> ######  *This script was made with the aim of running in crontab or in background, it will produce few output to screen, instead it will output to the log file specified in parameter log_file of the bluexport.conf.*
 
 ***
 
