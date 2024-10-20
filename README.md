@@ -14,7 +14,9 @@ Version 3.x now supports the creation, update, delete and list Snapshots.
 [IBM Cloud CLI install instructions](https://cloud.ibm.com/docs/cli?topic=cli-install-ibmcloud-cli)
 
 Before running `bluexport.sh`, first you must configure the file `bluexscrt` with your IBM Cloud Data (you can use `bluexscrt_config.sh` to help you create and customize your `bluexscrt` file), and you must fill in the file `bluexport.conf` with the paths. File `bluexport.conf` must reside in your $HOME folder.  
-
+  
+***
+  
 ## Usage:
 `./bluexport.sh [ -a | -x volumes_name_to_exclude ] [VSI_Name_to_Capture] [Capture_Image_Name] [both|image-catalog|cloud-storage] [hourly | daily | weekly | monthly | single]`  
   
