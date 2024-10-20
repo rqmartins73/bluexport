@@ -4,6 +4,8 @@ Version 3.x now supports the creation, update, delete and list Snapshots.
 
 ###### This script was made in GNU bash, version 5.2.21(1)-release.  
 
+Before running `bluexport.sh`, first you must configure the file `bluexscrt` with your IBM Cloud Data (you can use `bluexscrt_config.sh` to help you create and customize your `bluexscrt` file), and you must fill in the file `bluexport.conf` with the paths. File `bluexport.conf` must reside in your $HOME folder.  
+
 ## Usage:
 `./bluexport.sh [ -a | -x volumes_name_to_exclude ] [VSI_Name_to_Capture] [Capture_Image_Name] [both|image-catalog|cloud-storage] [hourly | daily | weekly | monthly | single]`  
   
