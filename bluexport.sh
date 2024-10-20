@@ -36,7 +36,7 @@
 
        #####  START:CODE  #####
 
-Version=3.3.2
+Version=3.3.3
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 end_log_file='==== END ========= $timestamp ========='
@@ -55,7 +55,7 @@ then
 	vsi_list_id_tmp=$(cat $HOME/bluexport.conf | grep -w "vsi_list_id_tmp" | awk {'print $2'})
 	vsi_list_tmp=$(cat $HOME/bluexport.conf | grep -w "vsi_list_tmp" | awk {'print $2'})
 	volumes_file=$(cat $HOME/bluexport.conf | grep -w "volumes_file" | awk {'print $2'})
-	snap_ret=$(cat $HOME/bluexport.conf | grep -w "snap_ret" | awk {'print $2'})
+	snap_retention=$(cat $HOME/bluexport.conf | grep -w "snap_retention" | awk {'print $2'})
 	single=0
 	vsi_user=$(cat $bluexscrt | grep "VSI_USER" | awk {'print $2'})
 	####  END: Constants Definition  #####
