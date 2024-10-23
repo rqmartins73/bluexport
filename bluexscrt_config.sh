@@ -7,7 +7,7 @@
 # Ricardo Martins - Blue Chip Portugal © 2024-2024
 #######################################################################################
 
-Version=0.2.7
+Version=0.2.8
 
 vsi_name_id_tmp_file="$HOME/vsi_name_file.tmp"
 
@@ -271,7 +271,7 @@ fi
 #### START:FUNCTION - Ping LPAR  ####
 ping_lpar() {
 
-	if ping -c1 -w3 $1 &> /dev/null
+	if ping -c7 -W3 $1 &> /dev/null
 	then
 		ping="OK"
 	else
@@ -336,7 +336,7 @@ then
 					if [[ "$crt_user_env" == "Y" ]] || [[ "$crt_user_env" == "y" ]]
 					then
 						echo "Creating user profile $vsi_user in LPAR ${vsi_name[$i]}, please wait..."
-						ssh $sshkey $usr_name@${vsi_ip[$i]} 'system "CRTUSRPRF USRPRF('$vsi_user') PASSWORD(*NONE) USRCLS(*USER) SPCAUT(*ALLOBJ *JOBCTL)"'
+						ssh $sshkey $usr_name@${vsi_ip[$i]} 'system "CRTUSRPRF USRPRF('$vsi_user') PASSWORD(*NONE) USRCLS(*USER) INLMNU(*SIGNOFF) SPCAUT(*ALLOBJ *JOBCTL)"'
 						echo "Preparing user $vsi_user environment in LPAR ${vsi_name[$i]}, please wait..."
 						ssh $sshkey $usr_name@${vsi_ip[$i]} 'mkdir '$usr_folder ';chmod 755 '$usr_folder ';mkdir '$usr_folder_ssh';chmod 700 '$usr_folder_ssh';echo "'$pub_ssh_key'">>'$auth_keys_path';chmod 600 '$auth_keys_path';chown -R '$vsi_user' '$usr_folder';exit 0'
 						ret=$?
