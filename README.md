@@ -52,7 +52,7 @@ Version 3.x now supports the creation, update, delete and list Snapshots.
 > ###### i.e. If weekly is selected it will try to delete the image from the week before.
 
 > [!NOTE]
-> ###### Reocurrence `hourly` only permits captures to image-catalog
+> ###### Reocurrence `hourly` and `daily` only permits captures to image-catalog
 <br>
 <br>
 
