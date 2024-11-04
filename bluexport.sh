@@ -27,7 +27,7 @@
 # Example:  ./bluexport.sh -x ASP2_ vsiprd vsiprd_img both monthly             ---- Excludes Volumes with ASP2_ in the name and exports to image catalog and COS
 # Example:  ./bluexport.sh -x "ASP2_ IASPname" vsiprd vsiprd_img both monthly  ---- Excludes Volumes with ASP2_ and IASPname in the name and exports to image catalog and COS
 #
-# Note: Reocurrence "hourly" only permits captures to image-catalog
+# Note: Reocurrence "hourly" and "daily" only permits captures to image-catalog
 #
 #
 # Ricardo Martins - Blue Chip Portugal - 2023-2024
@@ -35,7 +35,7 @@
 
        #####  START:CODE  #####
 
-Version=3.3.3
+Version=3.3.4
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 end_log_file='==== END ========= $timestamp ========='
@@ -583,17 +583,17 @@ case $1 in
 	destination=$4
 	capture_img_name=${3^^}
 	capture_name=$capture_img_name"_"$capture_time
-	if [[ $5 == "hourly" ]]
+	if [[ $5 == "hourly" ]] || [[ $5 == "daily" ]]
 	then
 		if [[ $destination == "both" ]] || [[ $destination == "cloud-storage" ]]
 		then
-			abort "`date +%Y-%m-%d_%H:%M:%S` - Destination $destination is not valid with hourly parameter!! Only image-catalog is possible."
+			abort "`date +%Y-%m-%d_%H:%M:%S` - Destination $destination is not valid with hourly and daily parameter!! Only image-catalog is possible."
 		fi
 		old_img=$(date --date '1 hour ago' "+_%H")
 		capture_name=$capture_img_name"_"$capture_hour
-	elif [[ $5 == "daily" ]]
-	then
-		old_img=$(date --date '1 day ago' "+%Y-%m-%d")
+#	elif [[ $5 == "daily" ]]
+#	then
+#		old_img=$(date --date '1 day ago' "+%Y-%m-%d")
 	elif [[ $5 == "weekly" ]]
 	then
 		old_img=$(date --date '1 week ago' "+%Y-%m-%d")
@@ -604,7 +604,7 @@ case $1 in
 	then
 		single=1
 	else
-		abort "`date +%Y-%m-%d_%H:%M:%S` - Reocurrence must be daily or weekly or monthly or single!"
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Reocurrence must be weekly or monthly or single!"
 	fi
 	if [[ $1 == "-ta" ]]
 	then
@@ -640,17 +640,17 @@ case $1 in
 	fi
 	capture_img_name=${4^^}
 	capture_name=$capture_img_name"_"$capture_time
-	if [[ $6 == "hourly" ]]
+	if [[ $6 == "hourly" ]] || [[ $6 == "daily" ]]
 	then
 		if [[ $destination == "both" ]] || [[ $destination == "cloud-storage" ]]
 		then
-			abort "`date +%Y-%m-%d_%H:%M:%S` - Destination $destination is not valid with hourly parameter!! Only image-catalog is possible."
+			abort "`date +%Y-%m-%d_%H:%M:%S` - Destination $destination is not valid with hourly and daily parameter!! Only image-catalog is possible."
 		fi
 		old_img=$(date --date '1 hour ago' "+%H")
 		capture_name=$capture_img_name"_"$capture_hour
-	elif [[ $6 == "daily" ]]
-	then
-		old_img=$(date --date '1 day ago' "+%Y-%m-%d")
+#	elif [[ $6 == "daily" ]]
+#	then
+#		old_img=$(date --date '1 day ago' "+%Y-%m-%d")
 	elif [[ $6 == "weekly" ]]
 	then
 		old_img=$(date --date '1 week ago' "+%Y-%m-%d")
@@ -661,7 +661,7 @@ case $1 in
 	then
 		single=1
 	else
-		abort "`date +%Y-%m-%d_%H:%M:%S` - Reocurrence must be daily or weekly or monthly or single!"
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Reocurrence must be weekly or monthly or single!"
 	fi
 	if [[ $1 == "-tx" ]]
 	then
