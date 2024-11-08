@@ -7,7 +7,7 @@
 # Ricardo Martins - Blue Chip Portugal © 2024-2024
 #######################################################################################
 
-Version=0.2.10
+Version=0.2.11
 
 vsi_name_id_tmp_file="$HOME/vsi_name_file.tmp"
 flag=$1
@@ -211,7 +211,7 @@ then
 	do
 		read -p "Enter LPAR name " vsi_name
 		read -p "Is this name $vsi_name correct? (y/n) " ok
-		exists=$(cat $bluexscrt | grep $vsi_name | awk {'print $1'})
+		exists=$(cat $bluexscrt | grep -w $vsi_name | awk {'print $1'})
 		if [[ $exists != "" ]]
 		then
 			echo ""
@@ -225,7 +225,7 @@ then
 	do
 		read -p "Enter LPAR IP " vsi_ip
 		read -p "Is this IP $vsi_ip correct? (y/n) " ok
-		exists=$(cat $bluexscrt | grep $vsi_ip | awk {'print $1'})
+		exists=$(cat $bluexscrt | grep -w $vsi_ip | awk {'print $1'})
 		if [[ $exists != "" ]]
 		then
 			echo ""
@@ -239,7 +239,7 @@ then
 	do
 		read -p "Enter LPAR ID " vsi_id
 		read -p "Is this ID $vsi_id correct? (y/n) " ok
-		exists=$(cat $bluexscrt | grep $vsi_id | awk {'print $1'})
+		exists=$(cat $bluexscrt | grep -w $vsi_id | awk {'print $1'})
 		if [[ $exists != "" ]]
 		then
 			echo ""
