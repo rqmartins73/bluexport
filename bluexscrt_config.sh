@@ -7,16 +7,258 @@
 # Ricardo Martins - Blue Chip Portugal © 2024-2024
 #######################################################################################
 
-Version=0.2.8
+Version=0.2.10
 
 vsi_name_id_tmp_file="$HOME/vsi_name_file.tmp"
+flag=$1
 
-if [[ $1 == "-v" ]]
+if [ $# -eq 1 ] && [[ $flag != "-v" ]] && [[ $flag != "-addlpar" ]]
+then
+	echo " ### Wrong Syntax!!..."
+	echo " ### Options:"
+	echo " ### To see the version                   ./bluexscrt_config.sh -v"
+	echo " ### To add an LPAR to the secrets file   ./bluexscrt_config.sh -addlpar"
+	echo ""
+	exit 0
+fi
+
+if [[ $flag == "-v" ]]
 then
 	echo ""
 	echo "   ####  Welcome to your bluexport secrets file configuration helper version $Version"
 	echo "   ####  by Ricardo Martins - Blue Chip Portugal - 2024-2024"
 	echo ""
+	exit 0
+fi
+
+#### START:FUNCTION - Ping LPAR  ####
+ping_lpar() {
+
+	if ping -c7 -W3 $1 &> /dev/null
+	then
+		ping="OK"
+	else
+		ping=""
+	fi
+}
+#### END:FUNCTION - Ping LPAR  ####
+
+#### START:FUNCTION - Create VSI User  ####
+	### Create VSI User and prepare ssh login credentials
+create_vsi_user() {
+echo ""
+echo "   #### Now let's take care of the LPAR user and prepare it to be able to login into the LPAR..."
+echo ""
+read -p "Do you want to create the user $vsi_user and/or its environment in the LPARs now (Y/N) " lpar_user
+if [[ "$lpar_user" == "Y" ]] || [[ "$lpar_user" == "y" ]]
+then
+	echo ""
+	echo "OK, let's go then..."
+	echo ""
+	usr_folder="/home/${vsi_user^^}"
+	usr_folder_ssh="$usr_folder/.ssh"
+	auth_keys_path="$usr_folder_ssh/authorized_keys"
+	pub_ssh_key_path="$ssh_key_path.pub"
+	pub_ssh_key=$(cat $pub_ssh_key_path)
+	len=${#vsi_name[@]}
+	for (( i=0; i<$len; i++ ))
+	do
+		echo " ## LPAR ${vsi_name[$i]} with IP ${vsi_ip[$i]}:"
+		echo ""
+		ping_lpar "${vsi_ip[$i]}"
+		if [[ "$ping" == "OK" ]]
+		then
+			read -p "Do you want to create the user $vsi_user in LPAR ${vsi_name[$i]} (Y/N) " crt_user
+			if [[ "$crt_user" == "Y" ]] || [[ "$crt_user" == "y" ]]
+			then
+				echo ""
+				echo "To create the user in ${vsi_name[$i]} you will have to provide a user name with permissions to create users and able to ssh into ${vsi_name[$i]}..."
+				echo ""
+				read -p "${vsi_name[$i]} User Name: " usr_name
+				echo ""
+				echo "If you have an ssh key for user $usr_name, please supply full path... if you don't leave it blank and just hit <ENTER>"
+				read -p "$usr_name SSH Key: " usr_name_sshkey
+				if [[ "$usr_name_sshkey" == "" ]]
+				then
+					sshkey=""
+				else
+					sshkey="-i $usr_name_sshkey"
+				fi
+				echo "Testing ssh connection to LPAR ${vsi_name[$i]} with IP ${vsi_ip[$i]} with user $usr_name"
+				ssh $sshkey -o ConnectTimeout=1 -o ConnectionAttempts=1 $usr_name@${vsi_ip[$i]} exit 0
+				ret=$?
+				if [ $ret -ne 0 ]
+				then
+					echo "    FAILED - Oops something went wrong!... Check messages above this line..."
+					echo ""
+					continue
+				fi
+				echo "Checking if user $vsi_user exists in LPAR ${vsi_name[$i]}, please wait..."
+				lpar_user_exists=$(ssh $sshkey $usr_name@${vsi_ip[$i]} 'system "DSPUSRPRF USRPRF('$vsi_user')"'| head -n 1 | awk {'print $1'})
+				if [[ "$lpar_user_exists" == "" ]] #&& [ $ret -eq 0 ]
+				then
+					read -p "Do you want to create the user $vsi_user environment in LPAR ${vsi_name[$i]} (Y/N) " crt_user_env
+					if [[ "$crt_user_env" == "Y" ]] || [[ "$crt_user_env" == "y" ]]
+					then
+						echo "Creating user profile $vsi_user in LPAR ${vsi_name[$i]}, please wait..."
+						ssh $sshkey $usr_name@${vsi_ip[$i]} 'system "CRTUSRPRF USRPRF('$vsi_user') PASSWORD(*NONE) USRCLS(*USER) INLMNU(*SIGNOFF) SPCAUT(*ALLOBJ *JOBCTL)"'
+						echo "Preparing user $vsi_user environment in LPAR ${vsi_name[$i]}, please wait..."
+						ssh $sshkey $usr_name@${vsi_ip[$i]} 'mkdir '$usr_folder ';chmod 755 '$usr_folder ';mkdir '$usr_folder_ssh';chmod 700 '$usr_folder_ssh';echo "'$pub_ssh_key'">>'$auth_keys_path';chmod 600 '$auth_keys_path';chown -R '$vsi_user' '$usr_folder';exit 0'
+						ret=$?
+						if [ $ret -ne 0 ]
+						then
+							echo "    FAILED - Oops something went wrong!... Check messages above this line..."
+							echo ""
+							continue
+						fi
+						echo ""
+						echo "User $vsi_user environment in LPAR ${vsi_name[$i]} prepared!"
+						echo "Testing credentials and environment, please wait..."
+						ssh $sshkey $usr_name@${vsi_ip[$i]} 'exit 0'
+						ret=$?
+						if [ $ret -ne 0 ]
+						then
+							echo "    FAILED - Oops something went wrong!... Check messages above this line..."
+							echo ""
+							continue
+						fi
+						echo ""
+						echo "Test done! Successfully ssh logged in in LPAR ${vsi_name[$i]} with user $vsi_user! All good to go!"
+						echo ""
+					else
+						echo ""
+						echo "  ## Don't forget to create user $vsi_user environment in LPAR ${vsi_name[$i]} ..."
+						echo "     You will need to create ${vsi_user^^} home folder, .ssh folder and put your public ssh key in file authorized_keys under .ssh"
+						echo "     and don't forget to change folder and file permissions."
+						echo ""
+					fi
+				else
+					echo "   ## User $vsi_user already exists in LPAR ${vsi_name[$i]} ..."
+					read -p "Do you still want to create the user $vsi_user environment in LPAR ${vsi_name[$i]} (Y/N) " crt_user_env
+					if [[ "$crt_user_env" == "Y" ]] || [[ "$crt_user_env" == "y" ]]
+					then
+						echo "Preparing user $vsi_user environment in LPAR ${vsi_name[$i]}, please wait..."
+						ssh $sshkey $usr_name@${vsi_ip[$i]} 'mkdir '$usr_folder ';chmod 755 '$usr_folder ';mkdir '$usr_folder_ssh';chmod 700 '$usr_folder_ssh';echo "'$pub_ssh_key'">>'$auth_keys_path';chmod 600 '$auth_keys_path';chown -R '$vsi_user' '$usr_folder';exit 0'
+						ret=$?
+						if [ $ret -ne 0 ]
+						then
+							echo "    FAILED - Oops something went wrong!... Check messages above this line..."
+							echo ""
+							continue
+						fi
+						echo ""
+						echo "User $vsi_user environment in LPAR ${vsi_name[$i]} prepared!"
+						echo "Testing credentials and environment, please wait..."
+						ssh $sshkey $usr_name@${vsi_ip[$i]} 'exit 0'
+						ret=$?
+						if [ $ret -ne 0 ]
+						then
+							echo "    FAILED - Oops something went wrong!... Check messages above this line..."
+							echo ""
+							continue
+						fi
+						echo ""
+						echo "Test done! Successfully ssh logged in in LPAR ${vsi_name[$i]} with user $vsi_user! All good to go!"
+						echo ""
+					else
+						echo ""
+						echo "  ## Don't forget to create user $vsi_user environment in LPAR ${vsi_name[$i]} ..."
+						echo "     You will need to create $vsi_user home folder, .ssh folder and put your pubic ssh key in file authorized_keys under .ssh"
+						echo "     and don't forget to change foler and file permissions."
+						echo ""
+					fi
+					echo ""
+#exit 0
+				fi
+			else
+				echo ""
+				echo "  ## Don't forget to create user $vsi_user in LPAR ${vsi_name[$i]} ..."
+				echo ""
+			fi
+		else
+			echo "  ## LPAR ${vsi_name[$i]} with IP ${vsi_ip[$i]} not reachable!..."
+			echo "  ## Please confirm the IP is correct, or if the LPAR is IPLed."
+			echo "  ## you can change the IP in file $file_name."
+			echo ""
+		fi
+	echo ""
+	echo "Moving on to the next LPAR..."
+	echo ""
+	done
+	echo "No more LPARs in listed."
+	echo ""
+	echo "Done!"
+else
+	echo "  ## Don't forget to create user $vsi_user and update file authorized_keys in each LPAR!..."
+fi
+}
+#### END:FUNCTION - Create VSI User  ####
+
+if [[ $flag == "-addlpar" ]]
+then
+	echo ""
+	echo "   ####  Welcome to your bluexport secrets file configuration helper version $Version"
+	echo ""
+	echo "So, you want to add an LPAR to the secrets file?!..."
+	echo "OK, let's go..."
+	echo ""
+	bluexscrt=$(cat $HOME/bluexport.conf | grep bluexscrt | awk {'print $2'})
+	lpar_number_now=$(tail -n1 $bluexscrt | grep LPAR | awk {'print $5'} | sed -z 's/LPAR//g')
+	lpar_number=$((lpar_number_now+1))
+	vsi_user=$(cat $bluexscrt | grep VSI_USER | awk {'print $2'})
+	ssh_key_path=$(cat $bluexscrt | grep SSHKEYPATH | awk {'print $2'})
+	while [[ "$ok" != "y" ]] && [[ "$ok" != "Y" ]]
+	do
+		read -p "Enter LPAR name " vsi_name
+		read -p "Is this name $vsi_name correct? (y/n) " ok
+		exists=$(cat $bluexscrt | grep $vsi_name | awk {'print $1'})
+		if [[ $exists != "" ]]
+		then
+			echo ""
+			echo "### An LPAR with that name $vsi_name already exists!"
+			echo ""
+			ok="n"
+		fi
+	done
+	ok="n"
+	while [[ "$ok" != "y" ]] && [[ "$ok" != "Y" ]]
+	do
+		read -p "Enter LPAR IP " vsi_ip
+		read -p "Is this IP $vsi_ip correct? (y/n) " ok
+		exists=$(cat $bluexscrt | grep $vsi_ip | awk {'print $1'})
+		if [[ $exists != "" ]]
+		then
+			echo ""
+			echo "### An LPAR with that IP $vsi_ip already exists!"
+			echo ""
+			ok="n"
+		fi
+	done
+	ok="n"
+	while [[ "$ok" != "y" ]] && [[ "$ok" != "Y" ]]
+	do
+		read -p "Enter LPAR ID " vsi_id
+		read -p "Is this ID $vsi_id correct? (y/n) " ok
+		exists=$(cat $bluexscrt | grep $vsi_id | awk {'print $1'})
+		if [[ $exists != "" ]]
+		then
+			echo ""
+			echo "### An LPAR with that ID $vsi_id already exists!"
+			echo ""
+			ok="n"
+		fi
+	done
+	wsshort=$(cat $bluexscrt | grep "crn:" | awk {'print $1'})
+	ok="n"
+	while [[ "$ok" != "y" ]] && [[ "$ok" != "Y" ]]
+	do
+		echo "Enter LPAR Workspace shortname (Copt/paste from the list below)"
+		echo "$wsshort"
+		read -p "> " vsi_ws
+		read -p "Is this Workspace $vsi_ws correct? (y/n) " ok
+	done
+	echo $vsi_name" "$vsi_ip" "$vsi_id" "$vsi_ws" "LPAR$lpar_number >> $bluexscrt
+	create_vsi_user
 	exit 0
 fi
 
@@ -268,163 +510,6 @@ else
 	echo "## If you want to use this file $file_name as your bluexscrt file, don't forget to update $HOME/bluexport.conf file"
 fi
 
-#### START:FUNCTION - Ping LPAR  ####
-ping_lpar() {
-
-	if ping -c7 -W3 $1 &> /dev/null
-	then
-		ping="OK"
-	else
-		ping=""
-	fi
-}
-
-### Create VSI User and prepare ssh login credentials
-
-echo ""
-echo "   #### Now let's take care of the LPAR user and prepare it to be able to login into the LPAR..."
-echo ""
-read -p "Do you want to create the user $vsi_user and/or its environment in the LPARs now (Y/N) " lpar_user
-if [[ "$lpar_user" == "Y" ]] || [[ "$lpar_user" == "y" ]]
-then
-	echo ""
-	echo "OK, let's go then..."
-	echo ""
-	usr_folder="/home/${vsi_user^^}"
-	usr_folder_ssh="$usr_folder/.ssh"
-	auth_keys_path="$usr_folder_ssh/authorized_keys"
-	pub_ssh_key_path="$ssh_key_path.pub"
-	pub_ssh_key=$(cat $pub_ssh_key_path)
-	len=${#vsi_name[@]}
-	for (( i=0; i<$len; i++ ))
-	do
-		echo " ## LPAR ${vsi_name[$i]} with IP ${vsi_ip[$i]}:"
-		echo ""
-		ping_lpar "${vsi_ip[$i]}"
-		if [[ "$ping" == "OK" ]]
-		then
-			read -p "Do you want to create the user $vsi_user in LPAR ${vsi_name[$i]} (Y/N) " crt_user
-			if [[ "$crt_user" == "Y" ]] || [[ "$crt_user" == "y" ]]
-			then
-				echo ""
-				echo "To create the user in ${vsi_name[$i]} you will have to provide a user name with permissions to create users and able to ssh into ${vsi_name[$i]}..."
-				echo ""
-				read -p "${vsi_name[$i]} User Name: " usr_name
-				echo ""
-				echo "If you have an ssh key for user $usr_name, please supply full path... if you don't leave it blank and just hit <ENTER>"
-				read -p "$usr_name SSH Key: " usr_name_sshkey
-				if [[ "$usr_name_sshkey" == "" ]]
-				then
-					sshkey=""
-				else
-					sshkey="-i $usr_name_sshkey"
-				fi
-				echo "Testing ssh connection to LPAR ${vsi_name[$i]} with IP ${vsi_ip[$i]} with user $usr_name"
-				ssh $sshkey -o ConnectTimeout=1 -o ConnectionAttempts=1 $usr_name@${vsi_ip[$i]} exit 0
-				ret=$?
-				if [ $ret -ne 0 ]
-				then
-					echo "    FAILED - Oops something went wrong!... Check messages above this line..."
-					echo ""
-					continue
-				fi
-				echo "Checking if user $vsi_user exists in LPAR ${vsi_name[$i]}, please wait..."
-				lpar_user_exists=$(ssh $sshkey $usr_name@${vsi_ip[$i]} 'system "DSPUSRPRF USRPRF('$vsi_user')"'| head -n 1 | awk {'print $1'})
-				if [[ "$lpar_user_exists" == "" ]] #&& [ $ret -eq 0 ]
-				then
-					read -p "Do you want to create the user $vsi_user environment in LPAR ${vsi_name[$i]} (Y/N) " crt_user_env
-					if [[ "$crt_user_env" == "Y" ]] || [[ "$crt_user_env" == "y" ]]
-					then
-						echo "Creating user profile $vsi_user in LPAR ${vsi_name[$i]}, please wait..."
-						ssh $sshkey $usr_name@${vsi_ip[$i]} 'system "CRTUSRPRF USRPRF('$vsi_user') PASSWORD(*NONE) USRCLS(*USER) INLMNU(*SIGNOFF) SPCAUT(*ALLOBJ *JOBCTL)"'
-						echo "Preparing user $vsi_user environment in LPAR ${vsi_name[$i]}, please wait..."
-						ssh $sshkey $usr_name@${vsi_ip[$i]} 'mkdir '$usr_folder ';chmod 755 '$usr_folder ';mkdir '$usr_folder_ssh';chmod 700 '$usr_folder_ssh';echo "'$pub_ssh_key'">>'$auth_keys_path';chmod 600 '$auth_keys_path';chown -R '$vsi_user' '$usr_folder';exit 0'
-						ret=$?
-						if [ $ret -ne 0 ]
-						then
-							echo "    FAILED - Oops something went wrong!... Check messages above this line..."
-							echo ""
-							continue
-						fi
-						echo ""
-						echo "User $vsi_user environment in LPAR ${vsi_name[$i]} prepared!"
-						echo "Testing credentials and environment, please wait..."
-						ssh $sshkey $usr_name@${vsi_ip[$i]} 'exit 0'
-						ret=$?
-						if [ $ret -ne 0 ]
-						then
-							echo "    FAILED - Oops something went wrong!... Check messages above this line..."
-							echo ""
-							continue
-						fi
-						echo ""
-						echo "Test done! Successfully ssh logged in in LPAR ${vsi_name[$i]} with user $vsi_user! All good to go!"
-						echo ""
-					else
-						echo ""
-						echo "  ## Don't forget to create user $vsi_user environment in LPAR ${vsi_name[$i]} ..."
-						echo "     You will need to create ${vsi_user^^} home folder, .ssh folder and put your public ssh key in file authorized_keys under .ssh"
-						echo "     and don't forget to change folder and file permissions."
-						echo ""
-					fi
-				else
-					echo "   ## User $vsi_user already exists in LPAR ${vsi_name[$i]} ..."
-					read -p "Do you still want to create the user $vsi_user environment in LPAR ${vsi_name[$i]} (Y/N) " crt_user_env
-					if [[ "$crt_user_env" == "Y" ]] || [[ "$crt_user_env" == "y" ]]
-					then
-						echo "Preparing user $vsi_user environment in LPAR ${vsi_name[$i]}, please wait..."
-						ssh $sshkey $usr_name@${vsi_ip[$i]} 'mkdir '$usr_folder ';chmod 755 '$usr_folder ';mkdir '$usr_folder_ssh';chmod 700 '$usr_folder_ssh';echo "'$pub_ssh_key'">>'$auth_keys_path';chmod 600 '$auth_keys_path';chown -R '$vsi_user' '$usr_folder';exit 0'
-						ret=$?
-						if [ $ret -ne 0 ]
-						then
-							echo "    FAILED - Oops something went wrong!... Check messages above this line..."
-							echo ""
-							continue
-						fi
-						echo ""
-						echo "User $vsi_user environment in LPAR ${vsi_name[$i]} prepared!"
-						echo "Testing credentials and environment, please wait..."
-						ssh $sshkey $usr_name@${vsi_ip[$i]} 'exit 0'
-						ret=$?
-						if [ $ret -ne 0 ]
-						then
-							echo "    FAILED - Oops something went wrong!... Check messages above this line..."
-							echo ""
-							continue
-						fi
-						echo ""
-						echo "Test done! Successfully ssh logged in in LPAR ${vsi_name[$i]} with user $vsi_user! All good to go!"
-						echo ""
-					else
-						echo ""
-						echo "  ## Don't forget to create user $vsi_user environment in LPAR ${vsi_name[$i]} ..."
-						echo "     You will need to create $vsi_user home folder, .ssh folder and put your pubic ssh key in file authorized_keys under .ssh"
-						echo "     and don't forget to change foler and file permissions."
-						echo ""
-					fi
-					echo ""
-#exit 0
-				fi
-			else
-				echo ""
-				echo "  ## Don't forget to create user $vsi_user in LPAR ${vsi_name[$i]} ..."
-				echo ""
-			fi
-		else
-			echo "  ## LPAR ${vsi_name[$i]} with IP ${vsi_ip[$i]} not reachable!..."
-			echo "  ## Please confirm the IP is correct, or if the LPAR is IPLed."
-			echo "  ## you can change the IP in file $file_name."
-			echo ""
-		fi
-	echo ""
-	echo "Moving on to the next LPAR..."
-	echo ""
-	done
-	echo "No more LPARs in listed."
-	echo ""
-	echo "Done!"
-else
-	echo "  ## Don't forget to create user $vsi_user and update file authorized_keys in each LPAR!..."
-fi
+create_vsi_user
 
 chmod 600 $file_name
