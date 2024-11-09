@@ -35,7 +35,7 @@
 
        #####  START:CODE  #####
 
-Version=3.3.7
+Version=3.3.8
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 end_log_file='==== END ========= $timestamp ========='
@@ -222,13 +222,19 @@ job_monitor() {
 			else
 				echo "`date +%Y-%m-%d_%H:%M:%S` - Image Capture and Export of $vsi to Image Catalog Completed !!" >> $log_file
 			fi
-			if [ $single -eq  0 ]
+			if [ $single -eq  0 ] && [ $flagj -ne 1 ]
 			then
 				delete_previous_img
 			fi
 			echo "`date +%Y-%m-%d_%H:%M:%S` - Finished Successfully!!" >> $job_log
 			job_log_perm=$job_log_short"_"$capture_name".log"
 			cp $job_log $job_log_perm
+			if [ $flagj -eq 1 ]
+			then
+				echo ""
+				echo "   ### Log files used: $job_log | $job_monitor | $log_file | $job_log_perm"
+				echo ""
+			fi
 			abort "`date +%Y-%m-%d_%H:%M:%S` - Finished Successfully!!"
 		elif [[ $job_status == "" ]]
 		then
@@ -298,7 +304,6 @@ get_IASP_name() {
 check_locally_VSI_exists() {
 
 	echo "" > $job_log
-
 	vsi_exists=$(cat $bluexscrt | grep -wi $vsi)
 	if [[ $vsi_exists != "" ]]
 	then
@@ -308,14 +313,18 @@ check_locally_VSI_exists() {
 		vsi_cloud_name=$(cat $vsi_list_tmp | grep -wi $vsi | awk {'print $1'})
 		wsshortlist=$(cat $bluexscrt | grep -w ALLWS)
 		wsposition=$(echo "$wsshortlist" | tr " " "\n" | grep -n "$vsiwsshort" | cut -d: -f1)
-		wslong=$(cat $bluexscrt | grep -w WSNAMES | sed -z 's/:/ /g'|awk {'print $'$wsposition''})
-		echo "`date +%Y-%m-%d_%H:%M:%S` - VSI $vsi_cloud_name was found in $wslong..." >> $log_file
+		full_ws_name=$(cat $bluexscrt | grep -w WSNAMES | sed -z 's/:/ /g'|awk {'print $'$wsposition''})
+		echo "`date +%Y-%m-%d_%H:%M:%S` - VSI $vsi_cloud_name was found in $full_ws_name..." >> $log_file
 		if [ $flagj -eq 0 ]
 		then
 			echo "`date +%Y-%m-%d_%H:%M:%S` - VSI to Capture: $vsi_cloud_name" >> $log_file
 			get_IASP_name
 		fi
-#		found=1
+	else
+		echo ""
+		echo "   ### VSI $vsi not found in any of the workspaces available in bluexscrt file!"
+		echo ""
+		exit 0
 	fi
 }
 ####  END:FUNCTION - Check if VSI exists in secret file and Get VSI IP and IASP NAME if exists  ####
@@ -348,7 +357,6 @@ check_VSI_exists() {
 		if grep -qie ^$vsi$ $vsi_list_tmp
 		then
 			echo "`date +%Y-%m-%d_%H:%M:%S` - VSI $vsi_cloud_name was found in $full_ws_name..." >> $log_file
-#			echo "`date +%Y-%m-%d_%H:%M:%S` - VSI to Capture: $vsi_cloud_name" >> $log_file
 			if [ $flagj -eq 0 ]
 			then
 				echo "`date +%Y-%m-%d_%H:%M:%S` - VSI to Capture: $vsi_cloud_name" >> $log_file
@@ -597,11 +605,15 @@ case $1 in
 	echo "==== END ========= $timestamp =========" >> $log_file
 	flagj=1
 	log_file="$HOME/bluexport_j_"$capture_name".log"
+	echo ""
+	echo "   ### Flag -j selected - Logging at file $log_file"
+	echo ""
 	echo "" > $log_file
 	timestamp=$(date +%F" "%T" "%Z)
 	echo "==== START ======= $timestamp =========" >> $log_file
 	cloud_login
-	check_VSI_exists
+	check_locally_VSI_exists
+#	check_VSI_exists
 	job_monitor
     ;;
 
