@@ -35,13 +35,15 @@
 
        #####  START:CODE  #####
 
-Version=3.3.8
+Version=3.3.9
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 end_log_file='==== END ========= $timestamp ========='
 if [ -t 1 ]
 then
+	echo ""
 	echo "   ### Logging at $log_file"
+	echo ""
 fi
 if [[ $1 != "-chscrt" ]] && [[ $1 != "-viewscrt" ]] && [[ $1 != "-v" ]] && [[ $1 != "-h" ]]
 then
@@ -148,6 +150,12 @@ help() {
 #### START:FUNCTION - Finish log file when aborting  ####
 abort() {
 	echo $1 >> $log_file
+	if [ -t 1 ]
+	then
+		echo ""
+		echo "   ### $1"
+		echo ""
+	fi
 	timestamp=$(date +%F" "%T" "%Z)
 	eval echo $end_log_file >> $log_file
 	exit 0
