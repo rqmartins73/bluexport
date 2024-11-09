@@ -35,7 +35,7 @@
 
        #####  START:CODE  #####
 
-Version=3.3.9
+Version=3.4.0
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 end_log_file='==== END ========= $timestamp ========='
@@ -341,52 +341,6 @@ check_locally_VSI_exists() {
 }
 ####  END:FUNCTION - Check if VSI exists in secret file and Get VSI IP and IASP NAME if exists  ####
 
-####  START:FUNCTION - Check if VSI exists and Get VSI IP and IASP NAME if exists  ####
-check_VSI_exists() {
-	echo "" > $job_log
-
-	# Convert 'wsnames' string to an array
-	IFS=':' read -r -a wsnames_array <<< "$wsnames"
-
-	# Convert 'allws' string to an array
-	read -r -a allws_array <<< "$allws"
-
-	# Initialize an associative array to map workspace abbreviations to full names
-	declare -A wsmap
-	# Populate the wsmap with dynamic values from allws and wsnames_array
-	for i in "${!allws_array[@]}"; do
-		wsmap[${allws_array[i]}]="${wsnames_array[i]}"
-	done
-
-	found=0
-	for ws in "${allws_array[@]}"
-	do
-		shortnamecrn="${!ws}"
-		full_ws_name="${wsmap[$ws]}" # Get the full workspace name from the map
-		echo "`date +%Y-%m-%d_%H:%M:%S` - Searching for VSI in $full_ws_name..." >> $log_file
-		dc_vsi_list "$shortnamecrn"
-		vsi_cloud_name=$(cat $vsi_list_tmp | grep -wi $vsi | awk {'print $1'})
-		if grep -qie ^$vsi$ $vsi_list_tmp
-		then
-			echo "`date +%Y-%m-%d_%H:%M:%S` - VSI $vsi_cloud_name was found in $full_ws_name..." >> $log_file
-			if [ $flagj -eq 0 ]
-			then
-				echo "`date +%Y-%m-%d_%H:%M:%S` - VSI to Capture: $vsi_cloud_name" >> $log_file
-				get_IASP_name
-			fi
-			found=1
-			break
-		else
-			echo "`date +%Y-%m-%d_%H:%M:%S` - VSI $vsi not found in $full_ws_name!" >> $log_file
-		fi
-	done
-	if [ "$found" -eq 0 ]
-	then
-		abort "$(date +%Y-%m-%d_%H:%M:%S) - VSI $vsi_cloud_name not found in any of the workspaces available in bluexscrt file!"
-	fi
-}
-####  END:FUNCTION - Check if VSI exists and Get VSI IP and IASP NAME if exists  ####
-
 ####  START:FUNCTION Flush ASPs and IASP Memory to Disk  ####
 flush_asps() {
 	if [ $test -eq 0 ]
@@ -628,7 +582,6 @@ case $1 in
 	echo "==== START ======= $timestamp =========" >> $log_file
 	cloud_login
 	check_locally_VSI_exists
-#	check_VSI_exists
 	job_monitor
     ;;
 
@@ -825,7 +778,6 @@ case $1 in
 	echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting Snapshot $snap_name of VSI $vsi with volumes: $volumes_to_echo !" >> $log_file
 	cloud_login
 	check_locally_VSI_exists
-#	check_VSI_exists
 	do_snap_create
 	abort "`date +%Y-%m-%d_%H:%M:%S` - === Successfully finished Snapshot $snap_name of VSI $vsi with volumes: $volumes_to_echo !"
     ;;
@@ -891,7 +843,6 @@ case $1 in
 		fi
 	fi
 	check_locally_VSI_exists
-#	check_VSI_exists
 	do_snap_update
 	abort "`date +%Y-%m-%d_%H:%M:%S` - === Successfully finished Snapshot $snap_name Update $new_name_echo !"
     ;;
@@ -1009,8 +960,6 @@ case $1 in
 		abort "`date +%Y-%m-%d_%H:%M:%S` - Volume Clone with name $vclone_name already exists, please choose a diferent name!"
 	fi
 	/usr/local/bin/ibmcloud pi ws tg $vsi_ws_id
-#	check_VSI_exists
-#	vsi_id=$(/usr/local/bin/ibmcloud pi ins ls | grep -wi $vsi | awk {'print $1'})
 	if [[ "$volumes_to_clone" == "ALL" ]]
 	then
 		volumes_to_clone=$(/usr/local/bin/ibmcloud pi ins get $vsi_id | grep Volumes | sed -z 's/ //g' | sed -z 's/Volumes//g')
@@ -1056,7 +1005,6 @@ esac
 ####  END: Iniciate Log and Validate Arguments  ####
 
 cloud_login
-#check_VSI_exists
 check_locally_VSI_exists
 
 ####  START: Get Volumes to capture  ####
