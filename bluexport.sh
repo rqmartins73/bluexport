@@ -35,7 +35,7 @@
 
        #####  START:CODE  #####
 
-Version=3.4.0
+Version=3.4.1
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 end_log_file='==== END ========= $timestamp ========='
@@ -993,8 +993,7 @@ case $1 in
 
    -v | --version)
 	echo "  ### bluexport by Ricardo Martins - Blue Chip Portugal - 2023-2024"
-	echo "  ### Version: $Version"
-	abort "`date +%Y-%m-%d_%H:%M:%S` - Version requested!!"
+	abort "`date +%Y-%m-%d_%H:%M:%S` - Version: $Version"
     ;;
 
     *)
