@@ -35,7 +35,7 @@
 
        #####  START:CODE  #####
 
-Version=3.3.6
+Version=3.3.7
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 end_log_file='==== END ========= $timestamp ========='
@@ -293,6 +293,32 @@ get_IASP_name() {
 	fi
 }
 ####  END:FUNCTION - Get IASP name  ####
+
+####  START:FUNCTION - Check if VSI exists in secret file and Get VSI IP and IASP NAME if exists  ####
+check_locally_VSI_exists() {
+
+	echo "" > $job_log
+
+	vsi_exists=$(cat $bluexscrt | grep -wi $vsi)
+	if [[ $vsi_exists != "" ]]
+	then
+		vsiwsshort=$(cat $bluexscrt | grep -wi $vsi | awk {'print $4'})
+		shortnamecrn=$(cat $bluexscrt | grep -wi $vsiwsshort | awk {'print $2'})
+		dc_vsi_list "$shortnamecrn"
+		vsi_cloud_name=$(cat $vsi_list_tmp | grep -wi $vsi | awk {'print $1'})
+		wsshortlist=$(cat $bluexscrt | grep -w ALLWS)
+		wsposition=$(echo "$wsshortlist" | tr " " "\n" | grep -n "$vsiwsshort" | cut -d: -f1)
+		wslong=$(cat $bluexscrt | grep -w WSNAMES | sed -z 's/:/ /g'|awk {'print $'$wsposition''})
+		echo "`date +%Y-%m-%d_%H:%M:%S` - VSI $vsi_cloud_name was found in $wslong..." >> $log_file
+		if [ $flagj -eq 0 ]
+		then
+			echo "`date +%Y-%m-%d_%H:%M:%S` - VSI to Capture: $vsi_cloud_name" >> $log_file
+			get_IASP_name
+		fi
+#		found=1
+	fi
+}
+####  END:FUNCTION - Check if VSI exists in secret file and Get VSI IP and IASP NAME if exists  ####
 
 ####  START:FUNCTION - Check if VSI exists and Get VSI IP and IASP NAME if exists  ####
 check_VSI_exists() {
@@ -1001,7 +1027,8 @@ esac
 ####  END: Iniciate Log and Validate Arguments  ####
 
 cloud_login
-check_VSI_exists
+#check_VSI_exists
+check_locally_VSI_exists
 
 ####  START: Get Volumes to capture  ####
 eval $volumes_cmd > $volumes_file | tee -a $log_file
