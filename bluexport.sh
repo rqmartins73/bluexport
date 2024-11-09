@@ -229,10 +229,14 @@ job_monitor() {
 			echo "`date +%Y-%m-%d_%H:%M:%S` - Finished Successfully!!" >> $job_log
 			job_log_perm=$job_log_short"_"$capture_name".log"
 			cp $job_log $job_log_perm
-			if [ $flagj -eq 1 ]
+			if [ $flagj -eq 1 ] && [ -t 1 ]
 			then
 				echo ""
-				echo "   ### Log files used: $job_log | $job_monitor | $log_file | $job_log_perm"
+				echo "   ### Log files used:"
+				echo "   ### $log_file"
+				echo "   ### $job_log"
+				echo "   ### $job_monitor"
+				echo "   ### $job_log_perm"
 				echo ""
 			fi
 			abort "`date +%Y-%m-%d_%H:%M:%S` - Finished Successfully!!"
@@ -605,9 +609,12 @@ case $1 in
 	echo "==== END ========= $timestamp =========" >> $log_file
 	flagj=1
 	log_file="$HOME/bluexport_j_"$capture_name".log"
-	echo ""
-	echo "   ### Flag -j selected - Logging at file $log_file"
-	echo ""
+	if [ -t 1 ]
+	then
+		echo ""
+		echo "   ### Flag -j selected - Logging at file $log_file"
+		echo ""
+	fi
 	echo "" > $log_file
 	timestamp=$(date +%F" "%T" "%Z)
 	echo "==== START ======= $timestamp =========" >> $log_file
@@ -809,7 +816,8 @@ case $1 in
 	fi
 	echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting Snapshot $snap_name of VSI $vsi with volumes: $volumes_to_echo !" >> $log_file
 	cloud_login
-	check_VSI_exists
+	check_locally_VSI_exists
+#	check_VSI_exists
 	do_snap_create
 	abort "`date +%Y-%m-%d_%H:%M:%S` - === Successfully finished Snapshot $snap_name of VSI $vsi with volumes: $volumes_to_echo !"
     ;;
@@ -874,7 +882,8 @@ case $1 in
 			new_name="--name \""$new_snap_name"\""
 		fi
 	fi
-	check_VSI_exists
+	check_locally_VSI_exists
+#	check_VSI_exists
 	do_snap_update
 	abort "`date +%Y-%m-%d_%H:%M:%S` - === Successfully finished Snapshot $snap_name Update $new_name_echo !"
     ;;
