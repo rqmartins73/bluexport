@@ -39,7 +39,7 @@ Version=3.3.6
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 end_log_file='==== END ========= $timestamp ========='
-if [[ $- == *i* ]]
+if [ -t 1 ]
 then
 	echo "   ### Logging at $log_file"
 fi
