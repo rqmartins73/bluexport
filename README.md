@@ -1,5 +1,5 @@
 # bluexport
-Capture IBM Cloud POWERVS IBM i VSI and Export to COS or/and Image Catalog.  
+Capture IBM Cloud PowerVS IBM i VSI and Export to COS or/and Image Catalog.  
 Version 3.x now supports the creation, update, delete and list Snapshots.  
 
 ###### This script was made in GNU bash, version 5.2.21(1)-release.  
