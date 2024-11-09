@@ -35,7 +35,7 @@
 
        #####  START:CODE  #####
 
-Version=3.4.1
+Version=3.4.2
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 end_log_file='==== END ========= $timestamp ========='
@@ -719,7 +719,6 @@ case $1 in
   -chscrt)
 	if [ $# -lt 2 ]
 	then
-		echo "Arguments Missing!! Syntax: bluexport.sh $1 bluexscrt_file_name - Use the full path ex: /home/user/bluexscrt_new"
 		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport.sh $1 bluexscrt_file_name - Use the full path ex: /home/user/bluexscrt_new"
 	fi
 	new_scrt=$2
@@ -729,7 +728,6 @@ case $1 in
 
   -viewscrt)
 	scrt_in_use=$(cat $HOME/bluexport.conf | grep bluexscrt | awk {'print $2'})
-	echo "Secret file in use is $scrt_in_use"
 	abort "`date +%Y-%m-%d_%H:%M:%S` - Secret file in use is $scrt_in_use"
     ;;
 
