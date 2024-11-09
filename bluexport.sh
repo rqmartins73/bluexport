@@ -39,6 +39,10 @@ Version=3.3.6
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 end_log_file='==== END ========= $timestamp ========='
+if [[ $- == *i* ]]
+then
+	echo "   ### Logging at $log_file"
+fi
 if [[ $1 != "-chscrt" ]] && [[ $1 != "-viewscrt" ]] && [[ $1 != "-v" ]] && [[ $1 != "-h" ]]
 then
 	####  START: Constants Definition  #####
@@ -57,7 +61,6 @@ then
 	snap_retention=$(cat $HOME/bluexport.conf | grep -w "snap_retention" | awk {'print $2'})
 	single=0
 	vsi_user=$(cat $bluexscrt | grep "VSI_USER" | awk {'print $2'})
-	if [[ $- == *i* ]]; then echo "Logging at $log_file"; fi
 	####  END: Constants Definition  #####
 
 	####  START: Check if Config File exists  ####
