@@ -35,11 +35,11 @@
 
        #####  START:CODE  #####
 
-Version=3.4.4
+Version=3.4.6
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 end_log_file='==== END ========= $timestamp ========='
-if [[ $1 != "-chscrt" ]] && [[ $1 != "-viewscrt" ]] && [[ $1 != "-v" ]] && [[ $1 != "-h" ]]
+if [[ $1 != "-chscrt" ]] && [[ $1 != "-viewscrt" ]] && [[ $1 != "-v" ]] && [[ $1 != "-h" ]] && [[ $1 != "" ]]
 then
 	####  START: Constants Definition  #####
 	capture_time=`date +%Y-%m-%d_%H%M`
@@ -93,6 +93,12 @@ then
 	allws=$(grep '^ALLWS' $bluexscrt | cut -d' ' -f2-)
 	wsnames=$(grep '^WSNAMES' $bluexscrt | cut -d' ' -f2-)
 	####  END: Get Cloud Config Data  #####
+	if [ -t 1 ]
+	then
+		echo ""
+		echo "   ### Logging at $log_file"
+		echo ""
+	fi	
 fi
 
        #####  START: FUNCTIONS  #####
@@ -546,13 +552,7 @@ then
 	abort "`date +%Y-%m-%d_%H:%M:%S` - No arguments supplied!!"
 fi
 
-if [ -t 1 ]
-then
-	echo ""
-	echo "   ### Logging at $log_file"
-	echo ""
-fi
-	
+
 case $1 in
    -h | --help)
 	help
@@ -893,6 +893,7 @@ case $1 in
 		echo "`date +%Y-%m-%d_%H:%M:%S` - === Listing Snapshots at Workspace $full_ws_name :" | tee -a $log_file
 		/usr/local/bin/ibmcloud pi ws tg $crn 2>> $log_file | tee -a $log_file
 		/usr/local/bin/ibmcloud pi ins snap ls 2>> $log_file | tee -a $log_file
+		echo "" | tee -a $log_file
 	done
 	abort "`date +%Y-%m-%d_%H:%M:%S` - === Finished Listing all Snapshots in all Workpsaces"
     ;;
