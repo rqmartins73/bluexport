@@ -990,6 +990,7 @@ case $1 in
     ;;
 
    -v | --version)
+    echo ""
 	echo "  ### bluexport by Ricardo Martins - Blue Chip Portugal - 2023-2024"
 	abort "`date +%Y-%m-%d_%H:%M:%S` - Version: $Version"
     ;;
