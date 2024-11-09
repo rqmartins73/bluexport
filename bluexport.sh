@@ -35,16 +35,10 @@
 
        #####  START:CODE  #####
 
-Version=3.4.2
+Version=3.4.3
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 end_log_file='==== END ========= $timestamp ========='
-if [ -t 1 ]
-then
-	echo ""
-	echo "   ### Logging at $log_file"
-	echo ""
-fi
 if [[ $1 != "-chscrt" ]] && [[ $1 != "-viewscrt" ]] && [[ $1 != "-v" ]] && [[ $1 != "-h" ]]
 then
 	####  START: Constants Definition  #####
@@ -99,6 +93,12 @@ then
 	allws=$(grep '^ALLWS' $bluexscrt | cut -d' ' -f2-)
 	wsnames=$(grep '^WSNAMES' $bluexscrt | cut -d' ' -f2-)
 	####  END: Get Cloud Config Data  #####
+	if [ -t 1 ]
+	then
+		echo ""
+		echo "   ### Logging at $log_file"
+		echo ""
+	fi	
 fi
 
        #####  START: FUNCTIONS  #####
