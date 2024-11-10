@@ -30,7 +30,7 @@ Version 3.x now supports the creation, update, delete and list Snapshots, and al
   
 `./bluexport.sh -snapdel SNAPSHOT_NAME`  
   
-`./bluexport.sh -vclone VOLUME_CLONE_NAME BASE_NAME LPAR_NAME True|False(replication-enabled) True|False(rollback-prepare) STORAGE_TIER ALL|(Comma seperated >`  
+`./bluexport.sh -vclone VOLUME_CLONE_NAME BASE_NAME LPAR_NAME True|False(replication-enabled) True|False(rollback-prepare) STORAGE_TIER ALL|(Comma seperated rated Volumes name list to clone)`  
   
 `./bluexport.sh -vclonedel VOLUME_CLONE_NAME`  
   
