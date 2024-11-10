@@ -1,6 +1,6 @@
 # bluexport
 Capture IBM Cloud PowerVS IBM i VSI and Export to COS or/and Image Catalog.  
-Version 3.x now supports the creation, update, delete and list Snapshots.  
+Version 3.x now supports the creation, update, delete and list Snapshots, and also Volume Clones.  
 
 ###### This script was made in GNU bash, version 5.2.21(1)-release.  
   
@@ -29,7 +29,12 @@ Version 3.x now supports the creation, update, delete and list Snapshots.
 `./bluexport.sh -snapupd SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|["DESCRIPTION"]`  
   
 `./bluexport.sh -snapdel SNAPSHOT_NAME`  
-
+  
+`./bluexport.sh -vclone VOLUME_CLONE_NAME BASE_NAME LPAR_NAME True|False(replication-enabled) True|False(rollback-prepare) STORAGE_TIER ALL|(Comma seperated >  
+  
+`./bluexport.sh -vclonedel VOLUME_CLONE_NAME  
+  
+`./bluexport.sh -vclonelsall
 <br>
 
 **Examples:**
@@ -122,7 +127,7 @@ SERVER2 192.168.111.112 abcdefgh-1234-1a2b-1234-abc123def123 WSMADDR LPAR1
 <br>
   
 > [!NOTE]
-> ######  *This script was made with the aim of running in crontab or in background, it will produce few output to screen, instead it will output to the log file specified in parameter log_file of the bluexport.conf.*
+> ######  *This script can be run in crontab, in background or interactively. Depending of the run mode it will always make log in the file specified in parameter log_file of the bluexport.conf.*
 
 ***
 
