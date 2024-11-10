@@ -35,12 +35,38 @@
 
        #####  START:CODE  #####
 
-Version=3.4.7
+Version=3.4.8
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 end_log_file='==== END ========= $timestamp ========='
+
+#### START:FUNCTION - Echo to log file and screen  ####
+echoscreen() {
+	if [[ $2 == "1" ]]
+	then
+		echo $1 >> $log_file
+	fi
+	if [ -t 1 ]
+	then
+		echo "$1"
+	fi
+}
+#### END:FUNCTION - Echo to log file and screen  ####
+
 if [[ $1 != "-chscrt" ]] && [[ $1 != "-viewscrt" ]] && [[ $1 != "-v" ]] && [[ $1 != "-h" ]] && [[ $1 != "" ]]
 then
+	####  START: Check if Config File exists  ####
+	if [ ! -f $bluexscrt ]
+	then
+		echoscreen ""
+		timestamp=$(date +%F" "%T" "%Z)
+		echo "==== START ======= $timestamp =========" >> $log_file
+		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Config file $bluexscrt Missing!! Aborting!..." "1"
+		echo "==== END ========= $timestamp =========" >> $log_file
+		echoscreen ""
+		exit 0
+	fi
+####  END: Check if Config File exists  ####
 	####  START: Constants Definition  #####
 	capture_time=`date +%Y-%m-%d_%H%M`
 	capture_date=`date +%Y-%m-%d`
@@ -58,19 +84,6 @@ then
 	single=0
 	vsi_user=$(cat $bluexscrt | grep "VSI_USER" | awk {'print $2'})
 	####  END: Constants Definition  #####
-
-	####  START: Check if Config File exists  ####
-	if [ ! -f $bluexscrt ]
-	then
-		echo "" >> $log_file
-		timestamp=$(date +%F" "%T" "%Z)
-		echo "==== START ======= $timestamp =========" >> $log_file
-		echo "`date +%Y-%m-%d_%H:%M:%S` - Config file $bluexscrt Missing!! Aborting!..." >> $log_file
-		echo "==== END ========= $timestamp =========" >> $log_file
-		echo "" >> $log_file
-		exit 0
-	fi
-	####  END: Check if Config File exists  ####
 
 	####  START: Get Cloud Config Data  #####
 	resource_grp=$(cat $bluexscrt | grep -w "RESOURCE_GRP" | awk {'print $2'})
@@ -93,57 +106,54 @@ then
 	allws=$(grep '^ALLWS' $bluexscrt | cut -d' ' -f2-)
 	wsnames=$(grep '^WSNAMES' $bluexscrt | cut -d' ' -f2-)
 	####  END: Get Cloud Config Data  #####
-	if [ -t 1 ]
-	then
-		echo ""
-		echo "   ### Logging at $log_file"
-		echo ""
-	fi	
+	echoscreen "   ### Logging at $log_file" ""
 fi
 
        #####  START: FUNCTIONS  #####
 
 #### START:FUNCTION - Help  ####
 help() {
-	echo ""
-	echo "Capture IBM Cloud POWERVS IBM i VSI and Export to COS or/and Image Catalog and Snapshots"
-	echo "Version 3.x now supports the creation, update, delete and list Snapshots."
-	echo ""
-	echo "Changing secret file:		./bluexport.sh -chscrt bluexscrt_file_name - Use the full path ex: /home/user/bluexscrt_new"
-	echo ""
-	echo "View secret file in use:	./bluexport.sh -viewscrt"
-	echo ""
-	echo "Usage for all volumes:		./bluexport.sh -a VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single"
-	echo ""
-	echo "Usage for excluding volumes:	./bluexport.sh -x volumes_name_to_exclude VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single"
-	echo ""
-	echo "Usage for monitoring job:	./bluexport.sh -j VSI_NAME IMAGE_NAME"
-	echo ""
-	echo "Usage to create a snapshot:	./bluexport.sh -snapcr VSI_NAME SNAPSHOT_NAME 0|[DESCRIPTION] 0|[VOLUMES(Comma separated list)]"
-	echo ""
-	echo "Usage to update a snapshot:	./bluexport.sh -snapupd VSI_NAME SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|[DESCRIPTION]"
-	echo ""
-	echo "Usage to delete snapshot:	./bluexport.sh -snapdel VSI_NAME SNAPSHOT_NAME"
-	echo ""
-	echo "Usage to list all snapshot"
-	echo " in all Workspaces:		./bluexport.sh -snaplsall"
-	echo ""
-	echo "Usage to create a volume clone:	./bluexport.sh -vclone VOLUME_CLONE_NAME BASE_NAME LPAR_NAME True|False(replication-enabled) True|False(rollback-prepare) STORAGE_TIER ALL|(Comma seperated Volumes name list to clone)"
-	echo ""
-	echo "Usage to delete a volume clone:	./bluexport.sh -vclonedel VOLUME_CLONE_NAME"
-	echo ""
-	echo "Usage to list all volume clones"
-	echo " in all Workspaces:		./bluexport.sh -vclonelsall"
-	echo ""
-	echo "Example:  ./bluexport.sh -a vsiprd vsiprd_img image-catalog daily ---- Includes all Volumes and exports to COS and image catalog"
-	echo "Example:  ./bluexport.sh -x ASP2_ vsiprd vsiprd_img both monthly    ---- Excludes Volumes with ASP2_ in the name and exports to image catalog and COS"
-	echo 'Example:  ./bluexport.sh -x "ASP2_ IASPname" vsiprd vsiprd_img both monthly    ---- Excludes Volumes with ASP2_ and IASPname in the name and exports to image catalog and COS'
-	echo ""
-	echo "Flag t before a or x makes it a test and do not makes the capture"
-	echo "Example:  ./bluexport.sh -tx ASP2_ vsiprd vsiprd_img both single ---- Does not makes the export"
-	echo ""
-	echo "Ricardo Martins - Blue Chip Portugal - 2023-2024"
-	echo ""
+	echoscreen ""
+	echoscreen "Capture IBM Cloud POWERVS IBM i VSI and Export to COS or/and Image Catalog and Snapshots"
+	echoscreen "Version 3.x now supports the creation, update, delete and list Snapshots."
+	echoscreen ""
+	echoscreen "Changing secret file:		./bluexport.sh -chscrt bluexscrt_file_name - Use the full path ex: /home/user/bluexscrt_new"
+	echoscreen ""
+	echoscreen "View secret file in use:	./bluexport.sh -viewscrt"
+	echoscreen ""
+	echoscreen "Usage for all volumes:		./bluexport.sh -a VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single"
+	echoscreen ""
+	echoscreen "Usage for excluding volumes:	./bluexport.sh -x volumes_name_to_exclude VSI_Name_to_Capture Capture_Image_Name both|image-catalog|cloud-storage hourly|daily|weekly|monthly|single"
+	echoscreen ""
+	echoscreen "Usage for monitoring job:	./bluexport.sh -j VSI_NAME IMAGE_NAME"
+	echoscreen ""
+	echoscreen "Usage to create a snapshot:	./bluexport.sh -snapcr VSI_NAME SNAPSHOT_NAME 0|[DESCRIPTION] 0|[VOLUMES(Comma separated list)]"
+	echoscreen ""
+	echoscreen "Usage to update a snapshot:	./bluexport.sh -snapupd VSI_NAME SNAPSHOT_NAME 0|[NEW_SNAPSHOT_NAME] 0|[DESCRIPTION]"
+	echoscreen ""
+	echoscreen "Usage to delete snapshot:	./bluexport.sh -snapdel VSI_NAME SNAPSHOT_NAME"
+	echoscreen ""
+	echoscreen "Usage to list all snapshot"
+	echoscreen " in all Workspaces:		./bluexport.sh -snaplsall"
+	echoscreen ""
+	echoscreen "Usage to create a volume clone:	./bluexport.sh -vclone VOLUME_CLONE_NAME BASE_NAME LPAR_NAME True|False(replication-enabled) True|False(rollback-prepare) STORAGE_TIER ALL|(Comma seperated Volumes name list to clone)"
+	echoscreen ""
+	echoscreen "Usage to delete a volume clone:	./bluexport.sh -vclonedel VOLUME_CLONE_NAME"
+	echoscreen ""
+	echoscreen "Usage to list all volume clones"
+	echoscreen " in all Workspaces:		./bluexport.sh -vclonelsall"
+	echoscreen ""
+	echoscreen "Example:  ./bluexport.sh -a vsiprd vsiprd_img image-catalog daily ---- Includes all Volumes and exports to COS and image catalog"
+	echoscreen "Example:  ./bluexport.sh -x ASP2_ vsiprd vsiprd_img both monthly    ---- Excludes Volumes with ASP2_ in the name and exports to image catalog and COS"
+	echoscreen 'Example:  ./bluexport.sh -x "ASP2_ IASPname" vsiprd vsiprd_img both monthly    ---- Excludes Volumes with ASP2_ and IASPname in the name and exports to image catalog and COS'
+	echoscreen ""
+	echoscreen "Flag t before a or x makes it a test and do not makes the capture"
+	echoscreen "Example:  ./bluexport.sh -tx ASP2_ vsiprd vsiprd_img both single ---- Does not makes the export"
+	echoscreen ""
+	echoscreen "Note: Reocurrence "hourly" and "daily" only permits captures to image-catalog"
+	echoscreen ""
+	echoscreen "Ricardo Martins - Blue Chip Portugal - 2023-2024"
+	echoscreen ""
 }
 #### END:FUNCTION - Help  ####
 
@@ -170,20 +180,20 @@ delete_previous_img() {
 	today_img=$(/usr/local/bin/ibmcloud cos list-objects-v2 --bucket $bucket | grep -wi $vsi | grep $capture_date | awk {'print $1'})
 	if [ ! $img_id_old ]
 	then
-		echo "`date +%Y-%m-%d_%H:%M:%S` - There is no Image from $old_img - Nothing to delete in image catalog." >> $log_file
+		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - There is no Image from $old_img - Nothing to delete in image catalog." "1"
 	else
-		echo "`date +%Y-%m-%d_%H:%M:%S` - == Deleting from image catalog image name $img_name_old - image ID $img_id_old - from day $old_img... ==" >> $log_file
+		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - == Deleting from image catalog image name $img_name_old - image ID $img_id_old - from day $old_img... ==" "1"
 		sh -c '/usr/local/bin/ibmcloud pi img del '$img_id_old 2>> $log_file | tee -a $log_file
 	fi
 	if [ ! $objstg_img ]
 	then
-		echo "`date +%Y-%m-%d_%H:%M:%S` - No image from previous export to delete in Object Storage." >> $log_file
+		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - No image from previous export to delete in Object Storage." "1"
 	else
 		if [ ! $today_img ]
 		then
-			echo "`date +%Y-%m-%d_%H:%M:%S` - == Something went wrong... Today's image is not in Bucket $bucket. Keeping ( Not deleted ) image name $objstg_img from day $old_img... ==" >> $log_file
+			echoscreen "`date +%Y-%m-%d_%H:%M:%S` - == Something went wrong... Today's image is not in Bucket $bucket. Keeping ( Not deleted ) image name $objstg_img from day $old_img... ==" "1"
 		else
-			echo "`date +%Y-%m-%d_%H:%M:%S` - == Deleting from Bucket $bucket, image name $objstg_img from day $old_img... ==" >> $log_file
+			echoscreen "`date +%Y-%m-%d_%H:%M:%S` - == Deleting from Bucket $bucket, image name $objstg_img from day $old_img... ==" "1"
 			sh -c '/usr/local/bin/ibmcloud cos object-delete --bucket '$bucket' --key '$objstg_img' --force' 2>> $log_file | tee -a $log_file
 		fi
 	fi
@@ -203,7 +213,7 @@ dc_vsi_list() {
 ####  START:FUNCTION - Monitor Capture and Export Job  ####
 job_monitor() {
     # Get Capture & Export Job ID #
-	echo "`date +%Y-%m-%d_%H:%M:%S` - Job log in file $job_log" >> $log_file
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Job log in file $job_log" "1"
 	if [ $flagj -eq 1 ]
 	then
 		job=$(sh -c '/usr/local/bin/ibmcloud pi job ls | grep -B7 '$capture_name' | grep "Job ID" | awk {'\''print $3'\''}' 2>> $log_file | tee -a $log_file)
@@ -222,13 +232,13 @@ job_monitor() {
 		then
 			if [[ $destination == "cloud-storage" ]]
 			then
-				echo "`date +%Y-%m-%d_%H:%M:%S` - Image Capture and Export of $vsi to Bucket $bucket Completed !!" >> $log_file
+				echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Image Capture and Export of $vsi to Bucket $bucket Completed !!" "1"
 			elif [[ $destination == "both" ]]
 			then
-				echo "`date +%Y-%m-%d_%H:%M:%S` - Image Capture and Export of $vsi to Image Catalog Completed !!" >> $log_file
-				echo "`date +%Y-%m-%d_%H:%M:%S` - Image Capture and Export of $vsi to Bucket $bucket Completed !!" >> $log_file
+				echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Image Capture and Export of $vsi to Image Catalog Completed !!" "1"
+				echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Image Capture and Export of $vsi to Bucket $bucket Completed !!" "1"
 			else
-				echo "`date +%Y-%m-%d_%H:%M:%S` - Image Capture and Export of $vsi to Image Catalog Completed !!" >> $log_file
+				echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Image Capture and Export of $vsi to Image Catalog Completed !!" "1"
 			fi
 			if [ $single -eq  0 ] && [ $flagj -ne 1 ]
 			then
@@ -239,30 +249,30 @@ job_monitor() {
 			cp $job_log $job_log_perm
 			if [ $flagj -eq 1 ] && [ -t 1 ]
 			then
-				echo ""
-				echo "   ### Log files used:"
-				echo "   ### $log_file"
-				echo "   ### $job_log"
-				echo "   ### $job_monitor"
-				echo "   ### $job_log_perm"
-				echo ""
+				echoscreen ""
+				echoscreen "   ### Log files used:"
+				echoscreen "   ### $log_file"
+				echoscreen "   ### $job_log"
+				echoscreen "   ### $job_monitor"
+				echoscreen "   ### $job_log_perm"
+				echoscreen ""
 			fi
 			abort "`date +%Y-%m-%d_%H:%M:%S` - Finished Successfully!!"
 		elif [[ $job_status == "" ]]
 		then
-			echo "`date +%Y-%m-%d_%H:%M:%S` - FAILED Getting Job ID or no Job Running!" >> $log_file
+			echoscreen "`date +%Y-%m-%d_%H:%M:%S` - FAILED Getting Job ID or no Job Running!" "1"
 			abort "`date +%Y-%m-%d_%H:%M:%S` - Check file $job_monitor for more details."
 		elif [[ $job_status == "failed" ]]
 		then
-			echo "`date +%Y-%m-%d_%H:%M:%S` - Job ID "$job" Status:" ${job_status^^} >> $log_file
-			echo "`date +%Y-%m-%d_%H:%M:%S` - Message:" $message >> $log_file
+			echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Job ID "$job" Status:" ${job_status^^} "1"
+			echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Message:" $message "1"
 			abort "`date +%Y-%m-%d_%H:%M:%S` - Job Failed, check message!!"
 		else
 			if [[ $operation != $operation_before ]]
 			then
-				echo "`date +%Y-%m-%d_%H:%M:%S` - Job ID "$job" Status:" ${job_status^^} >> $log_file
-				echo "`date +%Y-%m-%d_%H:%M:%S` - Message:" $message >> $log_file
-				echo "`date +%Y-%m-%d_%H:%M:%S` - Waiting for Operation Change... Operation Running Now:" ${operation^^} >> $log_file
+				echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Job ID "$job" Status:" ${job_status^^} "1"
+				echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Message:" $message "1"
+				echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Waiting for Operation Change... Operation Running Now:" ${operation^^} "1"
 				echo "`date +%Y-%m-%d_%H:%M:%S` - Running "${operation^^}"... Sleeping 60 seconds..." >> $job_log
 				sleep 60
 				operation_before=$operation
@@ -285,11 +295,11 @@ cloud_login() {
 get_IASP_name() {
 	if [ $test -eq 0 ]
 	then
-		echo "`date +%Y-%m-%d_%H:%M:%S` - Getting $vsi IASP Name..." >> $log_file
+		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Getting $vsi IASP Name..." "1"
 		vsi_ip=$(cat $bluexscrt | grep -wi $vsi | awk {'print $2'})
 		if ping -c1 -w3 $vsi_ip &> /dev/null
 		then
-			echo "`date +%Y-%m-%d_%H:%M:%S` - Ping VSI $vsi OK." >> $log_file
+			echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Ping VSI $vsi OK." "1"
 		else
 			abort "`date +%Y-%m-%d_%H:%M:%S` - Cannot ping VSI $vsi with IP $vsi_ip ! Aborting..."
 		fi
@@ -301,13 +311,13 @@ get_IASP_name() {
 			iasp_name=$(ssh -i $sshkeypath $vsi_user@$vsi_ip 'ls -l / | grep " IASP"' | awk {'print $9'})
 			if [[ $iasp_name == "" ]]
 			then
-				echo "`date +%Y-%m-%d_%H:%M:%S` - VSI $vsi doesn't have IASP or it is Varied OFF" >> $log_file
+				echoscreen "`date +%Y-%m-%d_%H:%M:%S` - VSI $vsi doesn't have IASP or it is Varied OFF" "1"
 			else
-				echo "`date +%Y-%m-%d_%H:%M:%S` - VSI $vsi IASP Name: $iasp_name" >> $log_file
+				echoscreen "`date +%Y-%m-%d_%H:%M:%S` - VSI $vsi IASP Name: $iasp_name" "1"
 			fi
 		fi
 	else
-		echo "`date +%Y-%m-%d_%H:%M:%S` - Running in test mode, skipping get_IASP_name." >> $log_file
+		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Running in test mode, skipping get_IASP_name." "1"
 	fi
 }
 ####  END:FUNCTION - Get IASP name  ####
@@ -326,16 +336,16 @@ check_locally_VSI_exists() {
 		wsshortlist=$(cat $bluexscrt | grep -w ALLWS)
 		wsposition=$(echo "$wsshortlist" | tr " " "\n" | grep -n "$vsiwsshort" | cut -d: -f1)
 		full_ws_name=$(cat $bluexscrt | grep -w WSNAMES | sed -z 's/:/ /g'|awk {'print $'$wsposition''})
-		echo "`date +%Y-%m-%d_%H:%M:%S` - VSI $vsi_cloud_name was found in $full_ws_name..." >> $log_file
+		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - VSI $vsi_cloud_name was found in $full_ws_name..." "1"
 		if [ $flagj -eq 0 ]
 		then
-			echo "`date +%Y-%m-%d_%H:%M:%S` - VSI to Capture: $vsi_cloud_name" >> $log_file
+			echoscreen "`date +%Y-%m-%d_%H:%M:%S` - VSI to Capture: $vsi_cloud_name" "1"
 			get_IASP_name
 		fi
 	else
-		echo ""
-		echo "   ### VSI $vsi not found in any of the workspaces available in bluexscrt file!"
-		echo ""
+		echoscreen ""
+		echoscreen "   ### VSI $vsi not found in any of the workspaces available in bluexscrt file!"
+		echoscreen ""
 		exit 0
 	fi
 }
@@ -345,18 +355,18 @@ check_locally_VSI_exists() {
 flush_asps() {
 	if [ $test -eq 0 ]
 	then
-		echo "`date +%Y-%m-%d_%H:%M:%S` - Flushing Memory to Disk for SYSBAS..." >> $log_file
+		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Flushing Memory to Disk for SYSBAS..." "1"
 		ssh -T -i $sshkeypath $vsi_user@$vsi_ip 'system "CHGASPACT ASPDEV(*SYSBAS) OPTION(*FRCWRT)"' >> $log_file | tee -a $log_file
 		if [[ $iasp_name != "" ]]
 		then
-			echo "`date +%Y-%m-%d_%H:%M:%S` - Flushing Memory to Disk for $iasp_name ..." >> $log_file
+			echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Flushing Memory to Disk for $iasp_name ..." "1"
 			ssh -T -i $sshkeypath $vsi_user@$vsi_ip 'system "CHGASPACT ASPDEV('$iasp_name') OPTION(*FRCWRT)"' >> $log_file | tee -a $log_file
 		fi
 	else
-		echo "`date +%Y-%m-%d_%H:%M:%S` - Flushing Memory to Disk for SYSBAS..." >> $log_file
+		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Flushing Memory to Disk for SYSBAS..." "1"
 		if [[ $iasp_name != "" ]]
 		then
-			echo "`date +%Y-%m-%d_%H:%M:%S` - Flushing Memory to Disk for $iasp_name ..." >> $log_file
+			echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Flushing Memory to Disk for $iasp_name ..." "1"
 		fi
 	fi
 }
@@ -365,14 +375,14 @@ flush_asps() {
 ####  START:FUNCTION - Do the Snapshot Create  ####
 do_snap_create() {
 	flush_asps
-	echo "`date +%Y-%m-%d_%H:%M:%S` - == Executing Snapshot $snap_name of Instance $vsi with volumes $volumes_to_echo" >> $log_file
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - == Executing Snapshot $snap_name of Instance $vsi with volumes $volumes_to_echo" "1"
 	snap_cr_cmd="/usr/local/bin/ibmcloud pi ins snap cr $vsi_id --name $snap_name $description $flag_volumes $volumes_to_snap"
 	eval $snap_cr_cmd 2>> $log_file
 	if [ $? -eq 1 ]
 	then
 		abort "`date +%Y-%m-%d_%H:%M:%S` - FAILED - Oops something went wrong!... Check the log above this line..."
 	else
-		echo "`date +%Y-%m-%d_%H:%M:%S` - Waiting for Snapshot $snap_name to reach 100%..." >> $log_file
+		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Waiting for Snapshot $snap_name to reach 100%..." "1"
 		snap_percent=0
 		while [ $snap_percent -lt 100 ]
 		do
@@ -387,9 +397,9 @@ do_snap_create() {
 			then
 				if [[ "$snap_percent" == "100" ]]
 				then
-					echo "`date +%Y-%m-%d_%H:%M:%S` - Snapshot $snap_name reached 100% - Done!" >> $log_file
+					echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Snapshot $snap_name reached 100% - Done!" "1"
 				else
-					echo "`date +%Y-%m-%d_%H:%M:%S` - Snapshot $snap_name at $snap_percent%" >> $log_file
+					echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Snapshot $snap_name at $snap_percent%" "1"
 				fi
 			fi
 		done
@@ -399,13 +409,13 @@ do_snap_create() {
 
 ####  START:FUNCTION - Do the Snapshot Update  ####
 do_snap_update() {
-	echo "`date +%Y-%m-%d_%H:%M:%S` - == Executing Snapshot $snap_name Update $new_name_echo" >> $log_file
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - == Executing Snapshot $snap_name Update $new_name_echo" "1"
 	snap_id=$(/usr/local/bin/ibmcloud pi ins snap ls | grep -w $snap_name | awk {'print $1'})
 	snap_upd_cmd="/usr/local/bin/ibmcloud pi ins snap upd $snap_id $description $new_name"
 	eval $snap_upd_cmd 2>> $log_file
 	if [ $? -eq 0 ]
 	then
-		echo "`date +%Y-%m-%d_%H:%M:%S` - Snapshot $snap_name updated $new_name_echo $new_description_echo - Done!" >> $log_file
+		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Snapshot $snap_name updated $new_name_echo $new_description_echo - Done!" "1"
 	else
 		abort "`date +%Y-%m-%d_%H:%M:%S` - FAILED - Oops something went wrong!... Check the log above this line..."
 	fi
@@ -414,12 +424,12 @@ do_snap_update() {
 
 ####  START:FUNCTION - Do the Snapshot Delete  ####
 do_snap_delete() {
-	echo "`date +%Y-%m-%d_%H:%M:%S` - == Executing Snapshot $snap_name Delete" >> $log_file
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - == Executing Snapshot $snap_name Delete" "1"
 	snap_id=$(/usr/local/bin/ibmcloud pi ins snap ls | grep -w $snap_name | awk {'print $1'})
 	/usr/local/bin/ibmcloud pi ins snap del $snap_id 2>> $log_file
 	if [ $? -eq 0 ]
 	then
-		echo "`date +%Y-%m-%d_%H:%M:%S` - Waiting for Snapshot $snap_name deletion to reach 100%..." >> $log_file
+		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Waiting for Snapshot $snap_name deletion to reach 100%..." "1"
 		snap_percent=0
 		while [ $snap_percent -lt 100 ]
 		do
@@ -434,9 +444,9 @@ do_snap_delete() {
 			then
 				if [ $snap_percent -eq 100 ]
 				then
-					echo "`date +%Y-%m-%d_%H:%M:%S` - Snapshot $snap_name Deleted. - Done!" >> $log_file
+					echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Snapshot $snap_name Deleted. - Done!" "1"
 				else
-					echo "`date +%Y-%m-%d_%H:%M:%S` - Snapshot $snap_name deletion at $snap_percent%" >> $log_file
+					echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Snapshot $snap_name deletion at $snap_percent%" "1"
 				fi
 			fi
 		done
@@ -449,11 +459,11 @@ do_snap_delete() {
 ####  START:FUNCTION - Do the Volume Clone Execute ####
 do_volume_clone_execute() {
 	flush_asps
-	echo "`date +%Y-%m-%d_%H:%M:%S` - == Executing Volume Clone with name $vclone_name ..." >> $log_file
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - == Executing Volume Clone with name $vclone_name ..." "1"
 	/usr/local/bin/ibmcloud pi vol cl ex $vclone_id --name $base_name --replication-enabled=$replication --rollback-prepare=$rollback --target-tier $target_tier 2>> $log_file
 	if [ $? -eq 0 ]
 	then
-		echo "`date +%Y-%m-%d_%H:%M:%S` - Waiting for Volume Clone $vclone_name execution to finish..." >> $log_file
+		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Waiting for Volume Clone $vclone_name execution to finish..." "1"
 		vcloneex_percent=0
 		while [ $vcloneex_percent -lt 100 ]
 		do
@@ -464,9 +474,9 @@ do_volume_clone_execute() {
 			then
 				if [ $vcloneex_percent -eq 100 ]
 				then
-					echo "`date +%Y-%m-%d_%H:%M:%S` - Volume Clone $vclone_name Done and ready to be used!" >> $log_file
+					echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Volume Clone $vclone_name Done and ready to be used!" "1"
 				else
-					echo "`date +%Y-%m-%d_%H:%M:%S` - Volume Clone $vclone_name execution at $vcloneex_percent%" >> $log_file
+					echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Volume Clone $vclone_name execution at $vcloneex_percent%" "1"
 				fi
 			fi
 		done
@@ -478,7 +488,7 @@ do_volume_clone_execute() {
 
 ####  START:FUNCTION - Do the Volume Clone Start ####
 do_volume_clone_start() {
-	echo "`date +%Y-%m-%d_%H:%M:%S` - == Starting Volume Clone with name $vclone_name ..." >> $log_file
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - == Starting Volume Clone with name $vclone_name ..." "1"
 	vclone_id=$(/usr/local/bin/ibmcloud pi vol cl ls | grep -A6 $vclone_name | grep "Volume Clone Request ID:" | awk {'print $5'})
 	/usr/local/bin/ibmcloud pi vol cl st $vclone_id 2>> $log_file
 	if [ $? -eq 0 ]
@@ -487,7 +497,7 @@ do_volume_clone_start() {
 		vclone_start_status=$(/usr/local/bin/ibmcloud pi vol cl get $vclone_id | grep "Status" | awk {'print $2'})
 		if [[ "$vclone_start_action" == "start" ]] && [[ "$vclone_start_status" == "available" ]]
 		then
-			echo "`date +%Y-%m-%d_%H:%M:%S` - Volume Clone $vclone_name Started and ready to execute..." >> $log_file
+			echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Volume Clone $vclone_name Started and ready to execute..." "1"
 		else
 			abort "`date +%Y-%m-%d_%H:%M:%S` - FAILED - Oops something went wrong!... Check the log above this line..."
 		fi
@@ -500,11 +510,11 @@ do_volume_clone_start() {
 
 ####  START:FUNCTION - Do the Volume Clone ####
 do_volume_clone() {
-	echo "`date +%Y-%m-%d_%H:%M:%S` - == Creating Volume Clone Request with name $vclone_name ..." >> $log_file
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - == Creating Volume Clone Request with name $vclone_name ..." "1"
 	/usr/local/bin/ibmcloud pi vol cl cr --name $vclone_name --volumes $volumes_to_clone 2>> $log_file
 	if [ $? -eq 0 ]
 	then
-		echo "`date +%Y-%m-%d_%H:%M:%S` - Waiting for Volume Clone Request $vclone_name creation to finish..." >> $log_file
+		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Waiting for Volume Clone Request $vclone_name creation to finish..." "1"
 		vclone_percent=0
 		while [ $vclone_percent -lt 100 ]
 		do
@@ -515,9 +525,9 @@ do_volume_clone() {
 			then
 				if [ $vclone_percent -eq 100 ]
 				then
-					echo "`date +%Y-%m-%d_%H:%M:%S` - Volume Clone Request $vclone_name Done!" >> $log_file
+					echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Volume Clone Request $vclone_name Done!" "1"
 				else
-					echo "`date +%Y-%m-%d_%H:%M:%S` - Volume Clone Request $vclone_name creation at $vclone_percent%" >> $log_file
+					echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Volume Clone Request $vclone_name creation at $vclone_percent%" >> $log_file
 				fi
 			fi
 		done
@@ -586,7 +596,7 @@ fi
 
 
 case $1 in
-   -h | --help)
+   -h | --help | -help)
 	help
 	abort "`date +%Y-%m-%d_%H:%M:%S` - Help requested!!"
     ;;
@@ -594,23 +604,18 @@ case $1 in
    -j)
 	if [ $# -lt 3 ]
 	then
-		echo "Flag -j selected, but Arguments Missing!! Syntax: bluexport.sh -j VSI_NAME IMAGE_NAME"
+		echoscreen "Flag -j selected, but Arguments Missing!! Syntax: bluexport.sh -j VSI_NAME IMAGE_NAME"
 		abort "`date +%Y-%m-%d_%H:%M:%S` - Flag -j selected, but Arguments Missing!! Syntax: bluexport.sh -j VSI_NAME IMAGE_NAME"
 	fi
 	vsi=$2
 	capture_name=${3^^}
-	echo "`date +%Y-%m-%d_%H:%M:%S` - Flag -j selected, watching only the Job Status for Capture Image $capture_name! Logging at $HOME/bluexport_j_"$capture_name".log" >> $log_file
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Flag -j selected, watching only the Job Status for Capture Image $capture_name! Logging at $HOME/bluexport_j_"$capture_name".log" "1"
 	timestamp=$(date +%F" "%T" "%Z)
-	echo "==== END ========= $timestamp =========" >> $log_file
+	echoscreen "==== END ========= $timestamp =========" "1"
 	flagj=1
 	log_file="$HOME/bluexport_j_"$capture_name".log"
-	if [ -t 1 ]
-	then
-		echo ""
-		echo "   ### Flag -j selected - Logging at file $log_file"
-		echo ""
-	fi
-	echo "" > $log_file
+	echoscreen "   ### Flag -j selected - Logging at file $log_file"
+	echoscreen "" > $log_file
 	timestamp=$(date +%F" "%T" "%Z)
 	echo "==== START ======= $timestamp =========" >> $log_file
 	cloud_login
@@ -656,10 +661,10 @@ case $1 in
 	if [[ $1 == "-ta" ]]
 	then
 		test=1
-		echo "`date +%Y-%m-%d_%H:%M:%S` - Flag -t selected. Logging at "$job_test_log >> $log_file
-		echo "`date +%Y-%m-%d_%H:%M:%S` - Testing only!! No Capture will be done!" >> $log_file
+		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Flag -t selected. Logging at "$job_test_log "1"
+		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Testing only!! No Capture will be done!" "1"
 		timestamp=$(date +%F" "%T" "%Z)
-		echo "==== END ========= $timestamp =========" >> $log_file
+		echoscreen "==== END ========= $timestamp =========" "1"
 		log_file=$job_test_log
 		timestamp=$(date +%F" "%T" "%Z)
 		echo "==== START ======= $timestamp =========" >> $log_file
@@ -668,12 +673,12 @@ case $1 in
 	fi
 	vsi=$2
 	vsi_id_bluexscrt
-	echo "`date +%Y-%m-%d_%H:%M:%S` - Starting Capture&Export for VSI Name: $vsi ..." >> $log_file
-	echo "`date +%Y-%m-%d_%H:%M:%S` - Capture Name: $capture_name" >> $log_file
-	echo "`date +%Y-%m-%d_%H:%M:%S` - Export Destination: $destination" >> $log_file
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Starting Capture&Export for VSI Name: $vsi ..." "1"
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Capture Name: $capture_name" "1"
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Export Destination: $destination" "1"
 	if [[ $destination == "both" ]] || [[ $destination == "image-catalog" ]] || [[ $destination == "cloud-storage" ]]
 	then
-		echo "`date +%Y-%m-%d_%H:%M:%S` - Export Destination $destination is valid." >> $log_file
+		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Export Destination $destination is valid." "1"
 	else
 		abort "`date +%Y-%m-%d_%H:%M:%S` - Export Destination $destination is NOT valid!"
 	fi
@@ -717,10 +722,10 @@ case $1 in
 	if [[ $1 == "-tx" ]]
 	then
 		test=1
-		echo "`date +%Y-%m-%d_%H:%M:%S` - Flag -t selected. Logging at "$job_test_log >> $log_file
-		echo "`date +%Y-%m-%d_%H:%M:%S` - Testing only!! No Capture will be done!" >> $log_file
+		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Flag -t selected. Logging at $job_test_log" "1"
+		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Testing only!! No Capture will be done!" "1"
 		timestamp=$(date +%F" "%T" "%Z)
-		echo "==== END ========= $timestamp =========" >> $log_file
+		echoscreen "==== END ========= $timestamp =========" "1"
 		log_file=$job_test_log
 		timestamp=$(date +%F" "%T" "%Z)
 		echo "==== START ======= $timestamp =========" >> $log_file
@@ -733,16 +738,16 @@ case $1 in
 	do
 		exclude_grep_opts+=" | grep -v $name"
 	done
-	echo "`date +%Y-%m-%d_%H:%M:%S` - Volumes Name to exclude: ${exclude_names[*]}" >> $log_file
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Volumes Name to exclude: ${exclude_names[*]}" "1"
 	vsi=$3
 	vsi_id_bluexscrt
-	echo "`date +%Y-%m-%d_%H:%M:%S` - Starting Capture&Export for VSI Name: $vsi ..." >> $log_file
-	echo "`date +%Y-%m-%d_%H:%M:%S` - Capture Name: $capture_name" >> $log_file
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Starting Capture&Export for VSI Name: $vsi ..." "1"
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Capture Name: $capture_name" "1"
 	destination=$5
-	echo "`date +%Y-%m-%d_%H:%M:%S` - Export Destination: $destination" >> $log_file
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Export Destination: $destination" "1"
 	if [[ $destination == "both" ]] || [[ $destination == "image-catalog" ]] || [[ $destination == "cloud-storage" ]]
 	then
-		echo "`date +%Y-%m-%d_%H:%M:%S` - Export Destination $destination is valid!" >> $log_file
+		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Export Destination $destination is valid!" "1"
 	else
 		abort "`date +%Y-%m-%d_%H:%M:%S` - Export Destination $destination is NOT valid!"
 	fi
@@ -806,7 +811,7 @@ case $1 in
 		volumes_to_echo=$volumes_to_snap
 		volumes_to_snap="--volumes "$volumes_to_snap
 	fi
-	echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting Snapshot $snap_name of VSI $vsi with volumes: $volumes_to_echo !" >> $log_file
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - === Starting Snapshot $snap_name of VSI $vsi with volumes: $volumes_to_echo !" "1"
 	cloud_login
 	check_locally_VSI_exists
 	do_snap_create
@@ -832,7 +837,7 @@ case $1 in
 			abort "`date +%Y-%m-%d_%H:%M:%S` - You must pass at least one flag, DESCRIPTION or NEW_SNAPSHOT_NAME!..."
 		fi
 	fi
-	echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting Snapshot $snap_name Update !" >> $log_file
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - === Starting Snapshot $snap_name Update !" "1"
 	cloud_login
 	snap_name_exists=$(/usr/local/bin/ibmcloud pi ins snap ls | grep -w $snap_name)
 	if [[ "$snap_name_exists" == "" ]]
@@ -888,7 +893,7 @@ case $1 in
 	vsi=$2
 	vsi_id_bluexscrt
 	snap_name=$3
-	echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting Snapshot Delete $snap_name from VSI $vsi !" >> $log_file
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - === Starting Snapshot Delete $snap_name from VSI $vsi !" "1"
 	cloud_login
 	/usr/local/bin/ibmcloud pi ws tg $vsi_ws_id
 	snap_name_exists=$(/usr/local/bin/ibmcloud pi ins snap ls $vsi_id | grep -w $snap_name)
@@ -902,7 +907,7 @@ case $1 in
 
    -snaplsall)
 	test=0
-	echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting Listing all Snapshot in all Workspaces !" >> $log_file
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - === Starting Listing all Snapshot in all Workspaces !" "1"
 	cloud_login
 
 	# Convert 'wsnames' string to an array
@@ -922,17 +927,17 @@ case $1 in
 	do
 		crn=$(grep "^$ws " "$bluexscrt" | awk '{print $2}')
 		full_ws_name="${wsmap[$ws]}" # Get the full workspace name from the map
-		echo "`date +%Y-%m-%d_%H:%M:%S` - === Listing Snapshots at Workspace $full_ws_name :" | tee -a $log_file
+		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - === Listing Snapshots at Workspace $full_ws_name :" "1"
 		/usr/local/bin/ibmcloud pi ws tg $crn 2>> $log_file | tee -a $log_file
 		/usr/local/bin/ibmcloud pi ins snap ls 2>> $log_file | tee -a $log_file
-		echo "" | tee -a $log_file
+		echoscreen "" "1"
 	done
 	abort "`date +%Y-%m-%d_%H:%M:%S` - === Finished Listing all Snapshots in all Workpsaces"
     ;;
 
    -vclonelsall)
 	test=0
-	echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting Listing all Volume Clones in all Workspaces !" >> $log_file
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - === Starting Listing all Volume Clones in all Workspaces !" "1"
 	cloud_login
 
 	# Convert 'wsnames' string to an array
@@ -952,9 +957,10 @@ case $1 in
 	do
 		crn=$(grep "^$ws " "$bluexscrt" | awk '{print $2}')
 		full_ws_name="${wsmap[$ws]}" # Get the full workspace name from the map
-		echo "`date +%Y-%m-%d_%H:%M:%S` - === Listing Volume Clones at Workspace $full_ws_name :" | tee -a $log_file
+		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - === Listing Volume Clones at Workspace $full_ws_name :" "1"
 		/usr/local/bin/ibmcloud pi ws tg $crn 2>> $log_file | tee -a $log_file
 		/usr/local/bin/ibmcloud pi vol cl ls 2>> $log_file | tee -a $log_file
+		echoscreen "" "1"
 	done
 	abort "`date +%Y-%m-%d_%H:%M:%S` - === Finished Listing all Volume Clones in all Workpsaces"
     ;;
@@ -996,8 +1002,8 @@ case $1 in
 	then
 		volumes_to_clone=$(/usr/local/bin/ibmcloud pi ins get $vsi_id | grep Volumes | sed -z 's/ //g' | sed -z 's/Volumes//g')
 	fi
-	echo "`date +%Y-%m-%d_%H:%M:%S` - === Starting the 3 processes of Volume Clone $vclone_name" >> $log_file
-	echo "`date +%Y-%m-%d_%H:%M:%S` - This is the list of volumes that will be cloned: $volumes_to_clone" >> $log_file
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - === Starting the 3 processes of Volume Clone $vclone_name" "1"
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - This is the list of volumes that will be cloned: $volumes_to_clone" "1"
 	do_volume_clone
 	do_volume_clone_start
 	do_volume_clone_execute
@@ -1017,7 +1023,7 @@ case $1 in
 	then
 		abort "`date +%Y-%m-%d_%H:%M:%S` - Volume Clone with name $vclone_name doesn't exists, please choose a diferent name!"
 	fi
-	echo "`date +%Y-%m-%d_%H:%M:%S` - === Trying to Delete Volume Clone with name $vclone_name" >> $log_file
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - === Trying to Delete Volume Clone with name $vclone_name" "1"
 	vclone_id=$(/usr/local/bin/ibmcloud pi vol cl ls | grep -A6 $vclone_name | grep "Volume Clone Request ID:" | awk {'print $5'})
 	/usr/local/bin/ibmcloud pi vol cl del $vclone_id
 	abort "`date +%Y-%m-%d_%H:%M:%S` - === Successfully Deleted Volume Clone with name $vclone_name !"
@@ -1040,13 +1046,16 @@ case $1 in
     ;;
 
    -v | --version)
-    echo ""
-	echo "  ### bluexport by Ricardo Martins - Blue Chip Portugal - 2023-2024"
+    echoscreen ""
+	echoscreen "  ### bluexport by Ricardo Martins - Blue Chip Portugal - 2023-2024"
 	abort "`date +%Y-%m-%d_%H:%M:%S` - Version: $Version"
     ;;
 
     *)
-	help
+	if [ -t 1 ]
+	then
+		help
+	fi
 	abort "`date +%Y-%m-%d_%H:%M:%S` - Flag -a or -x Missing or invalid Flag!"
     ;;
 esac
@@ -1059,8 +1068,8 @@ check_locally_VSI_exists
 eval $volumes_cmd > $volumes_file | tee -a $log_file
 volumes=$(cat $volumes_file | awk {'print $1'} | tr '\n' ',' | sed 's/,$//')
 volumes_name=$(cat $volumes_file | awk {'print $2'} | tr '\n' ' ')
-echo "`date +%Y-%m-%d_%H:%M:%S` - Volumes ID Captured: $volumes" >> $log_file
-echo "`date +%Y-%m-%d_%H:%M:%S` - Volumes Name Captured: $volumes_name" >> $log_file
+echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Volumes ID Captured: $volumes" "1"
+echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Volumes Name Captured: $volumes_name" "1"
 ####  END: Get Volumes to capture  ####
 
 ####  START: Flush ASPs and IASP Memory to Disk  ####
@@ -1070,19 +1079,19 @@ flush_asps
 ####  START: Make the Capture and Export  ####
 if [[ $destination == "image-catalog" ]]
 then
-	echo "`date +%Y-%m-%d_%H:%M:%S` - == Executing Capture to image catalog cloud command... ==" >> $log_file
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - == Executing Capture to image catalog cloud command... ==" "1"
 	if [ $test -eq 1 ]
 	then
-		echo "/usr/local/bin/ibmcloud pi ins cap cr $vsi_id --destination $destination --name $capture_name --volumes \"$volumes\"" >> $log_file
+		echoscreen "/usr/local/bin/ibmcloud pi ins cap cr $vsi_id --destination $destination --name $capture_name --volumes \"$volumes\"" "1"
 	else
 		rm $job_id
 		/usr/local/bin/ibmcloud pi ins cap cr $vsi_id --destination $destination --name $capture_name --volumes "$volumes" 2>> $log_file | tee -a $log_file $job_id
 	fi
 else
-	echo "`date +%Y-%m-%d_%H:%M:%S` - == Executing Capture and Export cloud command... ==" >> $log_file
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - == Executing Capture and Export cloud command... ==" "1"
 	if [ $test -eq 1 ]
 	then
-		echo "/usr/local/bin/ibmcloud pi ins cap cr $vsi_id --destination $destination --name $capture_name --volumes \"$volumes\" --access-key $accesskey --secret-key $secretkey --region $region --image-path $bucket" >> $log_file
+		echoscreen "/usr/local/bin/ibmcloud pi ins cap cr $vsi_id --destination $destination --name $capture_name --volumes \"$volumes\" --access-key $accesskey --secret-key $secretkey --region $region --image-path $bucket" "1"
 	else
 		rm $job_id
 		/usr/local/bin/ibmcloud pi ins cap cr $vsi_id --destination $destination --name $capture_name --volumes "$volumes" --access-key $accesskey --secret-key $secretkey --region $region --image-path $bucket 2>> $log_file | tee -a $log_file $job_id
@@ -1093,9 +1102,9 @@ fi
 ####  START: Job Monitoring  ####
 if [ $test -eq 0 ]
 then
-	echo "`date +%Y-%m-%d_%H:%M:%S` - => Iniciating Job Monitorization..." >> $log_file
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - => Iniciating Job Monitorization..." "1"
 else
-	echo "`date +%Y-%m-%d_%H:%M:%S` - => Iniciating Job Monitorization..." >> $log_file
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - => Iniciating Job Monitorization..." "1"
 	abort "`date +%Y-%m-%d_%H:%M:%S` - Test Finished!"
 fi
 
