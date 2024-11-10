@@ -35,7 +35,7 @@
 
        #####  START:CODE  #####
 
-Version=3.4.8
+Version=3.4.9
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 end_log_file='==== END ========= $timestamp ========='
@@ -61,6 +61,7 @@ then
 		echoscreen ""
 		timestamp=$(date +%F" "%T" "%Z)
 		echo "==== START ======= $timestamp =========" >> $log_file
+		echo "Flags Used: $@" >> $log_file
 		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Config file $bluexscrt Missing!! Aborting!..." "1"
 		echo "==== END ========= $timestamp =========" >> $log_file
 		echoscreen ""
@@ -587,6 +588,7 @@ start_vg() {
 ####  START: Iniciate Log and Validate Arguments  ####
 timestamp=$(date +%F" "%T" "%Z)
 echo "==== START ======= $timestamp =========" >> $log_file
+echo "Flags Used: $@" >> $log_file
 
 if [ $# -eq 0 ]
 then
@@ -618,6 +620,7 @@ case $1 in
 	echoscreen "" > $log_file
 	timestamp=$(date +%F" "%T" "%Z)
 	echo "==== START ======= $timestamp =========" >> $log_file
+	echo "Flags Used: $@" >> $log_file
 	cloud_login
 	check_locally_VSI_exists
 	job_monitor
@@ -668,6 +671,7 @@ case $1 in
 		log_file=$job_test_log
 		timestamp=$(date +%F" "%T" "%Z)
 		echo "==== START ======= $timestamp =========" >> $log_file
+		echo "Flags Used: $@" >> $log_file
 	else
 		test=0
 	fi
@@ -729,6 +733,7 @@ case $1 in
 		log_file=$job_test_log
 		timestamp=$(date +%F" "%T" "%Z)
 		echo "==== START ======= $timestamp =========" >> $log_file
+		echo "Flags Used: $@" >> $log_file
 	else
 		test=0
 	fi
