@@ -127,7 +127,7 @@ SERVER2 192.168.111.112 abcdefgh-1234-1a2b-1234-abc123def123 WSMADDR LPAR1
 <br>
   
 > [!NOTE]
-> ######  *This script can be run in crontab, in background or interactively. Depending of the run mode it will always make log in the file specified in parameter log_file of the bluexport.conf.*
+> ######  *This script can be run in crontab, in background or interactively. Depending of the run mode it will produce output to screen or not, but will always make log in the file specified in parameter log_file of the bluexport.conf.*
 
 ***
 
