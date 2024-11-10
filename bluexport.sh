@@ -542,6 +542,7 @@ vsi_id_bluexscrt() {
 
 ####  START:FUNCTION  Export to COS an existent Image  ####
 export_img() {
+	abort "`date +%Y-%m-%d_%H:%M:%S` - Under construction!!"
 }
 ####  END:FUNCTION  Export to COS an existent Image  ####
 
@@ -549,21 +550,25 @@ export_img() {
 
 ####  START:FUNCTION  Create Volume Group  ####
 create_vg() {
+	abort "`date +%Y-%m-%d_%H:%M:%S` - Under construction!!"
 }
 ####  END:FUNCTION  Create Volume Group  ####
 
 ####  START:FUNCTION  Onboarding auxiliary Volumes  ####
 onboard_aux_vol() {
+	abort "`date +%Y-%m-%d_%H:%M:%S` - Under construction!!"
 }
 ####  END:FUNCTION  Onboarding auxiliary Volumes  ####
 
 ####  START:FUNCTION  Stop Volume Group  ####
 stop_vg() {
+	abort "`date +%Y-%m-%d_%H:%M:%S` - Under construction!!"
 }
 ####  END:FUNCTION  Stop Volume Group  ####
 
 ####  START:FUNCTION  Start Volume Group  ####
 start_vg() {
+	abort "`date +%Y-%m-%d_%H:%M:%S` - Under construction!!"
 }
 ####  END:FUNCTION  Start Volume Group  ####
 
