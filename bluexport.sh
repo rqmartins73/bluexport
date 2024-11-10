@@ -18,7 +18,7 @@
 # Usage to list all snapshot
 #        in all Workspaces:		./bluexport.sh -snaplsall
 #
-# Usage to create a volume clone:   	./bluexport.sh -vclone VOLUME_CLONE_NAME BASE_NAME LPAR_NAME True|False True|False STORAGE_TIER ALL|(Comma seperated Volumes name list to clone)"
+# Usage to create a volume clone:   	./bluexport.sh -vclone VOLUME_CLONE_NAME BASE_NAME LPAR_NAME True|False(replication-enabled) True|False(rollback-prepare) STORAGE_TIER ALL|(Comma seperated Volumes name list to clone)"
 # Usage to delete a volume clone:	./bluexport.sh -vclonedel VOLUME_CLONE_NAME
 # Usage to list all volume clones
 #        in all Workspaces:		./bluexport.sh -vclonelsall
@@ -35,7 +35,7 @@
 
        #####  START:CODE  #####
 
-Version=3.4.6
+Version=3.4.7
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 end_log_file='==== END ========= $timestamp ========='
@@ -128,7 +128,7 @@ help() {
 	echo "Usage to list all snapshot"
 	echo " in all Workspaces:		./bluexport.sh -snaplsall"
 	echo ""
-	echo "Usage to create a volume clone:	./bluexport.sh -vclone VOLUME_CLONE_NAME BASE_NAME LPAR_NAME True|False True|False STORAGE_TIER ALL|(Comma seperated Volumes name list to clone)"
+	echo "Usage to create a volume clone:	./bluexport.sh -vclone VOLUME_CLONE_NAME BASE_NAME LPAR_NAME True|False(replication-enabled) True|False(rollback-prepare) STORAGE_TIER ALL|(Comma seperated Volumes name list to clone)"
 	echo ""
 	echo "Usage to delete a volume clone:	./bluexport.sh -vclonedel VOLUME_CLONE_NAME"
 	echo ""
@@ -539,6 +539,28 @@ vsi_id_bluexscrt() {
 	vsi_id=$(cat $bluexscrt | grep $vsi | awk {'print $3'})
 }
 ####  END:FUNCTION  Check if VSI ID exists in bluexscrt file  ####
+
+#################  GRS Code  ####################
+
+####  START:FUNCTION  Create Volume Group  ####
+create_vg(){
+}
+####  END:FUNCTION  Create Volume Group  ####
+
+####  START:FUNCTION  Onboarding auxiliary Volumes  ####
+onboard_aux_vol(){
+}
+####  END:FUNCTION  Onboarding auxiliary Volumes  ####
+
+####  START:FUNCTION  Stop Volume Group  ####
+stop_vg(){
+}
+####  END:FUNCTION  Stop Volume Group  ####
+
+####  START:FUNCTION  Start Volume Group  ####
+start_vg(){
+}
+####  END:FUNCTION  Start Volume Group  ####
 
        ####  END - FUNCTIONS  ####
 
