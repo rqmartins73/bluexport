@@ -540,25 +540,30 @@ vsi_id_bluexscrt() {
 }
 ####  END:FUNCTION  Check if VSI ID exists in bluexscrt file  ####
 
+####  START:FUNCTION  Export to COS an existent Image  ####
+export_img() {
+}
+####  END:FUNCTION  Export to COS an existent Image  ####
+
 #################  GRS Code  ####################
 
 ####  START:FUNCTION  Create Volume Group  ####
-create_vg(){
+create_vg() {
 }
 ####  END:FUNCTION  Create Volume Group  ####
 
 ####  START:FUNCTION  Onboarding auxiliary Volumes  ####
-onboard_aux_vol(){
+onboard_aux_vol() {
 }
 ####  END:FUNCTION  Onboarding auxiliary Volumes  ####
 
 ####  START:FUNCTION  Stop Volume Group  ####
-stop_vg(){
+stop_vg() {
 }
 ####  END:FUNCTION  Stop Volume Group  ####
 
 ####  START:FUNCTION  Start Volume Group  ####
-start_vg(){
+start_vg() {
 }
 ####  END:FUNCTION  Start Volume Group  ####
 
@@ -1011,6 +1016,22 @@ case $1 in
 	vclone_id=$(/usr/local/bin/ibmcloud pi vol cl ls | grep -A6 $vclone_name | grep "Volume Clone Request ID:" | awk {'print $5'})
 	/usr/local/bin/ibmcloud pi vol cl del $vclone_id
 	abort "`date +%Y-%m-%d_%H:%M:%S` - === Successfully Deleted Volume Clone with name $vclone_name !"
+    ;;
+
+   -expimg)
+	abort "`date +%Y-%m-%d_%H:%M:%S` - Under construction!!"
+    ;;
+
+   -crgrs)
+	abort "`date +%Y-%m-%d_%H:%M:%S` - Under construction!!"
+    ;;
+
+   -failover)
+	abort "`date +%Y-%m-%d_%H:%M:%S` - Under construction!!"
+    ;;
+
+   -failback)
+	abort "`date +%Y-%m-%d_%H:%M:%S` - Under construction!!"
     ;;
 
    -v | --version)
