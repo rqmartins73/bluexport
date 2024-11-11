@@ -621,7 +621,6 @@ case $1 in
 	echo "==== END ========= $timestamp =========" >> $log_file
 	flagj=1
 	log_file="$HOME/bluexport_j_"$capture_name".log"
-	echoscreen "   ### Flag -j selected - Logging at file $log_file"
 	echoscreen "" "1"
 	timestamp=$(date +%F" "%T" "%Z)
 	echo "==== START ======= $timestamp =========" >> $log_file
