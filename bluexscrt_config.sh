@@ -7,7 +7,7 @@
 # Ricardo Martins - Blue Chip Portugal © 2024-2024
 #######################################################################################
 
-Version=0.2.11
+Version=0.2.12
 
 vsi_name_id_tmp_file="$HOME/vsi_name_file.tmp"
 flag=$1
@@ -303,8 +303,20 @@ do
 	done
 	read -p "Region: " region
 	read -p "Bucket Name: " bucket
-	read -p "LPAR User: " vsi_user
-
+	
+	while true
+	do
+		read -p "LPAR User: " vsi_user
+		read -p "LPAR User $vsi_user, is this correct? (Y/N) " continue
+		if [[ $continue == "Y" ]] || [[ $continue == "y" ]]
+		then
+			if [ ${#vsi_user} -gt 8 ]
+			then
+				echo "   ### Important: LPAR User $vsi_user has more than 8 caracters. You have to enable that on the LPARs with command \"ADDENVVAR ENVVAR(PASE_USRGRP_LIMITED) VALUE(N) LEVEL(*SYS)\"
+			fi
+			break
+		fi
+	done
 	while true
 	do
 		read -p "SSH Key Full Path: " ssh_key_path
