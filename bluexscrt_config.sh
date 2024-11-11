@@ -312,7 +312,7 @@ do
 		then
 			if [ ${#vsi_user} -gt 8 ]
 			then
-				echo "   ### Important: LPAR User $vsi_user has more than 8 caracters. You have to enable that on the LPARs with command \"ADDENVVAR ENVVAR(PASE_USRGRP_LIMITED) VALUE(N) LEVEL(*SYS)\"
+				echo "   ### Important: LPAR User $vsi_user has more than 8 caracters. You have to enable that on the LPARs with command \"ADDENVVAR ENVVAR(PASE_USRGRP_LIMITED) VALUE(N) LEVEL(*SYS)\""
 			fi
 			break
 		fi
