@@ -35,20 +35,20 @@
 
        #####  START:CODE  #####
 
-Version=3.4.10
+Version=3.4.11
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 end_log_file='==== END ========= $timestamp ========='
 
 #### START:FUNCTION - Echo to log file and screen  ####
 echoscreen() {
-	if [[ $2 == "1" ]]
-	then
-		echo $1 >> $log_file
-	fi
 	if [ -t 1 ]
 	then
 		echo "$1"
+	fi
+	if [[ $2 == "1" ]]
+	then
+		echo $1 >> $log_file
 	fi
 }
 #### END:FUNCTION - Echo to log file and screen  ####
@@ -265,15 +265,15 @@ job_monitor() {
 			abort "`date +%Y-%m-%d_%H:%M:%S` - Check file $job_monitor for more details."
 		elif [[ $job_status == "failed" ]]
 		then
-			echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Job ID "$job" Status:" ${job_status^^} "1"
-			echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Message:" $message "1"
+			echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Job ID $job Status: ${job_status^^}" "1"
+			echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Message: $message" "1"
 			abort "`date +%Y-%m-%d_%H:%M:%S` - Job Failed, check message!!"
 		else
 			if [[ $operation != $operation_before ]]
 			then
-				echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Job ID "$job" Status:" ${job_status^^} "1"
-				echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Message:" $message "1"
-				echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Waiting for Operation Change... Operation Running Now:" ${operation^^} "1"
+				echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Job ID $job Status: ${job_status^^}" "1"
+				echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Message: $message" "1"
+				echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Waiting for Operation Change... Operation Running Now: ${operation^^}" "1"
 				echo "`date +%Y-%m-%d_%H:%M:%S` - Running "${operation^^}"... Sleeping 60 seconds..." >> $job_log
 				sleep 60
 				operation_before=$operation
