@@ -7,7 +7,7 @@
 # Ricardo Martins - Blue Chip Portugal © 2024-2024
 #######################################################################################
 
-Version=0.2.13
+Version=0.2.14
 
 vsi_name_id_tmp_file="$HOME/vsi_name_file.tmp"
 flag=$1
@@ -312,7 +312,7 @@ do
 		then
 			if [ ${#vsi_user} -gt 8 ]
 			then
-				echo "   ### Important: LPAR User $vsi_user has more than 8 caracters. You have to enable that on the LPARs with command \"ADDENVVAR ENVVAR(PASE_USRGRP_LIMITED) VALUE(N) LEVEL(*SYS)\" and then ENDTCPSVR *SSH followed by STRTCPSVR *SSHD"
+				echo "   ### Important: LPAR User $vsi_user has more than 8 caracters. You have to enable that on the LPARs with command \"ADDENVVAR ENVVAR(PASE_USRGRP_LIMITED) VALUE(N) LEVEL(*SYS)\" and then \"ENDTCPSVR *SSHD\" followed by \"STRTCPSVR *SSHD\""
 			fi
 			break
 		fi
