@@ -528,7 +528,7 @@ do_volume_clone() {
 				then
 					echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Volume Clone Request $vclone_name Done!" "1"
 				else
-					echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Volume Clone Request $vclone_name creation at $vclone_percent%" >> $log_file
+					echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Volume Clone Request $vclone_name creation at $vclone_percent%" "1"
 				fi
 			fi
 		done
@@ -616,13 +616,13 @@ case $1 in
 	fi
 	vsi=$2
 	capture_name=${3^^}
-	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Flag -j selected, watching only the Job Status for Capture Image $capture_name! Logging at $HOME/bluexport_j_"$capture_name".log" "1"
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Flag -j selected, watching only the Job Status for Capture Image $capture_name! Logging at $HOME/bluexport_j_$capture_name.log" "1"
 	timestamp=$(date +%F" "%T" "%Z)
-	echoscreen "==== END ========= $timestamp =========" "1"
+	echo "==== END ========= $timestamp =========" >> $log_file
 	flagj=1
 	log_file="$HOME/bluexport_j_"$capture_name".log"
 	echoscreen "   ### Flag -j selected - Logging at file $log_file"
-	echoscreen "" > $log_file
+	echoscreen "" "1"
 	timestamp=$(date +%F" "%T" "%Z)
 	echo "==== START ======= $timestamp =========" >> $log_file
 	echo "Flags Used: $@" >> $log_file
@@ -673,7 +673,7 @@ case $1 in
 	if [[ $1 == "-ta" ]]
 	then
 		test=1
-		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Flag -t selected. Logging at "$job_test_log "1"
+		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Flag -t selected. Logging at $job_test_log" "1"
 		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Testing only!! No Capture will be done!" "1"
 		timestamp=$(date +%F" "%T" "%Z)
 		echoscreen "==== END ========= $timestamp =========" "1"
