@@ -35,7 +35,7 @@
 
        #####  START:CODE  #####
 
-Version=3.4.11
+Version=3.4.12
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 end_log_file='==== END ========= $timestamp ========='
@@ -109,6 +109,7 @@ then
 	####  END: Get Cloud Config Data  #####
 	echoscreen ""
 	echoscreen "   ### Logging at $log_file" ""
+	echoscreen ""
 fi
 
        #####  START: FUNCTIONS  #####
