@@ -107,6 +107,7 @@ then
 	allws=$(grep '^ALLWS' $bluexscrt | cut -d' ' -f2-)
 	wsnames=$(grep '^WSNAMES' $bluexscrt | cut -d' ' -f2-)
 	####  END: Get Cloud Config Data  #####
+	echoscreen ""
 	echoscreen "   ### Logging at $log_file" ""
 fi
 
@@ -151,7 +152,7 @@ help() {
 	echoscreen "Flag t before a or x makes it a test and do not makes the capture"
 	echoscreen "Example:  ./bluexport.sh -tx ASP2_ vsiprd vsiprd_img both single ---- Does not makes the export"
 	echoscreen ""
-	echoscreen "Note: Reocurrence "hourly" and "daily" only permits captures to image-catalog"
+	echoscreen "Note: Reocurrence \"hourly\" and \"daily\" only permits captures to image-catalog"
 	echoscreen ""
 	echoscreen "Ricardo Martins - Blue Chip Portugal - 2023-2024"
 	echoscreen ""
@@ -675,7 +676,7 @@ case $1 in
 		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Flag -t selected. Logging at $job_test_log" "1"
 		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Testing only!! No Capture will be done!" "1"
 		timestamp=$(date +%F" "%T" "%Z)
-		echoscreen "==== END ========= $timestamp =========" "1"
+		echo "==== END ========= $timestamp =========" >> $log_file
 		log_file=$job_test_log
 		timestamp=$(date +%F" "%T" "%Z)
 		echo "==== START ======= $timestamp =========" >> $log_file
@@ -741,7 +742,7 @@ case $1 in
 		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Flag -t selected. Logging at $job_test_log" "1"
 		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Testing only!! No Capture will be done!" "1"
 		timestamp=$(date +%F" "%T" "%Z)
-		echoscreen "==== END ========= $timestamp =========" "1"
+		echo "==== END ========= $timestamp =========" >> $log_file
 		log_file=$job_test_log
 		timestamp=$(date +%F" "%T" "%Z)
 		echo "==== START ======= $timestamp =========" >> $log_file
