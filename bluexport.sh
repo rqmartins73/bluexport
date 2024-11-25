@@ -35,7 +35,7 @@
 
        #####  START:CODE  #####
 
-Version=3.4.12
+Version=3.4.14
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 end_log_file='==== END ========= $timestamp ========='
@@ -83,7 +83,7 @@ then
 	volumes_file=$(cat $HOME/bluexport.conf | grep -w "volumes_file" | awk {'print $2'})
 	snap_retention=$(cat $HOME/bluexport.conf | grep -w "snap_retention" | awk {'print $2'})
 	single=0
-	vsi_user=$(cat $bluexscrt | grep "VSI_USER" | awk {'print $2'})
+	vsi_user=$(cat $bluexscrt | grep -w "VSI_USER" | awk {'print $2'})
 	####  END: Constants Definition  #####
 
 	####  START: Get Cloud Config Data  #####
@@ -103,7 +103,7 @@ then
 	done
 	   ### END: Dynamically create a variable with the name of the workspace ###
 
-	region=$(cat $bluexscrt | grep "REGION" | awk {'print $2'})
+	region=$(cat $bluexscrt | grep -w "REGION" | awk {'print $2'})
 	allws=$(grep '^ALLWS' $bluexscrt | cut -d' ' -f2-)
 	wsnames=$(grep '^WSNAMES' $bluexscrt | cut -d' ' -f2-)
 	####  END: Get Cloud Config Data  #####
@@ -547,9 +547,9 @@ vsi_id_bluexscrt() {
 	then
 		abort "`date +%Y-%m-%d_%H:%M:%S` - VSI ID missing or VSI Name $vsi doesn't exist in $bluexscrt file, please insert it there..."
 	fi
-	vsi_ws=$(cat $bluexscrt | grep $vsi | awk {'print $4'})
+	vsi_ws=$(cat $bluexscrt | grep -i $vsi | awk {'print $4'})
 	vsi_ws_id=$(cat $bluexscrt | grep -m 1 $vsi_ws | awk {'print $2'})
-	vsi_id=$(cat $bluexscrt | grep $vsi | awk {'print $3'})
+	vsi_id=$(cat $bluexscrt | grep -i $vsi | awk {'print $3'})
 }
 ####  END:FUNCTION  Check if VSI ID exists in bluexscrt file  ####
 
@@ -559,17 +559,206 @@ export_img() {
 }
 ####  END:FUNCTION  Export to COS an existent Image  ####
 
+####  START:FUNCTION  Delete Image from image-catalog  ####
+delete_img() {
+	abort "`date +%Y-%m-%d_%H:%M:%S` - Under construction!!"
+}
+####  END:FUNCTION  Export to COS an existent Image  ####
+
 #################  GRS Code  ####################
 
 ####  START:FUNCTION  Create Volume Group  ####
 create_vg() {
-	abort "`date +%Y-%m-%d_%H:%M:%S` - Under construction!!"
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Starting Create $vg_flag_echo $vg_name" "1"
+	echoscreen ""
+	test=0
+	flagj=1
+	vsi_id_bluexscrt
+	cloud_login
+	check_locally_VSI_exists
+	volumes_to_GRS=$(/usr/local/bin/ibmcloud pi ins vol ls $vsi_id | tail -n +2 | awk {'print $1'} | sed -z 's/\n/,/g' | sed 's/.$//')
+	ret=$?
+	if [ $ret -ne 0 ]
+	then
+		abort "`date +%Y-%m-%d_%H:%M:%S` -     FAILED - Oops something went wrong!... Check messages above this line..."
+	fi
+	volumes_rep=$(echo $volumes_to_GRS | sed -z 's/,/\n/g')
+	index=0
+	fail=0
+	all_good=0
+	while [ $all_good -eq 0 ]
+	do
+		for volume in $volumes_rep
+		do
+			tmp_vol=$(/usr/local/bin/ibmcloud pi vol get $volume | grep -we "Replication Enabled" -we "Name" -we "ID")
+			ret=$?
+			if [ $ret -ne 0 ]
+			then
+				abort "`date +%Y-%m-%d_%H:%M:%S` -     FAILED - Oops something went wrong!... Check messages above this line..."
+			fi
+			is_vol_rep_enabled=$(echo $tmp_vol | awk {'print $7'})
+			vol_name=$(echo $tmp_vol | awk {'print $4'})
+			vol_id=$(echo $tmp_vol | awk {'print $2'})
+			if [[ "$is_vol_rep_enabled" != "true" ]]
+			then
+				fail=1
+				vol_not_rep_enabled[$index]=$vol_name
+				vol_id_not_rep_enabled[$index]=$vol_id
+				index=$((index + 1))
+			fi
+		done
+		all_good=1
+		if [ $fail -eq 1 ]
+		then
+			echoscreen ""
+			echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Create $vg_flag_echo $vg_name can not continue because the following volumes are not replication enabled" "1"	
+			for i in ${vol_not_rep_enabled[@]}
+			do
+				echoscreen "$i" "1"
+			done
+			read -p "Do you want to enable replication on these volumes (Y/N) ? " enable_rep
+			if [[ "$enable_rep" == "Y" ]] || [[ "$enable_rep" == "y" ]]
+			then
+				echoscreen ""
+				echoscreen "OK, let's try enable the replication on the volumes..." "1"
+				echoscreen ""
+				index=0
+				for i in ${vol_not_rep_enabled[@]}
+				do
+					echoscreen "Enabling replication on volume $i" "1"
+					/usr/local/bin/ibmcloud pi vol act ${vol_id_not_rep_enabled[$index]} --replication-enabled=True
+					index=$((index + 1))
+					ret=$?
+					if [ $ret -ne 0 ]
+					then
+						abort "`date +%Y-%m-%d_%H:%M:%S` -     FAILED - Oops something went wrong!... Check messages above this line..."
+					fi
+					echoscreen ""
+				done
+				fail=0
+				all_good=0
+				echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Now waiting one minute for the volumes to update..." "1"
+				sleep 60
+			fi
+		fi
+	done
+	if [ $fail -eq 1 ]
+	then
+		abort "`date +%Y-%m-%d_%H:%M:%S` - If you still want to create a $vg_flag_echo, please enable replication on the volumes listed above!..."
+	fi
+	echoscreen ""
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - All good with the volumes, now creating $vg_flag_echo $vg_name" "1"
+	/usr/local/bin/ibmcloud pi vg cr $vg_flag $vg_name --member-volume-ids "$volumes_to_GRS"
+	ret=$?
+	if [ $ret -ne 0 ]
+	then
+		abort "`date +%Y-%m-%d_%H:%M:%S` -     FAILED - Oops something went wrong!... Check messages above this line..."
+	fi
+	vgcsg_ready=""
+	while [[ "$vgcsg_ready" != "available" ]]
+	do
+		sleep 5
+		vgcsg_ready=$(/usr/local/bin/ibmcloud pi vg ls | grep -w $vg_name | awk {'print $5'})
+		ret=$?
+		if [ $ret -ne 0 ]
+		then
+			abort "`date +%Y-%m-%d_%H:%M:%S` -     FAILED - Oops something went wrong!... Check messages above this line..."
+		fi
+		if [[ "$vgcsg_ready" == "available" ]]
+		then
+			echoscreen "`date +%Y-%m-%d_%H:%M:%S` - $vg_flag_echo $vg_name created!... Done!" "1"
+		else
+			echoscreen "`date +%Y-%m-%d_%H:%M:%S` - $vg_flag_echo $vg_name still $vgcsg_ready" "1"
+		fi
+		if [[ "$vgcsg_ready" == "error" ]]
+		then
+			echoscreen "`date +%Y-%m-%d_%H:%M:%S` - $vg_flag_echo $vg_name still $vgcsg_ready" "1"
+			abort "`date +%Y-%m-%d_%H:%M:%S` -     FAILED - Oops something went wrong!... Check messages above this line..."
+		fi
+	done
+	vg_id=$(/usr/local/bin/ibmcloud pi vg ls | grep -w $vg_name | awk {'print $1'})
+	ret=$?
+	if [ $ret -ne 0 ]
+	then
+		abort "`date +%Y-%m-%d_%H:%M:%S` -     FAILED - Oops something went wrong!... Check messages above this line..."
+	fi
+	copy_sts="inconsistent_copying"	
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Checking state of the Consistency Group, please wait..." "1"
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Copy Status: $copy_sts" "1"
+	while [[ "$copy_sts" == "inconsistent_copying" ]] || [[ "$copy_sts" == "updating" ]]
+	do
+		sleep 40
+		copy_sts=$(/usr/local/bin/ibmcloud pi vg sd $vg_id | grep -w "State:" | awk {'print $2'})
+		# ret=$?
+		# if [ $ret -ne 0 ]
+		# then
+			# abort "`date +%Y-%m-%d_%H:%M:%S` -     FAILED - Oops something went wrong!... Check messages above this line..."
+		# fi
+		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Percentage by Volumes:"
+		/usr/local/bin/ibmcloud pi vg rcr $vg_id | grep rcrel | awk {'print $1" "$4" "$11"%"'}
+		# ret=$?
+		# if [ $ret -ne 0 ]
+		# then
+			# abort "`date +%Y-%m-%d_%H:%M:%S` -     FAILED - Oops something went wrong!... Check messages above this line..."
+		# fi
+		if [[ "$copy_sts" == "consistent_copying" ]]
+		then
+			echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Copy Status: $copy_sts" "1"
+			echoscreen "`date +%Y-%m-%d_%H:%M:%S` - $vg_flag_echo $vg_name ready to be onboarded in the DR site!" "1"
+		fi
+	done
 }
 ####  END:FUNCTION  Create Volume Group  ####
 
 ####  START:FUNCTION  Onboarding auxiliary Volumes  ####
 onboard_aux_vol() {
-	abort "`date +%Y-%m-%d_%H:%M:%S` - Under construction!!"
+# ./bluexport.sh -onboard LPAR_NAME
+	test=0
+	flagj=1
+	vsi_id_bluexscrt
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Starting onboarding volumes for LPAR $vsi" "1"
+	echoscreen ""
+	cloud_login
+	check_locally_VSI_exists
+	volumes_to_GRS=$(/usr/local/bin/ibmcloud pi ins vol ls $vsi_id | tail -n +2 | awk {'print $1'} | sed -z 's/\n/,/g' | sed 's/.$//')
+	ret=$?
+	if [ $ret -ne 0 ]
+	then
+		abort "`date +%Y-%m-%d_%H:%M:%S` -     FAILED - Oops something went wrong!... Check messages above this line..."
+	fi
+	aux_volumes_to_onboard=$(/usr/local/bin/ibmcloud pi ins vol ls $vsi_id --json | grep -w '"auxVolumeName":' | awk {'print $2'} | sed -z 's/\"//g'| sed -z 's/,//g')
+	index=0
+	for i in $aux_volumes_to_onboard
+	do
+		aux_volumes[$index]=$i
+		index=$((index + 1))
+	done
+	volume_name_to_onboard=$(/usr/local/bin/ibmcloud pi ins vol ls $vsi_id --json | grep -w '"name":' | awk {'print $2'} | sed -z 's/\"//g'| sed -z 's/,//g')
+	index=0
+	for i in $volume_name_to_onboard
+	do
+		volume_name[$index]=$i
+		index=$((index + 1))
+	done
+	index=0
+	for volume in ${aux_volumes[@]}
+	do
+		if [[ "$volume" == "" ]]
+		then
+			abort "`date +%Y-%m-%d_%H:%M:%S` - Onboarding can not continue because volume $volume_name[$index] do not have an auxiliary volume!..."
+		fi
+		index=$((index + 1))
+	done
+	aux_vol_to_onboard=$(echo ${aux_volumes[@]}| sed -z 's/ /,/g')
+	/usr/local/bin/ibmcloud pi ws tg $target_ws_crn
+	/usr/local/bin/ibmcloud pi vol on cr --auxiliary-volumes $aux_vol_to_onboard --source-crn $vsi_ws_id
+	ret=$?
+	if [ $ret -ne 0 ]
+	then
+		abort "`date +%Y-%m-%d_%H:%M:%S` -     FAILED - Oops something went wrong!... Check messages above this line..."
+	fi
+	# Testar o status do onboard com o onboard_id=$(/usr/local/bin/ibmcloud pi vol on ls | grep aux_volume-IBMi73FR3-58500-1-5cc7ca0a-5a9087847569 | awk {'print $1'})
+	# onboard_status=$(/usr/local/bin/ibmcloud pi vol on ls | grep $onboard_id | awk {'print $2'})
 }
 ####  END:FUNCTION  Onboarding auxiliary Volumes  ####
 
@@ -1088,6 +1277,49 @@ case $1 in
 	abort "`date +%Y-%m-%d_%H:%M:%S` - Under construction!!"
     ;;
 
+   -createvg)
+	if [ $# -gt 4 ]
+	then
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Too many arguments!! Syntax: bluexport.sh $1 LPAR_NAME -vg VG_NAME"
+	fi
+	if [ $# -lt 4 ]
+	then
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments missing!! Syntax: bluexport.sh $1 LPAR_NAME -vg VG_NAME"
+	fi
+	flagvg=$3
+	if [[ "$flagvg" == "-vg" ]]
+	then
+		vg_flag="--volume-group-name"
+		vg_flag_echo="Volume Group"
+	else
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Argument 3 must be -vg"
+	fi
+	vsi=$2
+	vg_name=$4
+	create_vg
+	abort "`date +%Y-%m-%d_%H:%M:%S` - === Successfully Create $vg_flag_echo $vg_name !"
+    ;;
+	
+   -onboard)
+	if [ $# -gt 3 ]
+	then
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Too many arguments!! Syntax: bluexport.sh $1 LPAR_NAME SHORT_NAME_TARGET_WS"
+	fi
+	if [ $# -lt 3 ]
+	then
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments missing!! Syntax: bluexport.sh $1 LPAR_NAME SHORT_NAME_TARGET_WS"
+	fi
+	vsi=$2
+	target_short_ws=$3
+	target_ws_crn=$(cat $bluexscrt | grep -w $target_short_ws | head -n1 | awk {'print $2'})
+	if [[ "$target_ws_crn" == "" ]]
+	then
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Workspace with Shortname $target_short_ws does not exist in $bluexscrt file... Aborting!..."
+	fi
+	onboard_aux_vol
+	abort "`date +%Y-%m-%d_%H:%M:%S` - === Successfully Onboarded LPAR $vsi !"
+    ;;
+	
    -crgrs)
 	abort "`date +%Y-%m-%d_%H:%M:%S` - Under construction!!"
     ;;
