@@ -18,6 +18,9 @@
 # Usage to list all snapshot
 #        in all Workspaces:		./bluexport.sh -snaplsall
 #
+# Usage to list all Captured
+# images in all Workspaces:             ./bluexport.sh -imglsall
+#
 # Usage to create a volume clone:   	./bluexport.sh -vclone VOLUME_CLONE_NAME BASE_NAME LPAR_NAME True|False(replication-enabled) True|False(rollback-prepare) STORAGE_TIER ALL|(Comma seperated Volumes name list to clone)"
 # Usage to delete a volume clone:	./bluexport.sh -vclonedel VOLUME_CLONE_NAME
 # Usage to list all volume clones
@@ -35,7 +38,7 @@
 
        #####  START:CODE  #####
 
-Version=3.4.14
+Version=3.4.15
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 end_log_file='==== END ========= $timestamp ========='
@@ -138,6 +141,9 @@ help() {
 	echoscreen ""
 	echoscreen "Usage to list all snapshot"
 	echoscreen " in all Workspaces:		./bluexport.sh -snaplsall"
+	echoscreen ""
+	echoscreen "Usage to list all Captured"
+	echoscreen " images in all Workspaces:         ./bluexport.sh -imglsall"
 	echoscreen ""
 	echoscreen "Usage to create a volume clone:	./bluexport.sh -vclone VOLUME_CLONE_NAME BASE_NAME LPAR_NAME True|False(replication-enabled) True|False(rollback-prepare) STORAGE_TIER ALL|(Comma seperated Volumes name list to clone)"
 	echoscreen ""
@@ -685,15 +691,21 @@ create_vg() {
 	copy_sts="inconsistent_copying"	
 	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Checking state of the Consistency Group, please wait..." "1"
 	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Copy Status: $copy_sts" "1"
+	error=0
 	while [[ "$copy_sts" == "inconsistent_copying" ]] || [[ "$copy_sts" == "updating" ]]
 	do
+		if [ $error -eq 5 ]
+		then
+			abort "`date +%Y-%m-%d_%H:%M:%S` -     FAILED - Oops something went wrong with the VG Creation... Check in IBM Cloud CLI the possibles reasons."
+		fi
 		sleep 40
 		copy_sts=$(/usr/local/bin/ibmcloud pi vg sd $vg_id | grep -w "State:" | awk {'print $2'})
-		# ret=$?
-		# if [ $ret -ne 0 ]
-		# then
-			# abort "`date +%Y-%m-%d_%H:%M:%S` -     FAILED - Oops something went wrong!... Check messages above this line..."
-		# fi
+		#ret=$?
+		if [[ $copy_sts == "" ]]
+		then
+			echoscreen "`date +%Y-%m-%d_%H:%M:%S` -     FAILED - Oops something went wrong!... Check messages above this line... Retrying..."
+			error=$((error+1))
+		fi
 		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Percentage by Volumes:"
 		/usr/local/bin/ibmcloud pi vg rcr $vg_id | grep rcrel | awk {'print $1" "$4" "$11"%"'}
 		# ret=$?
@@ -757,8 +769,22 @@ onboard_aux_vol() {
 	then
 		abort "`date +%Y-%m-%d_%H:%M:%S` -     FAILED - Oops something went wrong!... Check messages above this line..."
 	fi
-	# Testar o status do onboard com o onboard_id=$(/usr/local/bin/ibmcloud pi vol on ls | grep aux_volume-IBMi73FR3-58500-1-5cc7ca0a-5a9087847569 | awk {'print $1'})
+	# Testar o status do onboard com o onboard_id=$(/usr/local/bin/ibmcloud pi vol on ls | grep ${aux_volumes[0]} | awk {'print $1'})
 	# onboard_status=$(/usr/local/bin/ibmcloud pi vol on ls | grep $onboard_id | awk {'print $2'})
+	# onboard_status=""
+	#while true
+	#do
+	#	onboard_previous_status=$onboard_status
+	#	onboard_status=$(/usr/local/bin/ibmcloud pi vol on ls | grep $onboard_id | awk {'print $2'})
+	#	if [[ "$onboard_status" != "$onboard_previous_status" ]]
+	#	then
+	#		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Onboard Request Status is $onboard_status !" "1"
+	#	elif [[ "$onboard_status" == "SUCCESS" ]]
+	#	then
+	#		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Onboard Request done!" "1"
+	#		break
+	#	fi
+	#done
 }
 ####  END:FUNCTION  Onboarding auxiliary Volumes  ####
 
@@ -1167,6 +1193,40 @@ case $1 in
 	abort "`date +%Y-%m-%d_%H:%M:%S` - === Finished Listing all Snapshots in all Workpsaces"
     ;;
 
+   -imglsall)
+	if [ $# -gt 1 ]
+	then
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Too many arguments!! Syntax: bluexport.sh $1"
+	fi
+	test=0
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - === Starting Listing all Cpatured Images in all Workspaces !" "1"
+	cloud_login
+
+	# Convert 'wsnames' string to an array
+	IFS=':' read -r -a wsnames_array <<< "$wsnames"
+
+	# Convert 'allws' string to an array
+	read -r -a allws_array <<< "$allws"
+
+	# Initialize an associative array to map workspace abbreviations to full names
+	declare -A wsmap
+	# Populate the wsmap with dynamic values from allws and wsnames_array
+	for i in "${!allws_array[@]}"; do
+		wsmap[${allws_array[i]}]="${wsnames_array[i]}"
+	done
+
+	for ws in "${allws_array[@]}"
+	do
+		crn=$(grep "^$ws " "$bluexscrt" | awk '{print $2}')
+		full_ws_name="${wsmap[$ws]}" # Get the full workspace name from the map
+		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - === Listing Captured Images at Workspace $full_ws_name :" "1"
+		/usr/local/bin/ibmcloud pi ws tg $crn 2>> $log_file | tee -a $log_file
+		/usr/local/bin/ibmcloud pi img ls 2>> $log_file | tee -a $log_file
+		echoscreen "" "1"
+	done
+	abort "`date +%Y-%m-%d_%H:%M:%S` - === Finished Listing all Captured Images in all Workpsaces"
+    ;;
+
    -vclonelsall)
     if [ $# -gt 1 ] 
 	then
@@ -1299,7 +1359,7 @@ case $1 in
 	create_vg
 	abort "`date +%Y-%m-%d_%H:%M:%S` - === Successfully Create $vg_flag_echo $vg_name !"
     ;;
-	
+
    -onboard)
 	if [ $# -gt 3 ]
 	then
@@ -1319,7 +1379,7 @@ case $1 in
 	onboard_aux_vol
 	abort "`date +%Y-%m-%d_%H:%M:%S` - === Successfully Onboarded LPAR $vsi !"
     ;;
-	
+
    -crgrs)
 	abort "`date +%Y-%m-%d_%H:%M:%S` - Under construction!!"
     ;;
