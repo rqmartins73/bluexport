@@ -143,7 +143,7 @@ help() {
 	echoscreen " in all Workspaces:		./bluexport.sh -snaplsall"
 	echoscreen ""
 	echoscreen "Usage to list all Captured"
-	echoscreen " images in all Workspaces:     ./bluexport.sh -imglsall"
+	echoscreen " images in all Workspaces:      ./bluexport.sh -imglsall"
 	echoscreen ""
 	echoscreen "Usage to create a volume clone:	./bluexport.sh -vclone VOLUME_CLONE_NAME BASE_NAME LPAR_NAME True|False(replication-enabled) True|False(rollback-prepare) STORAGE_TIER ALL|(Comma seperated Volumes name list to clone)"
 	echoscreen ""
