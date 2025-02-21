@@ -1199,7 +1199,7 @@ case $1 in
 		abort "`date +%Y-%m-%d_%H:%M:%S` - Too many arguments!! Syntax: bluexport.sh $1"
 	fi
 	test=0
-	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - === Starting Listing all Cpatured Images in all Workspaces !" "1"
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - === Starting Listing all Captured Images in all Workspaces !" "1"
 	cloud_login
 
 	# Convert 'wsnames' string to an array
