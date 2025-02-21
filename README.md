@@ -30,6 +30,10 @@ Version 3.x now supports the creation, update, delete and list Snapshots, and al
   
 `./bluexport.sh -snapdel SNAPSHOT_NAME`  
   
+`./bluexport.sh -snaplsall`  
+  
+`./bluexport.sh -imglsall`  
+  
 `./bluexport.sh -vclone VOLUME_CLONE_NAME BASE_NAME LPAR_NAME True|False(replication-enabled) True|False(rollback-prepare) STORAGE_TIER ALL|(Comma seperated rated Volumes name list to clone)`  
   
 `./bluexport.sh -vclonedel VOLUME_CLONE_NAME`  
@@ -50,6 +54,8 @@ Version 3.x now supports the creation, update, delete and list Snapshots, and al
 - `./bluexport.sh -snapdel IBMi75_snap`   ---- Deletes the snapshot named IBMi75_snap.
 
 - `./bluexport.sh -snaplsall`   ---- It will list to terminal and log file all existent snapshots in all Workspaces.  
+
+- `./bluexport.sh -imglsall`   ---- It will list to terminal and log file all existent Captured Images in all Workspaces.  
 <br>
 
 > [!NOTE]
