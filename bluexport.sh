@@ -26,6 +26,8 @@
 # Usage to list all volume clones
 #        in all Workspaces:		./bluexport.sh -vclonelsall
 #
+# Usage to change volume tier:          ./bluexport.sh -vchtier VSI_NAME VOLUMES_NAME TIER_TO_CHANGE_TO
+#
 # Example:  ./bluexport.sh -a vsiprd vsiprd_img image-catalog daily            ---- Includes all Volumes and exports to COS and image catalog
 # Example:  ./bluexport.sh -x ASP2_ vsiprd vsiprd_img both monthly             ---- Excludes Volumes with ASP2_ in the name and exports to image catalog and COS
 # Example:  ./bluexport.sh -x "ASP2_ IASPname" vsiprd vsiprd_img both monthly  ---- Excludes Volumes with ASP2_ and IASPname in the name and exports to image catalog and COS
@@ -38,7 +40,7 @@
 
        #####  START:CODE  #####
 
-Version=3.4.15
+Version=3.5.5
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 end_log_file='==== END ========= $timestamp ========='
@@ -151,6 +153,8 @@ help() {
 	echoscreen ""
 	echoscreen "Usage to list all volume clones"
 	echoscreen " in all Workspaces:		./bluexport.sh -vclonelsall"
+	echoscreen ""
+	echoscreen "Usage to change volume tier:          ./bluexport.sh -vchtier VSI_NAME VOLUMES_NAME TIER_TO_CHANGE_TO"
 	echoscreen ""
 	echoscreen "Example:  ./bluexport.sh -a vsiprd vsiprd_img image-catalog daily ---- Includes all Volumes and exports to COS and image catalog"
 	echoscreen "Example:  ./bluexport.sh -x ASP2_ vsiprd vsiprd_img both monthly    ---- Excludes Volumes with ASP2_ in the name and exports to image catalog and COS"
@@ -558,6 +562,12 @@ vsi_id_bluexscrt() {
 	vsi_id=$(cat $bluexscrt | grep -i $vsi | awk {'print $3'})
 }
 ####  END:FUNCTION  Check if VSI ID exists in bluexscrt file  ####
+
+####  START:FUNCTION  Change Instance Volumes Tier  ####
+vchtier() {
+
+}
+####  END:FUNCTION  Change Instance Volumes Tier  ####
 
 ####  START:FUNCTION  Export to COS an existent Image  ####
 export_img() {
