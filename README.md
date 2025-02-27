@@ -59,7 +59,7 @@ Version 3.x now supports the creation, update, delete and list Snapshots, and al
 
 - `./bluexport.sh -imglsall`   ---- It will list to terminal and log file all existent Captured Images in all Workspaces.  
 
-- `./bluexport.sh -vchtier VSI_NAME VOLUMES_NAME TIER_TO_CHANGE_TO`   ---- It will change the tier of the volumes that have in their name the name "VOLUMES_NAME" to tier TIER_TO_CHANGE_TO(0 or 1 or 3)
+- `./bluexport.sh -vchtier VSI_NAME VOLUMES_NAME TIER_TO_CHANGE_TO`   ---- It will change the tier of the volumes of the instance with VSI_NAME that have in their names the name "VOLUMES_NAME" to tier TIER_TO_CHANGE_TO(0 or 1 or 3)
 <br>
 
 > [!NOTE]
