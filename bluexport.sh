@@ -40,7 +40,7 @@
 
        #####  START:CODE  #####
 
-Version=3.7.4
+Version=3.7.5
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 end_log_file='==== END ========= $timestamp ========='
@@ -576,7 +576,7 @@ vchtier() {
 	volumes_ids=$(echo $volumes | sed -z 's/,/\n/g')
 	echo "" > $vol_ch_tier
 	failed_vol=""
-	smae_tier=0
+	same_tier=0
 	for vol in $volumes_ids
 	do
 		vol_name=$(cat $volumes_file | grep $vol | awk {'print $2'})
