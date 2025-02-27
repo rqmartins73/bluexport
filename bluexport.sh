@@ -40,7 +40,7 @@
 
        #####  START:CODE  #####
 
-Version=3.7.2
+Version=3.7.3
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 end_log_file='==== END ========= $timestamp ========='
@@ -86,6 +86,8 @@ then
 	vsi_list_id_tmp=$(cat $HOME/bluexport.conf | grep -w "vsi_list_id_tmp" | awk {'print $2'})
 	vsi_list_tmp=$(cat $HOME/bluexport.conf | grep -w "vsi_list_tmp" | awk {'print $2'})
 	volumes_file=$(cat $HOME/bluexport.conf | grep -w "volumes_file" | awk {'print $2'})
+	vol_ch_tier=$(cat $HOME/bluexport.conf | grep -w "vol_ch_tier" | awk {'print $2'})
+	vol_failed_tst=$(cat $HOME/bluexport.conf | grep -w "vol_failed_tst" | awk {'print $2'})
 	snap_retention=$(cat $HOME/bluexport.conf | grep -w "snap_retention" | awk {'print $2'})
 	single=0
 	vsi_user=$(cat $bluexscrt | grep -w "VSI_USER" | awk {'print $2'})
@@ -572,13 +574,38 @@ vchtier() {
 	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Volumes ID to be changed to tier $tier: $volumes" "1"
 	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Volumes Name to be changed to tier $tier: $volumes_name" "1"
 	volumes_ids=$(echo $volumes | sed -z 's/,/\n/g')
+	echo "" > $vol_ch_tier
+	failed_vol=""
+	smae_tier=0
 	for vol in $volumes_ids
 	do
 		vol_name=$(cat $volumes_file | grep $vol | awk {'print $2'})
 		echoscreen "Changing volume $vol_name with Volume ID $vol to tier $tier" "1"
-		/usr/local/bin/ibmcloud pi vol act $vol --target-tier $tier 2>&1 | tee -a $log_file
+		/usr/local/bin/ibmcloud pi vol act $vol --target-tier $tier 2>&1 | tee -a $log_file | tee $vol_failed_tst
+		failed_vol_temp=$(cat $vol_failed_tst | grep "current storage tier")
+		if [[ $failed_vol_temp == "" ]]
+		then
+			cat $vol_failed_tst >> $vol_ch_tier
+		else
+			same_tier=1
+		fi
 	done
-	abort "`date +%Y-%m-%d_%H:%M:%S` - Tier change finished! Please check the log above to see if there was any errors..."
+	failed_vol=$(cat $vol_ch_tier | grep -B2 Failed | grep Performing | awk {'print $5'})
+	if [[ $failed_vol != "" ]]
+	then
+		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Some volumes Failed to change tier!" "1"
+		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Try changing the tier manually with the following commands..." "1"
+		for vol in $failed_vol
+		do
+			echoscreen "`date +%Y-%m-%d_%H:%M:%S` - /usr/local/bin/ibmcloud pi vol act $vol --target-tier $tier" "1"
+		done
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Tier change finished, but there was errors! Please check the log above to see if there was any errors..."
+	fi
+	if [ $same_tier -eq 1 ]
+	then
+		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Some volumes were already in tier $tier, no action done on those volumes!"
+	fi
+	abort "`date +%Y-%m-%d_%H:%M:%S` - Tier change finished successfuly! Please check the log above to see if there was any errors..."
 
 }
 ####  END:FUNCTION  Change Instance Volumes Tier  ####
