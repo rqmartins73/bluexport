@@ -603,7 +603,7 @@ vchtier() {
 	fi
 	if [ $same_tier -eq 1 ]
 	then
-		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Some volumes were already in tier $tier, no action done on those volumes!"
+		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Some volumes were already in tier $tier, no action done on those volumes!" "1"
 	fi
 	abort "`date +%Y-%m-%d_%H:%M:%S` - Tier change finished successfuly! Please check the log above to see if there was any errors..."
 
