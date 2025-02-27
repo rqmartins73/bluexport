@@ -40,7 +40,7 @@
 
        #####  START:CODE  #####
 
-Version=3.7.1
+Version=3.7.2
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 end_log_file='==== END ========= $timestamp ========='
@@ -565,7 +565,7 @@ vsi_id_bluexscrt() {
 
 ####  START:FUNCTION  Change Instance Volumes Tier  ####
 vchtier() {
-	if [[ $volumes_ids == "" ]]
+	if [[ $volumes == "" ]]
 	then
 		abort "`date +%Y-%m-%d_%H:%M:%S` - There are no volumes with any of these words \"${volchtier_names[*]}\" in instance $vsi_cloud_name"
 	fi
