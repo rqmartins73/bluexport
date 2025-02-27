@@ -40,7 +40,7 @@
 
        #####  START:CODE  #####
 
-Version=3.7.5
+Version=3.7.6
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 end_log_file='==== END ========= $timestamp ========='
@@ -221,6 +221,10 @@ dc_vsi_list() {
     # List all VSI in this POWERVS DC and Get VSI Name and ID #
 	sh -c '/usr/local/bin/ibmcloud pi ins ls | awk {'\''print $1" "$2'\''} | tail -n +2' > $vsi_list_id_tmp 2>> $log_file
 	vsi_id=$(cat $vsi_list_id_tmp | grep -wi $vsi | awk {'print $1'})
+	if [[ $vsi_id == "" ]]
+	then
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Instance $vsi exists in your bluexscrt file, but do not exists on IBM Cloud. Please update bluexscrt file!"
+	fi
 	cat $vsi_list_id_tmp | awk {'print $2'} > $vsi_list_tmp
 }
 ####  END:FUNCTION - Target DC and List all VSI in the POWERVS DC and Get VSI Name and ID  ####
