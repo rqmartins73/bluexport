@@ -154,7 +154,7 @@ help() {
 	echoscreen "Usage to list all volume clones"
 	echoscreen " in all Workspaces:		./bluexport.sh -vclonelsall"
 	echoscreen ""
-	echoscreen "Usage to change volume tier:          ./bluexport.sh -vchtier VSI_NAME VOLUMES_NAME TIER_TO_CHANGE_TO"
+	echoscreen "Usage to change volume tier:    ./bluexport.sh -vchtier VSI_NAME VOLUMES_NAME TIER_TO_CHANGE_TO"
 	echoscreen ""
 	echoscreen "Example:  ./bluexport.sh -a vsiprd vsiprd_img image-catalog daily ---- Includes all Volumes and exports to COS and image catalog"
 	echoscreen "Example:  ./bluexport.sh -x ASP2_ vsiprd vsiprd_img both monthly    ---- Excludes Volumes with ASP2_ in the name and exports to image catalog and COS"
