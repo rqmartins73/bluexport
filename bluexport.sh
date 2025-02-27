@@ -40,7 +40,7 @@
 
        #####  START:CODE  #####
 
-Version=3.5.5
+Version=3.7.1
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 end_log_file='==== END ========= $timestamp ========='
@@ -565,6 +565,20 @@ vsi_id_bluexscrt() {
 
 ####  START:FUNCTION  Change Instance Volumes Tier  ####
 vchtier() {
+	if [[ $volumes_ids == "" ]]
+	then
+		abort "`date +%Y-%m-%d_%H:%M:%S` - There are no volumes with any of these words \"${volchtier_names[*]}\" in instance $vsi_cloud_name"
+	fi
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Volumes ID to be changed to tier $tier: $volumes" "1"
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Volumes Name to be changed to tier $tier: $volumes_name" "1"
+	volumes_ids=$(echo $volumes | sed -z 's/,/\n/g')
+	for vol in $volumes_ids
+	do
+		vol_name=$(cat $volumes_file | grep $vol | awk {'print $2'})
+		echoscreen "Changing volume $vol_name with Volume ID $vol to tier $tier" "1"
+		/usr/local/bin/ibmcloud pi vol act $vol --target-tier $tier 2>&1 | tee -a $log_file
+	done
+	abort "`date +%Y-%m-%d_%H:%M:%S` - Tier change finished! Please check the log above to see if there was any errors..."
 
 }
 ####  END:FUNCTION  Change Instance Volumes Tier  ####
@@ -997,6 +1011,38 @@ case $1 in
 	fi
 	volumes_cmd="/usr/local/bin/ibmcloud pi ins vol ls $vsi_id $exclude_grep_opts | tail -n +2"
     ;;
+
+  -vchtier)
+	tier="tier$4"
+	test=0
+	flagj=1
+	if [ $# -lt 4 ]
+	then
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Arguments Missing!! Syntax: bluexport.sh $1 VSI_NAME VOLUMES_NAME TIER_TO_CHANGE_TO"
+	fi
+	if [ $# -gt 4 ]
+	then
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Too many arguments!! Syntax: bluexport.sh $1 VSI_NAME VOLUMES_NAME TIER_TO_CHANGE_TO"
+	fi
+	IFS=' ' read -r -a volchtier_names <<< "$3"
+	volchtier_grep_opts=""
+	volchtier_grep_opts=" | grep"
+	for name in "${volchtier_names[@]}"
+	do
+		volchtier_grep_opts+=" -e $name"
+	done
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Common Name of Volumes to change to tier $tier: ${volchtier_names[*]}" "1"
+	vsi=$2
+	vsi_id_bluexscrt
+	volumes_cmd="/usr/local/bin/ibmcloud pi ins vol ls $vsi_id $volchtier_grep_opts | tail -n +1"
+	cloud_login
+	check_locally_VSI_exists
+	eval $volumes_cmd > $volumes_file | tee -a $log_file
+	volumes=$(cat $volumes_file | awk {'print $1'} | tr '\n' ',' | sed 's/,$//')
+	volumes_name=$(cat $volumes_file | awk {'print $2'} | tr '\n' ' ')
+#exit 0
+	vchtier
+	;;
 
   -chscrt)
 	if [ $# -lt 2 ]
