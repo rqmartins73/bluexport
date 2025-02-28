@@ -7,7 +7,7 @@
 # Ricardo Martins - Blue Chip Portugal © 2024-2024
 #######################################################################################
 
-Version=0.3.0
+Version=0.3.1
 
 vsi_name_id_tmp_file="$HOME/vsi_name_file.tmp"
 flag=$1
