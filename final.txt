@@ -1,0 +1,29 @@
+APYKEY qfI1jDtfoogKx0TYMOaAhCBOLFVgHje7FrDufElBJWJV
+WSFRA1 crn:v1:bluemix:public:power-iaas:eu-de-1:a/66dbaf0bbf364a8c9773fe06cd57ca11:d109f8ff-ccd2-471a-a3ce-20f7d901e408::
+WSFRA2 crn:v1:bluemix:public:power-iaas:eu-de-2:a/66dbaf0bbf364a8c9773fe06cd57ca11:06701e63-7d4a-4077-b898-6805dc0a0bf6::
+WSMAD2 crn:v1:bluemix:public:power-iaas:mad02:a/66dbaf0bbf364a8c9773fe06cd57ca11:faa7f488-cd76-4985-a046-d8ab14dac172::
+WSMAD4 crn:v1:bluemix:public:power-iaas:mad04:a/66dbaf0bbf364a8c9773fe06cd57ca11:0e3961cd-aaff-4d48-9e81-f2044218b956::
+
+ACCESSKEY e79c78bb826b42f8a96e60dbac4e31f5
+SECRETKEY f80ad49c0926df741fc22f82ebd867da972c4a8407068235
+BUCKETNAME bcce-geral
+REGION eu-es
+
+ALLWS WSFRA1 WSFRA2 WSMAD2 WSMAD4
+WSNAMES Blue-Chip-PVS-WS-FRA1:Blue-Chip-PVS-WS-FRA2:Blue-Chip-PVS-WS-MAD02:Blue-Chip-PVS-WS-MAD04:
+
+VSI_USER bluexport
+
+SSHKEYPATH /home/rqmartins/.ssh/bluexport_rsa
+
+WSFRA1ID d109f8ff-ccd2-471a-a3ce-20f7d901e408
+WSFRA2ID 06701e63-7d4a-4077-b898-6805dc0a0bf6
+WSMAD2ID faa7f488-cd76-4985-a046-d8ab14dac172
+WSMAD4ID 0e3961cd-aaff-4d48-9e81-f2044218b956
+
+RESOURCE_GRP powervs
+
+ibmi75f1 172.26.11.5 4eb5532a-fcdb-4e1d-8a08-b8a48c6a4ccc WSFRA1 LPAR1
+ABSM75f2 172.26.12.5 42e57a78-ead2-4da8-937e-6ec635749497 WSFRA2 LPAR2
+ibmi75m2 172.26.2.5 b4572a7f-1b1d-4ff7-8caa-f3b8ccffd4b0 WSMAD2 LPAR3
+ibmi73m2 172.26.2.3 d937447d-33aa-450b-a4b1-a3c473454a80 WSMAD2 LPAR4

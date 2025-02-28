@@ -7,17 +7,18 @@
 # Ricardo Martins - Blue Chip Portugal © 2024-2024
 #######################################################################################
 
-Version=0.2.14
+Version=0.3.0
 
 vsi_name_id_tmp_file="$HOME/vsi_name_file.tmp"
 flag=$1
 
-if [ $# -eq 1 ] && [[ $flag != "-v" ]] && [[ $flag != "-addlpar" ]]
+if [ $# -eq 1 ] && [[ $flag != "-v" ]] && [[ $flag != "-addlpar" ]] && [[ $flag != "-dellpar" ]]
 then
 	echo " ### Wrong Syntax!!..."
 	echo " ### Options:"
 	echo " ### To see the version                   ./bluexscrt_config.sh -v"
 	echo " ### To add an LPAR to the secrets file   ./bluexscrt_config.sh -addlpar"
+	echo " ### To delete an LPAR from the secrets file   ./bluexscrt_config.sh -dellpar"
 	echo ""
 	exit 0
 fi
@@ -194,6 +195,49 @@ fi
 }
 #### END:FUNCTION - Create VSI User  ####
 
+if [[ $flag == "-dellpar" ]]
+then
+	echo ""
+	echo "   ####  Welcome to your bluexport secrets file configuration helper version $Version"
+	echo ""
+	echo "So, you want to delete an LPAR from the secrets file?!..."
+	echo "OK, let's go..."
+	echo ""
+	bluexscrt=$(cat $HOME/bluexport.conf | grep bluexscrt | awk {'print $2'})
+	vsi_user=$(cat $bluexscrt | grep VSI_USER | awk {'print $2'})
+	ssh_key_path=$(cat $bluexscrt | grep SSHKEYPATH | awk {'print $2'})
+	existent_lpars=$(cat $bluexscrt | grep LPAR | awk {'print $1'})
+	while [[ "$ok" != "y" ]] && [[ "$ok" != "Y" ]]
+	do
+		echo $existent_lpars
+		read -p "From the list above, enter LPAR name to delete: " vsi_name
+		read -p "Is this name $vsi_name correct? (y/n) " ok
+		exists=$(cat $bluexscrt | grep -w $vsi_name | awk {'print $1'})
+		if [[ $exists == "" ]]
+		then
+			echo ""
+			echo "### LPAR with that name $vsi_name do not exists!"
+			echo ""
+			ok="n"
+		fi
+	done
+	grep -v $vsi_name $bluexscrt > .tmp && mv .tmp final.txt
+	lpar_lines=$(grep "LPAR" final.txt | wc -l)
+	count=1
+	lpars=$(grep "LPAR" final.txt | awk {'print $1'})
+	for lpar in $lpars
+	do
+		lpar_num=$(grep $lpar final.txt | awk {'print $5'} | sed -z 's/LPAR//g')
+		lpar_num_full=$(grep $lpar final.txt | awk {'print $5'})
+		if [ $lpar_num -ne $count ]
+		then
+			sed -i 's/'$lpar_num_full'/'LPAR$count'/g' final.txt
+		fi
+		count=$((count+1))
+	done
+	echo "### LPAR $vsi_name was removed from bluxscrt file!"
+	exit 0
+fi
 if [[ $flag == "-addlpar" ]]
 then
 	echo ""
