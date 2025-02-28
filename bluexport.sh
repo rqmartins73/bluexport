@@ -40,7 +40,7 @@
 
        #####  START:CODE  #####
 
-Version=3.7.6
+Version=3.7.7
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 end_log_file='==== END ========= $timestamp ========='
@@ -603,13 +603,13 @@ vchtier() {
 		do
 			echoscreen "`date +%Y-%m-%d_%H:%M:%S` - /usr/local/bin/ibmcloud pi vol act $vol --target-tier $tier" "1"
 		done
-		abort "`date +%Y-%m-%d_%H:%M:%S` - Tier change finished, but there was errors! Please check the log above to see if there was any errors..."
+		abort "`date +%Y-%m-%d_%H:%M:%S` - Tier change finished, but there was errors! Please check the log above to see the errors..."
 	fi
 	if [ $same_tier -eq 1 ]
 	then
 		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Some volumes were already in tier $tier, no action done on those volumes!" "1"
 	fi
-	abort "`date +%Y-%m-%d_%H:%M:%S` - Tier change finished successfuly! Please check the log above to see if there was any errors..."
+	abort "`date +%Y-%m-%d_%H:%M:%S` - Tier change finished successfuly!"
 
 }
 ####  END:FUNCTION  Change Instance Volumes Tier  ####
