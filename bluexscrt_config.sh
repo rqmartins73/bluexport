@@ -221,17 +221,17 @@ then
 			ok="n"
 		fi
 	done
-	grep -v $vsi_name $bluexscrt > .tmp && mv .tmp final.txt
-	lpar_lines=$(grep "LPAR" final.txt | wc -l)
+	grep -v $vsi_name $bluexscrt > .tmp && mv .tmp $bluexscrt
+	lpar_lines=$(grep "LPAR" $bluexscrt | wc -l)
 	count=1
-	lpars=$(grep "LPAR" final.txt | awk {'print $1'})
+	lpars=$(grep "LPAR" $bluexscrt | awk {'print $1'})
 	for lpar in $lpars
 	do
-		lpar_num=$(grep $lpar final.txt | awk {'print $5'} | sed -z 's/LPAR//g')
-		lpar_num_full=$(grep $lpar final.txt | awk {'print $5'})
+		lpar_num=$(grep $lpar $bluexscrt | awk {'print $5'} | sed -z 's/LPAR//g')
+		lpar_num_full=$(grep $lpar $bluexscrt | awk {'print $5'})
 		if [ $lpar_num -ne $count ]
 		then
-			sed -i 's/'$lpar_num_full'/'LPAR$count'/g' final.txt
+			sed -i 's/'$lpar_num_full'/'LPAR$count'/g' $bluexscrt
 		fi
 		count=$((count+1))
 	done
