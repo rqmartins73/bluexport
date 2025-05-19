@@ -40,7 +40,7 @@
 
        #####  START:CODE  #####
 
-Version=3.7.7
+Version=3.7.8
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 end_log_file='==== END ========= $timestamp ========='
@@ -1140,9 +1140,9 @@ case $1 in
 			abort "`date +%Y-%m-%d_%H:%M:%S` - Argument VOLUMES must be 0 or comma separated names or IDs!! Syntax: bluexport.sh $1 LPAR_NAME SNAPSHOT_NAME 0|[\"DESCRIPTION\"] 0|[VOLUMES - Comma separated Volumes name list to snap]"
 		fi
 	else
-		flag_volumes="--volumes"
+		flag_volumes="--volumes "
 		volumes_to_echo=$volumes_to_snap
-		volumes_to_snap="--volumes "$volumes_to_snap
+#		volumes_to_snap="--volumes "$volumes_to_snap
 	fi
 	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - === Starting Snapshot $snap_name of VSI $vsi with volumes: $volumes_to_echo !" "1"
 	cloud_login
