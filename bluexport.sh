@@ -40,7 +40,7 @@
 
        #####  START:CODE  #####
 
-Version=3.7.9
+Version=3.7.10
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 end_log_file='==== END ========= $timestamp ========='
@@ -83,6 +83,7 @@ then
 	job_id=$(cat $HOME/bluexport.conf | grep -w "job_id" | awk {'print $2'})
 	job_log_short=$(cat $HOME/bluexport.conf | grep -w "job_log_short" | awk {'print $2'})
 	job_monitor=$(cat $HOME/bluexport.conf | grep -w "job_monitor" | awk {'print $2'})
+	operid_file=$(cat $HOME/bluexport.conf | grep -w "operid_file" | awk {'print $2'})
 	vsi_list_id_tmp=$(cat $HOME/bluexport.conf | grep -w "vsi_list_id_tmp" | awk {'print $2'})
 	vsi_list_tmp=$(cat $HOME/bluexport.conf | grep -w "vsi_list_tmp" | awk {'print $2'})
 	volumes_file=$(cat $HOME/bluexport.conf | grep -w "volumes_file" | awk {'print $2'})
@@ -235,9 +236,12 @@ job_monitor() {
 	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Job log in file $job_log" "1"
 	if [ $flagj -eq 1 ]
 	then
-		job=$(sh -c '/usr/local/bin/ibmcloud pi job ls | grep -B7 '$capture_name' | grep "Job ID" | awk {'\''print $3'\''}' 2>> $log_file | tee -a $log_file)
+		operid=$(cat $operid_file | grep -w $capture_name | awk {'print $2'})
+		job=$(sh -c '/usr/local/bin/ibmcloud pi job ls | grep -B2 -A7 '$operid' | grep "Job ID" | awk {'\''print $3'\''}' 2>> $log_file | tee -a $log_file)
 	else
 		job=$(cat $job_id | grep "Job ID " | awk {'print $3'})
+		operid=$(/usr/local/bin/ibmcloud pi job ls | grep -A7 $job | grep "Operation ID" | awk {'print $3'})
+		echo $capture_name" "$operid >> $operid_file
 	fi
     # Check Capture & Export Job Status #
 	echo "Job Monitoring of VM Capture "$capture_name" - Job ID:" $job >> $job_log
@@ -246,7 +250,7 @@ job_monitor() {
 		sh -c '/usr/local/bin/ibmcloud pi job get '$job 1> $job_monitor 2>>$job_log | tee -a $log_file
 		job_status=$(cat $job_monitor | grep "State " | awk {'print $2'})
 		message=$(cat $job_monitor |grep "Message" | cut -f 2- -d ' ')
-		operation=$(cat $job_monitor |grep "Message" | cut -f 2- -d ' '| sed 's/::/ /g' | awk {'print $3'})
+		operation=$(cat $job_monitor |grep "Progress" | awk {'print $2'})
 		if [[ $job_status == "completed" ]]
 		then
 			if [[ $destination == "cloud-storage" ]]
