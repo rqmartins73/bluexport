@@ -240,7 +240,7 @@ job_monitor() {
 		job=$(sh -c '/usr/local/bin/ibmcloud pi job ls | grep -B2 -A7 '$operid' | grep "Job ID" | awk {'\''print $3'\''}' 2>> $log_file | tee -a $log_file)
 	else
 		job=$(cat $job_id | grep "Job ID " | awk {'print $3'})
-		operid=$(/usr/local/bin/ibmcloud pi job ls | grep -A7 $job | grep "Operation ID" | awk {'print $3'})
+		operid=$(/usr/local/bin/ibmcloud pi job ls | grep -A7 $job | grep "Job ID" | awk {'print $3'})
 		echo $capture_name" "$operid >> $operid_file
 	fi
     # Check Capture & Export Job Status #
