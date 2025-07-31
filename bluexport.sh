@@ -35,7 +35,7 @@
 # Note: Reocurrence "hourly" and "daily" only permits captures to image-catalog
 #
 #
-# Ricardo Martins - Blue Chip Portugal - 2023-2024
+# Ricardo Martins - Blue Chip Portugal - 2023-2025
 ########################################################################################
 
        #####  START:CODE  #####
@@ -169,7 +169,7 @@ help() {
 	echoscreen ""
 	echoscreen "Note: Reocurrence \"hourly\" and \"daily\" only permits captures to image-catalog"
 	echoscreen ""
-	echoscreen "Ricardo Martins - Blue Chip Portugal - 2023-2024"
+	echoscreen "Ricardo Martins - Blue Chip Portugal - 2023-2025"
 	echoscreen ""
 }
 #### END:FUNCTION - Help  ####
@@ -1523,7 +1523,7 @@ case $1 in
 		abort "`date +%Y-%m-%d_%H:%M:%S` - Too many arguments!! Syntax: bluexport.sh -v | --version"
 	fi
     echoscreen ""
-	echoscreen "  ### bluexport by Ricardo Martins - Blue Chip Portugal - 2023-2024"
+	echoscreen "  ### bluexport by Ricardo Martins - Blue Chip Portugal - 2023-2025"
 	abort "`date +%Y-%m-%d_%H:%M:%S` - Version: $Version"
     ;;
 
