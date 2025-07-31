@@ -30,7 +30,7 @@
 #
 # Example:  ./bluexport.sh -a vsiprd vsiprd_img image-catalog daily            ---- Includes all Volumes and exports to COS and image catalog
 # Example:  ./bluexport.sh -x ASP2_ vsiprd vsiprd_img both monthly             ---- Excludes Volumes with ASP2_ in the name and exports to image catalog and COS
-# Example:  ./bluexport.sh -x "ASP2_ IASPname" vsiprd vsiprd_img both monthly  ---- Excludes Volumes with ASP2_ and IASPname in the name and exports to image catalog and COS
+# Example:  ./bluexport.sh -x "ASP2_ iASPname" vsiprd vsiprd_img both monthly  ---- Excludes Volumes with ASP2_ and iASPname in the name and exports to image catalog and COS
 #
 # Note: Reocurrence "hourly" and "daily" only permits captures to image-catalog
 #
@@ -40,7 +40,7 @@
 
        #####  START:CODE  #####
 
-Version=3.7.13
+Version=3.8.11
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
 end_log_file='==== END ========= $timestamp ========='
@@ -49,7 +49,7 @@ end_log_file='==== END ========= $timestamp ========='
 echoscreen() {
 	if [ -t 1 ]
 	then
-		echo "$1"
+		echo $1
 	fi
 	if [[ $2 == "1" ]]
 	then
@@ -90,6 +90,7 @@ then
 	vol_ch_tier=$(cat $HOME/bluexport.conf | grep -w "vol_ch_tier" | awk {'print $2'})
 	vol_failed_tst=$(cat $HOME/bluexport.conf | grep -w "vol_failed_tst" | awk {'print $2'})
 	snap_retention=$(cat $HOME/bluexport.conf | grep -w "snap_retention" | awk {'print $2'})
+	iasp_names_file=$(cat $HOME/bluexport.conf | grep -w "iasp_names_file" | awk {'print $2'})
 	single=0
 	vsi_user=$(cat $bluexscrt | grep -w "VSI_USER" | awk {'print $2'})
 	####  END: Constants Definition  #####
@@ -161,7 +162,7 @@ help() {
 	echoscreen ""
 	echoscreen "Example:  ./bluexport.sh -a vsiprd vsiprd_img image-catalog daily ---- Includes all Volumes and exports to COS and image catalog"
 	echoscreen "Example:  ./bluexport.sh -x ASP2_ vsiprd vsiprd_img both monthly    ---- Excludes Volumes with ASP2_ in the name and exports to image catalog and COS"
-	echoscreen 'Example:  ./bluexport.sh -x "ASP2_ IASPname" vsiprd vsiprd_img both monthly    ---- Excludes Volumes with ASP2_ and IASPname in the name and exports to image catalog and COS'
+	echoscreen 'Example:  ./bluexport.sh -x "ASP2_ iASPname" vsiprd vsiprd_img both monthly    ---- Excludes Volumes with ASP2_ and iASPname in the name and exports to image catalog and COS'
 	echoscreen ""
 	echoscreen "Flag t before a or x makes it a test and do not makes the capture"
 	echoscreen "Example:  ./bluexport.sh -tx ASP2_ vsiprd vsiprd_img both single ---- Does not makes the export"
@@ -240,6 +241,10 @@ job_monitor() {
 		job=$(sh -c '/usr/local/bin/ibmcloud pi job ls | grep -B2 -A7 '$operid' | grep "Job ID" | awk {'\''print $3'\''}' 2>> $log_file | tee -a $log_file)
 	else
 		job=$(cat $job_id | grep "Job ID " | awk {'print $3'})
+		if [[ $job == "" ]]
+		then
+			abort "`date +%Y-%m-%d_%H:%M:%S` - Capturing instance $vsi has Failed, see log file!"
+		fi
 		operid=$(/usr/local/bin/ibmcloud pi job ls | grep -A7 $job | grep "Job ID" | awk {'print $3'})
 		echo $capture_name" "$operid >> $operid_file
 	fi
@@ -314,38 +319,62 @@ cloud_login() {
 }
 ####  END:FUNCTION - Login in IBM Cloud  ####
 
-####  START:FUNCTION - Get IASP name  ####
-get_IASP_name() {
+####  START:FUNCTION - Get iASP name  ####
+get_iASP_name() {
 	if [ $test -eq 0 ]
 	then
-		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Getting $vsi IASP Name..." "1"
 		vsi_ip=$(cat $bluexscrt | grep -wi $vsi | awk {'print $2'})
-		if ping -c1 -w3 $vsi_ip &> /dev/null
+		vsi_status=$(/usr/local/bin/ibmcloud pi ins get $vsi_id | grep -m1 Status | awk {'print $2'})
+		shutoff=0
+		if [[ $vsi_status != "SHUTOFF" ]]
 		then
-			echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Ping VSI $vsi OK." "1"
+			if ping -c1 -w3 $vsi_ip &> /dev/null
+			then
+				echoscreen "`date +%Y-%m-%d_%H:%M:%S` - VSI $vsi is in Status: $vsi_status" "1"
+				echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Ping VSI $vsi at IP $vsi_ip OK." "1"
+				echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Getting $vsi iASP Names..." "1"
+			else
+				echoscreen "`date +%Y-%m-%d_%H:%M:%S` - VSI $vsi is in Status: $vsi_status!" "1"
+				abort "`date +%Y-%m-%d_%H:%M:%S` - Cannot ping VSI $vsi with IP $vsi_ip ! Aborting..."
+			fi
 		else
-			abort "`date +%Y-%m-%d_%H:%M:%S` - Cannot ping VSI $vsi with IP $vsi_ip ! Aborting..."
+			echoscreen "`date +%Y-%m-%d_%H:%M:%S` - VSI $vsi is in Status: $vsi_status" "1"
+			shutoff=1
+			return
 		fi
-		ssh -q -i $sshkeypath $vsi_user@$vsi_ip exit
+		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Trying to ssh into VSI $vsi..." "1"
+		ssh -T -q -i $sshkeypath $vsi_user@$vsi_ip exit
 		if [ $? -eq 255 ]
 		then
-			abort "`date +%Y-%m-%d_%H:%M:%S` - Unable to SSH to $vsi and not able to get IASP status! Try STRTCPSVR *SSHD on the $vsi VSI. Aborting..."
+			abort "`date +%Y-%m-%d_%H:%M:%S` - Unable to SSH to $vsi and not able to get iASP status! Try STRTCPSVR *SSHD on the $vsi VSI. Aborting..."
 		else
-			iasp_name=$(ssh -i $sshkeypath $vsi_user@$vsi_ip 'ls -l / | grep " IASP"' | awk {'print $9'})
-			if [[ $iasp_name == "" ]]
+			echoscreen "`date +%Y-%m-%d_%H:%M:%S` - ssh into VSI $vsi succeded..." "1"
+			cmd="system 'WRKCFGSTS CFGTYPE(*DEV) CFGD(*ASP)'"
+			iasp_name=$(ssh -T -i $sshkeypath $vsi_user@$vsi_ip $cmd | tail -n+4 | head -n-1 | awk {'print $1":"$3'})
+			echo "" > $iasp_names_file
+			for line in $iasp_name
+			do
+				line_status=$(echo $line | cut -d ":" -f2-)
+				if [[ $line_status == "AVAILABLE" ]]
+				then
+					echo $line | cut -d: -f1 >> $iasp_names_file
+				fi
+			done
+			iasp_names=$(cat $iasp_names_file)
+			if [[ $iasp_names == "" ]]
 			then
-				echoscreen "`date +%Y-%m-%d_%H:%M:%S` - VSI $vsi doesn't have IASP or it is Varied OFF" "1"
+				echoscreen "`date +%Y-%m-%d_%H:%M:%S` - VSI $vsi doesn't have iASPs or are Varied OFF... Moving on..." "1"
 			else
-				echoscreen "`date +%Y-%m-%d_%H:%M:%S` - VSI $vsi IASP Name: $iasp_name" "1"
+				echoscreen "`date +%Y-%m-%d_%H:%M:%S` - VSI $vsi iASP Names: $iasp_names" "1"
 			fi
 		fi
 	else
-		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Running in test mode, skipping get_IASP_name." "1"
+		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Running in test mode, skipping get iASP name." "1"
 	fi
 }
-####  END:FUNCTION - Get IASP name  ####
+####  END:FUNCTION - Get iASP name  ####
 
-####  START:FUNCTION - Check if VSI exists in secret file and Get VSI IP and IASP NAME if exists  ####
+####  START:FUNCTION - Check if VSI exists in secret file and Get VSI IP and iASP NAME if exists  ####
 check_locally_VSI_exists() {
 
 	echo "" > $job_log
@@ -363,7 +392,7 @@ check_locally_VSI_exists() {
 		if [ $flagj -eq 0 ]
 		then
 			echoscreen "`date +%Y-%m-%d_%H:%M:%S` - VSI to Capture: $vsi_cloud_name" "1"
-			get_IASP_name
+			get_iASP_name
 		fi
 	else
 		echoscreen ""
@@ -372,9 +401,9 @@ check_locally_VSI_exists() {
 		exit 0
 	fi
 }
-####  END:FUNCTION - Check if VSI exists in secret file and Get VSI IP and IASP NAME if exists  ####
+####  END:FUNCTION - Check if VSI exists in secret file and Get VSI IP and iASP NAME if exists  ####
 
-####  START:FUNCTION Flush ASPs and IASP Memory to Disk  ####
+####  START:FUNCTION Flush ASPs and iASP Memory to Disk  ####
 flush_asps() {
 	if [ $test -eq 0 ]
 	then
@@ -382,8 +411,13 @@ flush_asps() {
 		ssh -T -i $sshkeypath $vsi_user@$vsi_ip 'system "CHGASPACT ASPDEV(*SYSBAS) OPTION(*FRCWRT)"' >> $log_file | tee -a $log_file
 		if [[ $iasp_name != "" ]]
 		then
-			echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Flushing Memory to Disk for $iasp_name ..." "1"
-			ssh -T -i $sshkeypath $vsi_user@$vsi_ip 'system "CHGASPACT ASPDEV('$iasp_name') OPTION(*FRCWRT)"' >> $log_file | tee -a $log_file
+			#########
+			for iasp_name in $iasp_names
+			do
+				echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Flushing Memory to Disk for $iasp_name ..." "1"
+				ssh -T -i $sshkeypath $vsi_user@$vsi_ip 'system "CHGASPACT ASPDEV('$iasp_name') OPTION(*FRCWRT)"' >> $log_file | tee -a $log_file
+			done
+			#########
 		fi
 	else
 		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Flushing Memory to Disk for SYSBAS..." "1"
@@ -393,7 +427,7 @@ flush_asps() {
 		fi
 	fi
 }
-####  END:FUNCTION Flush ASPs and IASP Memory to Disk  ####
+####  END:FUNCTION Flush ASPs and iASP Memory to Disk  ####
 
 ####  START:FUNCTION - Do the Snapshot Create  ####
 do_snap_create() {
@@ -1514,9 +1548,15 @@ echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Volumes ID Captured: $volumes" "1"
 echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Volumes Name Captured: $volumes_name" "1"
 ####  END: Get Volumes to capture  ####
 
-####  START: Flush ASPs and IASP Memory to Disk  ####
-flush_asps
-####  END: Flush ASPs and IASP Memory to Disk  ####
+####  START: Flush ASPs and iASP Memory to Disk  ####
+if [ $shutoff -eq 0 ]
+then
+	flush_asps
+else
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Skipping Flushing Memory to Disk..." "1"
+fi
+
+####  END: Flush ASPs and iASP Memory to Disk  ####
 
 ####  START: Make the Capture and Export  ####
 if [[ $destination == "image-catalog" ]]
