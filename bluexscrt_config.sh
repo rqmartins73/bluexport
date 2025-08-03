@@ -7,18 +7,19 @@
 # Ricardo Martins - Blue Chip Portugal © 2024-2024
 #######################################################################################
 
-Version=0.3.1
+Version=0.3.2
 
 vsi_name_id_tmp_file="$HOME/vsi_name_file.tmp"
 flag=$1
 
-if [ $# -eq 1 ] && [[ $flag != "-v" ]] && [[ $flag != "-addlpar" ]] && [[ $flag != "-dellpar" ]]
+if [ $# -eq 1 ] && [[ $flag != "-v" ]] && [[ $flag != "-addlpar" ]] && [[ $flag != "-dellpar" ]] && [[ $flag != "-updlpars" ]]
 then
 	echo " ### Wrong Syntax!!..."
 	echo " ### Options:"
 	echo " ### To see the version                   ./bluexscrt_config.sh -v"
 	echo " ### To add an LPAR to the secrets file   ./bluexscrt_config.sh -addlpar"
 	echo " ### To delete an LPAR from the secrets file   ./bluexscrt_config.sh -dellpar"
+	echo " ### Automatically updated the existent LPARs in the secret file with new ID if different /bluexscrt_config.sh -updlpars"
 	echo ""
 	exit 0
 fi
@@ -303,6 +304,51 @@ then
 	done
 	echo $vsi_name" "$vsi_ip" "$vsi_id" "$vsi_ws" "LPAR$lpar_number >> $bluexscrt
 	create_vsi_user
+	exit 0
+fi
+
+if [[ $flag != "-updlpars" ]]
+then
+	echo ""
+	echo "   ####  Welcome to your bluexport secrets file configuration helper version $Version"
+	echo ""
+	echo "So, you want to update the LPARs to the secrets file?!..."
+	echo "OK, let's go..."
+	echo ""
+	bluexscrt=$(cat $HOME/bluexport.conf | grep bluexscrt | awk {'print $2'})
+	echo "Getting updated PowerVS VSI from Account..."
+	vsi=$(ic resources | grep -B3 pvm-instance | grep "Name:" | awk {'print $2'}) ############ Get VMs
+	echo "Getting VM IDs..."
+	vsi_id=$(ic resources | grep -B3 pvm-instance | grep "CRN:" | awk {'print $2'} | sed -E 's/.*?pvm-instance://' ) #### Get VMs ID
+	echo "Generating file..."
+	awk 'FNR==NR { map[FNR]=$0;next } { print map[FNR]" "$0} ' <(echo "$vsi") <(echo "$vsi_id") > updlpars.tmp ##### Combine VMs with VMs ID
+	updlpars=$(cat updlpars.tmp)
+	upd=0
+	for line in $updlpars
+	do
+		count=$(echo $line | wc -c)
+		if [ $count -lt 12 ]
+		then
+			vm=$line
+			vmid=$(cat $bluexscrt | grep -i $line | awk {'print $3'})
+		else
+			upd=1
+			new_vmid=$line
+			if [[ "$line" != "$vmid" ]] && [[ "$vmid" != "" ]]
+			then
+				echo ""
+				echo "New ID detected for VSI $vm, updating secret file with new ID: $line"
+				sed -i 's/'$vmid'/'$new_vmid'/g' $bluexscrt
+				echo ""
+			fi
+		fi
+	done
+	if [ $upd -eq 1 ]
+	then
+		echo "Secret file $bluexscrt updated!"
+	else
+		echo "No updates needed to Secret file $bluexscrt"
+	fi
 	exit 0
 fi
 
