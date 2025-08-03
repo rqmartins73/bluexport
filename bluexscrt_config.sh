@@ -307,7 +307,7 @@ then
 	exit 0
 fi
 
-if [[ $flag != "-updlpars" ]]
+if [[ $flag == "-updlpars" ]]
 then
 	echo ""
 	echo "   ####  Welcome to your bluexport secrets file configuration helper version $Version"
@@ -394,7 +394,7 @@ do
 	done
 	read -p "Region: " region
 	read -p "Bucket Name: " bucket
-	
+
 	while true
 	do
 		read -p "LPAR User: " vsi_user
