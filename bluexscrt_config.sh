@@ -314,7 +314,6 @@ then
 	echo "   ####  Welcome to your bluexport secrets file configuration helper version $Version"
 	echo ""
 	echo "So... you want to update the LPARs in the secrets file?!..."
-	echo "OK, let's go..."
 	echo ""
 	bluexscrt=$(cat $HOME/bluexport.conf | grep bluexscrt | awk {'print $2'})
 	echo " ### Secret file that will be updated is $bluexscrt ###"
@@ -326,6 +325,8 @@ then
 		echo ""
 		exit 0
 	fi
+	echo "OK, let's go..."
+	echo ""
 	apikey=$(cat $bluexscrt | grep -w "APYKEY" | awk {'print $2'})
 	region=$(cat $bluexscrt | grep -w "REGION" | awk {'print $2'})
 	resource_grp=$(cat $bluexscrt | grep -w "RESOURCE_GRP" | awk {'print $2'})
