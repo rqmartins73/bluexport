@@ -4,7 +4,7 @@
 # Script to help populate the bluexscrt file
 #
 #
-# Ricardo Martins - Blue Chip Portugal © 2024-2024
+# Ricardo Martins - Blue Chip Portugal © 2024-2025
 #######################################################################################
 
 Version=0.4.0
