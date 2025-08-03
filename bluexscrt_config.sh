@@ -349,6 +349,7 @@ then
 	else
 		echo "No updates needed to Secret file $bluexscrt"
 	fi
+	rm -f updlpars.tmp
 	exit 0
 fi
 
