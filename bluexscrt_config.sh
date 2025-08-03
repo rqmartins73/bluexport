@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 #
-# Script to help populate the bluexscrt file
+# Script to help populate and update the bluexscrt file
 #
 #
 # Ricardo Martins - Blue Chip Portugal © 2024-2025
