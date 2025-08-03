@@ -313,7 +313,7 @@ then
 	echo ""
 	echo "   ####  Welcome to your bluexport secrets file configuration helper version $Version"
 	echo ""
-	echo "So, you want to update the LPARs to the secrets file?!..."
+	echo "So... you want to update the LPARs in the secrets file?!..."
 	echo "OK, let's go..."
 	echo ""
 	bluexscrt=$(cat $HOME/bluexport.conf | grep bluexscrt | awk {'print $2'})
