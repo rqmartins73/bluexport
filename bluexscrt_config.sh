@@ -7,7 +7,7 @@
 # Ricardo Martins - Blue Chip Portugal © 2024-2024
 #######################################################################################
 
-Version=0.3.2
+Version=0.4.0
 
 vsi_name_id_tmp_file="$HOME/vsi_name_file.tmp"
 flag=$1
@@ -318,10 +318,12 @@ then
 	echo ""
 	bluexscrt=$(cat $HOME/bluexport.conf | grep bluexscrt | awk {'print $2'})
 	echo " ### Secret file that will be updated is $bluexscrt ###"
-	read -p "   Do you want to continue? (Y/N) " continue
+	read -p "     Do you want to continue? (Y/N) " continue
 	if [[ $continue == "N" ]] || [[ $continue == "n" ]]
 	then
+		echo ""
 		echo "You said No... Aborting...!"
+		echo ""
 		exit 0
 	fi
 	apikey=$(cat $bluexscrt | grep -w "APYKEY" | awk {'print $2'})
