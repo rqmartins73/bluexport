@@ -315,11 +315,11 @@ then
 	echo "So, you want to update the LPARs to the secrets file?!..."
 	echo "OK, let's go..."
 	echo ""
-	/usr/local/bin/ibmcloud login --apikey $apikey -r $region -g $resource_grp
 	bluexscrt=$(cat $HOME/bluexport.conf | grep bluexscrt | awk {'print $2'})
 	apikey=$(cat $bluexscrt | grep -w "APYKEY" | awk {'print $2'})
 	region=$(cat $bluexscrt | grep -w "REGION" | awk {'print $2'})
 	resource_grp=$(cat $bluexscrt | grep -w "RESOURCE_GRP" | awk {'print $2'})
+	/usr/local/bin/ibmcloud login --apikey $apikey -r $region -g $resource_grp
 	echo "Getting updated PowerVS VSI from Account..."
 	vsi=$(/usr/local/bin/ibmcloud resources | grep -B3 pvm-instance | grep "Name:" | awk {'print $2'}) ############ Get VMs
 	echo "Getting VM IDs..."
@@ -349,9 +349,13 @@ then
 	done
 	if [ $upd -eq 1 ]
 	then
+		echo ""
 		echo "Secret file $bluexscrt updated!"
+		echo ""
 	else
+		echo ""
 		echo "No updates needed to Secret file $bluexscrt"
+		echo ""
 	fi
 	rm -f updlpars.tmp
 	exit 0
