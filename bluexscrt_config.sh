@@ -19,7 +19,8 @@ then
 	echo " ### To see the version  ---  ./bluexscrt_config.sh -v"
 	echo " ### To add an LPAR to the secrets file  ---   ./bluexscrt_config.sh -addlpar"
 	echo " ### To delete an LPAR from the secrets file  ---   ./bluexscrt_config.sh -dellpar"
-	echo " ### Automatically updated the existent LPARs in the secret file with new ID if different  ---   ./bluexscrt_config.sh -updlpars"
+	echo " ### Automatically updated the existent LPARs in the secret file in use with new ID if different  ---   ./bluexscrt_config.sh -updlpars"
+	echo "     #### To see which secret file is in use, do a ./bluexport.sh -viewscrt"
 	echo ""
 	exit 0
 fi
