@@ -317,6 +317,13 @@ then
 	echo "OK, let's go..."
 	echo ""
 	bluexscrt=$(cat $HOME/bluexport.conf | grep bluexscrt | awk {'print $2'})
+	echo " ### Secret file that will be updated is $bluexscrt ###"
+	read -p "Do you want to continue? (Y/N) " continue
+	if [[ $continue == "N" ]] || [[ $continue == "n" ]]
+	then
+		echo "You said No... Aborting...!"
+		exit 0
+	fi
 	apikey=$(cat $bluexscrt | grep -w "APYKEY" | awk {'print $2'})
 	region=$(cat $bluexscrt | grep -w "REGION" | awk {'print $2'})
 	resource_grp=$(cat $bluexscrt | grep -w "RESOURCE_GRP" | awk {'print $2'})
