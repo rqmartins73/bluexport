@@ -318,7 +318,7 @@ then
 	echo ""
 	bluexscrt=$(cat $HOME/bluexport.conf | grep bluexscrt | awk {'print $2'})
 	echo " ### Secret file that will be updated is $bluexscrt ###"
-	read -p "Do you want to continue? (Y/N) " continue
+	read -p "   Do you want to continue? (Y/N) " continue
 	if [[ $continue == "N" ]] || [[ $continue == "n" ]]
 	then
 		echo "You said No... Aborting...!"
