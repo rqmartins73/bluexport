@@ -16,10 +16,10 @@ if [ $# -eq 1 ] && [[ $flag != "-v" ]] && [[ $flag != "-addlpar" ]] && [[ $flag 
 then
 	echo " ### Wrong Syntax!!..."
 	echo " ### Options:"
-	echo " ### To see the version                   ./bluexscrt_config.sh -v"
-	echo " ### To add an LPAR to the secrets file   ./bluexscrt_config.sh -addlpar"
-	echo " ### To delete an LPAR from the secrets file   ./bluexscrt_config.sh -dellpar"
-	echo " ### Automatically updated the existent LPARs in the secret file with new ID if different /bluexscrt_config.sh -updlpars"
+	echo " ### To see the version  ---  ./bluexscrt_config.sh -v"
+	echo " ### To add an LPAR to the secrets file  ---   ./bluexscrt_config.sh -addlpar"
+	echo " ### To delete an LPAR from the secrets file  ---   ./bluexscrt_config.sh -dellpar"
+	echo " ### Automatically updated the existent LPARs in the secret file with new ID if different  ---   ./bluexscrt_config.sh -updlpars"
 	echo ""
 	exit 0
 fi
