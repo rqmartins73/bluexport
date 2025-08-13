@@ -335,8 +335,16 @@ get_iASP_name() {
 				echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Ping VSI $vsi at IP $vsi_ip OK." "1"
 				echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Getting $vsi iASP Names..." "1"
 			else
-				echoscreen "`date +%Y-%m-%d_%H:%M:%S` - VSI $vsi is in Status: $vsi_status!" "1"
-				abort "`date +%Y-%m-%d_%H:%M:%S` - Cannot ping VSI $vsi with IP $vsi_ip ! Aborting..."
+				echoscreen "`date +%Y-%m-%d_%H:%M:%S` - First ping try to VSI $vsi at IP $vsi_ip Failed! Trying again..." "1"
+				if ping -c1 -w9 $vsi_ip &> /dev/null
+				then
+					echoscreen "`date +%Y-%m-%d_%H:%M:%S` - VSI $vsi is in Status: $vsi_status" "1"
+					echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Ping VSI $vsi at IP $vsi_ip OK." "1"
+					echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Getting $vsi iASP Names..." "1"
+				else
+					echoscreen "`date +%Y-%m-%d_%H:%M:%S` - VSI $vsi is in Status: $vsi_status!" "1"
+					abort "`date +%Y-%m-%d_%H:%M:%S` - Cannot ping VSI $vsi with IP $vsi_ip ! Aborting..."
+				fi
 			fi
 		else
 			echoscreen "`date +%Y-%m-%d_%H:%M:%S` - VSI $vsi is in Status: $vsi_status" "1"
