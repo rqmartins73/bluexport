@@ -29,7 +29,7 @@ if [[ $flag == "-v" ]]
 then
 	echo ""
 	echo "   ####  Welcome to your bluexport secrets file configuration helper version $Version"
-	echo "   ####  by Ricardo Martins - Blue Chip Portugal - 2024-2024"
+	echo "   ####  by Ricardo Martins - Blue Chip Portugal - 2024-2025"
 	echo ""
 	exit 0
 fi
