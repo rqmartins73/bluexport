@@ -334,7 +334,7 @@ then
 	echo "Getting updated PowerVS VSI from Account..."
 	vsi=$(/usr/local/bin/ibmcloud resources | grep -B3 pvm-instance | grep "Name:" | awk {'print $2'}) ############ Get VMs
 	echo "Getting VM IDs..."
-	vsi_id=$(/usr/local/bin/ibmcloud resources | grep -B3 pvm-instance | grep "CRN:" | awk {'print $2'} | sed -E 's/.*?pvm-instance://' ) #### Get VMs ID
+	vsi_id=$(/usr/local/bin/ibmcloud resources | grep -B3 pvm-instance | grep "CRN:" | awk {'print $2'} | sed -E 's/.*?pvm-instance://') #### Get VMs ID
 	echo "Generating file..."
 	awk 'FNR==NR { map[FNR]=$0;next } { print map[FNR]" "$0} ' <(echo "$vsi") <(echo "$vsi_id") > updlpars.tmp ##### Combine VMs with VMs ID
 	updlpars=$(cat updlpars.tmp)
@@ -348,7 +348,7 @@ then
 			vmid=$(cat $bluexscrt | grep -i $line | awk {'print $3'})
 		else
 			new_vmid=$line
-			if [[ "$line" != "$vmid" ]] && [[ "$vmid" != "" ]]
+			if [[ "$line" != "$vmid" ]] #&& [[ "$vmid" != "" ]]
 			then
 				upd=1
 				echo ""
