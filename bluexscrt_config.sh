@@ -353,7 +353,7 @@ then
 				upd=1
 				echo ""
 				echo "New ID detected for VSI $vm, updating secret file with new ID: $line"
-				sed -i 's/'$vmid'/'$new_vmid'/g' $bluexscrt
+				sed -i 's/"$vmid"/"$new_vmid"/g' $bluexscrt
 				echo ""
 			fi
 		fi
