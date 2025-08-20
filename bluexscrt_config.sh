@@ -348,7 +348,7 @@ then
 			vmid=$(cat $bluexscrt | grep -i $line | awk {'print $3'})
 		else
 			new_vmid=$line
-			if [[ "$line" != "$vmid" ]] #&& [[ "$vmid" != "" ]]
+			if [[ "$line" != "$vmid" ]] && [[ "$vmid" != "" ]]
 			then
 				upd=1
 				echo ""
