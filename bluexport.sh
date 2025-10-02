@@ -40,7 +40,7 @@
 
        #####  START:CODE  #####
 
-Version=3.8.3
+Version=3.8.4
 
 log_file=$(cat $HOME/bluexport.conf | grep -w "log_file" | awk {'print $2'})
 bluexscrt=$(cat $HOME/bluexport.conf | grep -w "bluexscrt" | awk {'print $2'})
@@ -454,7 +454,7 @@ do_snap_create() {
 		do
 			snap_percent_before=$snap_percent
 			sleep 10
-			snap_percent=$(/usr/local/bin/ibmcloud pi ins snap ls | grep -w $snap_name | awk {'print $7'})
+			snap_percent=$(/usr/local/bin/ibmcloud pi ins snap ls | grep -w $snap_name | awk 'NF>1{print $NF}')
 			if [[ "$snap_percent" == "" ]]
 			then
 				abort "`date +%Y-%m-%d_%H:%M:%S` - FAILED - Oops something went wrong!... Check the log above this line..."
@@ -501,7 +501,7 @@ do_snap_delete() {
 		do
 			snap_percent_before=$snap_percent
 			sleep 5
-			snap_percent=$(/usr/local/bin/ibmcloud pi ins snap ls | grep -w $snap_name | awk {'print $7'})
+			snap_percent=$(/usr/local/bin/ibmcloud pi ins snap ls | grep -w $snap_name | awk 'NF>1{print $NF}')
 			if [[ $snap_percent == "" ]]
 			then
 				snap_percent=100
@@ -1007,6 +1007,7 @@ case $1 in
 	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Starting Capture&Export for VSI Name: $vsi ..." "1"
 	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Capture Name: $capture_name" "1"
 	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Export Destination: $destination" "1"
+	echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Export Bucket: $bucket" "1"
 	if [[ $destination == "both" ]] || [[ $destination == "image-catalog" ]] || [[ $destination == "cloud-storage" ]]
 	then
 		echoscreen "`date +%Y-%m-%d_%H:%M:%S` - Export Destination $destination is valid." "1"
