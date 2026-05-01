@@ -142,3 +142,10 @@ SERVER2 192.168.111.112 abcdefgh-1234-1a2b-1234-abc123def123 WSMADDR LPAR1
 ***
 
  <sub>Ricardo Martins - [Blue Chip Portugal](http://www.bluechip.pt) - 2024</sub>  
+
+---
+## Author
+
+Ricardo Martins  
+IBM Power Technical Leader @ Blue Chip Portugal  
+IBM Champion 2025 | 2026
